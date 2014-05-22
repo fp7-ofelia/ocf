@@ -22,7 +22,7 @@ class NetworkInterface(db.Model):
     __tablename__ = table_prefix + 'networkinterface'
 
     '''Generic parameters'''
-    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
+    id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True, index=True)
     name = db.Column(db.String(128), nullable=False, default="")
     mac_id = db.Column(db.ForeignKey(table_prefix + 'macslot.id'), nullable=False, index=True)
     mac = db.relationship("MacSlot", backref="networkInterface", uselist=False, lazy='dynamic')
@@ -37,7 +37,7 @@ class NetworkInterface(db.Model):
     connected_from = association_proxy("from_network_interface", "from_networkinterface", creator=lambda iface:NetworkInterfaceConnectedTo(from_networkinterface=iface))
 
     '''Physical connection details for bridged interfaces''' 
-    switch_id = db.Column("switchID", db.String(23), nullable=True, default="")
+    switch_id = db.Column("switchID", db.String(23), nullable=True)
     port = db.Column(db.Integer, nullable=True)
     id_form = db.Column("idForm", db.Integer, nullable=True)
 
@@ -275,8 +275,8 @@ class NetworkInterfaceConnectedTo(db.Model):
     __tablename__ = table_prefix + 'networkinterface_connectedTo'
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    from_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
-    to_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False)
+    from_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False, index=True)
+    to_networkinterface_id = db.Column(db.ForeignKey(table_prefix + 'networkinterface.id'), nullable=False, index=True)
 
     to_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.from_networkinterface_id", backref=db.backref("from_network_interface"))
     from_networkinterface = db.relationship("NetworkInterface", primaryjoin="NetworkInterface.id==NetworkInterfaceConnectedTo.to_networkinterface_id", backref=db.backref("to_network_interface", cascade="all, delete-orphan"))
