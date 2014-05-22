@@ -394,6 +394,8 @@ class VTResourceManager(object):
         # Add the VM information
         vm_dict['status'] = VirtualMachine.ONQUEUE_STATE
         vm_dict['uuid'] = uuid.uuid4()
+	vm_dict['virtualization_type'] = server.get_virtualization_technology()
+	vm_dict['server_id'] = dictionary['server']['uuid']
         dictionary['xen_configuration'] = vm_dict.pop('disc_image')
         dictionary['xen_configuration']['memory_mb'] = vm_dict.pop('memory_mb')
         dictionary['xen_configuration']['hd_origin_path'] = 'default/default.tar.gz'
