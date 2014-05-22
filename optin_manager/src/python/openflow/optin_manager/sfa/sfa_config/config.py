@@ -1,4 +1,12 @@
 from django.conf import settings
+#################
+#Federated Links - Static information about the connection from the switches to other authorities
+#################
+FEDERATED_LINKS = [ {"src_id":"00:10:00:00:00:00:00:03", "src_port":"10", "dst_id":"VirtualWall-GW-A", "dst_port":""},
+                    {"src_id":"00:10:00:00:00:00:00:03", "src_port":"11", "dst_id":"VirtualWall-GW-B", "dst_port":""},
+                    {"src_id":"00:10:00:00:00:00:00:04", "src_port":"10", "dst_id":"VirtualWall-GW-C", "dst_port":""},
+                    {"src_id":"00:10:00:00:00:00:00:04", "src_port":"11", "dst_id":"VirtualWall-GW-D", "dst_port":""},
+                  ]
 
 #################
 #Credential stuff
@@ -21,7 +29,8 @@ HOSTNAME = settings.SITE_DOMAIN
 TESTBED = 'Ofelia Control Framework'
 #Geni API
 GENI_API_VERSION = 2
-GENI_API_URL = 'https://%s:8443/xmlrpc/sfa/' % settings.SITE_IP_ADDR
+#GENI_API_URL = 'https://%s:8443/xmlrpc/sfa/' % settings.SITE_IP_ADDR
+GENI_API_URL = 'https://10.216.12.5:8443/xmlrpc/sfa/' #% settings.SITE_IP_ADDR
 INTERFACE = 'aggregate'
 CODE_URL = 'git://git.onelab.eu/sfa.git@sfa-2.1-24'
 CODE_TAG = '2.1-24'

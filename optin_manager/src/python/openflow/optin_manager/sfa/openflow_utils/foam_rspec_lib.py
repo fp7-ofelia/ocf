@@ -35,6 +35,7 @@ def getAdvertisement (nodes):
 
   devices = nodes['switches']#OFShell().get_switches(flow_visor)
   links = nodes['links']#OFShell().get_links(flow_visor)
+  federated_links = nodes['federated_links']
  
   #links = FV.getLinkList()
   #devices =FV.getDeviceList()
@@ -55,6 +56,12 @@ def getAdvertisement (nodes):
     for link in links:
       addGeniLink(rspec,link)
 #getLinks END 
+
+  if federated_links:
+    for link in federated_links:
+      addAdLink(rspec,link,True)
+    for link in federated_links:
+      addGeniLink(rspec,link,True)
 
   xml = StringIO()
   element = ET.ElementTree(rspec)
@@ -86,14 +93,21 @@ def addAdDevice (rspec, dpid, active=True):
       #  a.attrib["desc"] = info.desc
 
 
-def addAdLink (rspec, link):
+def addAdLink (rspec, link, federated=False):
+  if not federated:
+      dst_device  = "dstDPID"
+  else:
+      dst_device = "dstDevice"
+  
   od = ET.SubElement(rspec, "{%s}link" % (OFNSv3))
   od.attrib["srcDPID"] = link['src']['dpid']#link["srcDPID"]
   od.attrib["srcPort"] = link['src']['port']#link["srcPort"]
-  od.attrib["dstDPID"] = link['dst']['dpid']#link["dstDPID"]
+  od.attrib[dst_device] = link['dst']['dpid']#link["dstDPID"]
   od.attrib["dstPort"] = link['dst']['port']#link["dstPort"]
 
-def addGeniLink(rspec, link):
+def addGeniLink(rspec, link, federated=False):
+  
+
   def add_dpid(od, dpid):
     dpids = ET.SubElement(od, "{%s}datapath" %(OFNSv3))
     dpids.attrib["component_id"] = "urn:publicid:IDN+openflow:%s+datapath+%s" % (config.HRN_URN, dpid)
@@ -102,13 +116,21 @@ def addGeniLink(rspec, link):
   def add_port(od, port):
     ps = ET.SubElement(od, "{%s}port" %(OFNSv3))
     ps.attrib["port_num"] = link['src']['port']
-
+  def add_device(od, device):
+    devices = ET.SubElement(od, "{%s}device" %(OFNSv3))
+    devices.attrib["component_id"] = "urn:publicid:IDN+federation:%s+device+%s" % (config.HRN_URN, device)
+    devices.attrib["component_manager_id"] = "urn:publicid:IDN+federation:%s+cm" % (config.HRN_URN)
+  if federated:
+    add = add_device
+  else:
+    add = add_dpid
+ 
   od = ET.SubElement(rspec, "{%s}link" % (OFNSv3))
   od.attrib["component_id"] = "urn:publicid:IDN+openflow:%s+link+%s_%s_%s_%s" %(config.HRN_URN,link['src']['dpid'], link['src']['port'],link['dst']['dpid'],link['dst']['port'])
-  add_dpid(od, link['src']['dpid'])
+  add(od, link['src']['dpid'])
   add_port(od, link['src']['port'])
-  add_dpid(od,link['dst']['dpid'])
-  add_dpid(od,link['dst']['port']) 
+  add(od,link['dst']['dpid'])
+  add(od,link['dst']['port']) 
   
 
 def generateSwitchComponentID (dpid, tag = None):

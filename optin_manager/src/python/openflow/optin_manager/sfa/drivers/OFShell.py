@@ -13,6 +13,7 @@ from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVS
 from django.conf import settings 
 from openflow.optin_manager.sfa.openflow_utils.ServiceThread import ServiceThread
 from openflow.optin_manager.sfa.models import ExpiringComponents
+from openflow.optin_manager.sfa.openflow_utils.federationlinkmanager import FederationLinkManager
 
 #XXX TEST
 from openflow.optin_manager.sfa.tests.data_example import test_switches, test_links
@@ -48,15 +49,25 @@ class OFShell:
                 links = OFShell().get_raw_links()
 		link_list = list()
 		for link in links:
-			link_list.append({ 'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})
+			link_list.append({'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})
+                #for link in FederationLinkManager.get_federated_links():
+                #        link_list.append({'src':{'dpid':link['src_id'], 'port':link['src_port']}, 'dst':{'dpid':link['dst_id'],'port':link['dst_port']}})
 
 		return link_list
+
+        @staticmethod
+        def get_federation_links():
+                link_list = list()
+                for link in FederationLinkManager.get_federated_links():
+                        link_list.append({'src':{'dpid':link['src_id'], 'port':link['src_port']}, 'dst':{'dpid':link['dst_id'],'port':link['dst_port']}})
+                return link_list
 
 	def GetNodes(self,slice_urn=None,authority=None):
                 if not slice_urn:
 		    switch_list = self.get_switches()
 		    link_list = self.get_links()
-		    return {'switches':switch_list, 'links':link_list}
+                    federated_links = self.get_federation_links()
+		    return {'switches':switch_list, 'links':link_list, 'federated_links':federated_links}
                 else:
                     nodes = list()
                     experiments = Experiment.objects.filter(slice_id=slice_urn)
