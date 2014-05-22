@@ -552,7 +552,6 @@ class VTDelegate3(GENIv3DelegateBase):
                     continue
                 # Then, try to allocate them to the previous state
                 try:
-                    # TODO: Get the correct args
-                    self._resource_manager.allocate_vm(requested_vm, end_time, slice_urn, GENIv3_prefix)
+                    self._resource_manager.allocate_vm(param, param['expiration_time'], param['container_gid'], GENIv3_prefix)
                 except:
                     continue

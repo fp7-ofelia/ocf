@@ -188,6 +188,9 @@ class VTResourceManager(object):
         if not "server_uuid" in vm_dict.keys():
             vm_dict["server_uuid"] = server.get_uuid()
         logging.debug("*********** SERVER INFORMATION ADDED...")
+        container_gid = self.get_vm_container(vm.get_urn())
+        if container_gid:
+            vm_dict["container_uuid"] = container_gid
         return vm_dict
     
     def get_vm(self, vm_uuid):
@@ -435,6 +438,16 @@ class VTResourceManager(object):
         else:
             raise virt_exception.VirtContainerDuplicated(container_gid)
         return container
+
+    def get_vm_container(self, vm_urn):
+        result_container = None
+        containers = Container.query.all()
+        for container in containers:
+            for vm in container.vms:
+                if vm.urn == vm_urn:
+                    result_container = container.get_container_gid()
+                    break
+        return result_container 
 
     def create_vm(self, args_dict, template, container_gid, prefix="", end_time=None):
         """
