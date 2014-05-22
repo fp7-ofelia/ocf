@@ -19,14 +19,15 @@ class ProvisioningDispatcher():
         """
         # Assign the callBackURL this way so this method can be called without a ServiceThread
         if not callback_url:
-            callback_url = threading.currentThread().callBackURL
+#            callback_url = threading.currentThread().callBackURL
+            callback_url = UrlUtils.get_own_callback_url()
         logging.debug("PROVISIONING STARTED...\n")
         for action in provisioning.action:
             action_model = ActionController.action_to_model(action, "provisioning")
             logging.debug("ACTION type: %s with id: %s" % (action_model.type, action_model.uuid))
             try:
                 logging.debug("************************** PYPELIB...")
-                RuleTableManager.Evaluate(action,RuleTableManager.getDefaultName())
+#                RuleTableManager.Evaluate(action,RuleTableManager.getDefaultName())
                 logging.debug("************************** PYPELIB END...")
             except Exception as e:
                 logging.debug("************************** PYPELIB FAIL... " + str(e))
