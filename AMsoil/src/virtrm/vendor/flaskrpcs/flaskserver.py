@@ -66,7 +66,7 @@ class FlaskServer(object):
         debug = config.get("flask.debug")
         cFCGI = config.get("flask.fcgi")
         host = config.get("flask.bind")
-        app_port = 8445#config.get("flask.app_port")
+        app_port = config.get("flask.app_port")
         fcgi_port = config.get("flask.fcgi_port")
         must_have_client_cert = config.get("flask.force_client_cert")
 

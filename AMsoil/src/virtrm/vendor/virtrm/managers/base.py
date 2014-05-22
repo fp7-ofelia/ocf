@@ -190,7 +190,7 @@ class VTResourceManager(object):
         logging.debug("*********** SERVER INFORMATION ADDED...")
         container_gid = self.get_vm_container(vm.get_urn())
         if container_gid:
-            vm_dict["container_uuid"] = container_gid
+            vm_dict["container_urn"] = container_gid
         return vm_dict
     
     def get_vm(self, vm_uuid):
@@ -447,7 +447,7 @@ class VTResourceManager(object):
         for container in containers:
             for vm in container.vms:
                 if vm.urn == vm_urn:
-                    result_container = container.get_container_gid()
+                    result_container = container.get_GID()
                     break
         return result_container 
 
