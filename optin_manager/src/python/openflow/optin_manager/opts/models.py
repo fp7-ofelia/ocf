@@ -32,6 +32,7 @@ class Experiment(models.Model):
     controller_url      = models.CharField(max_length = 1024)
     owner_email         = models.CharField(blank=True, max_length = 1024)
     owner_password      = models.CharField(blank=True, max_length = 2048)
+    slice_urn           = models.CharField(blank=True, null=True, max_length = 2048)
     
     # TODO: takeout the replacement when Rob fixes the . escaping in FV
     def get_fv_slice_name(self):

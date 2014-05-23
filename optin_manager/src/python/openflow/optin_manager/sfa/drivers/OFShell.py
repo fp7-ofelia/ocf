@@ -111,7 +111,8 @@ class OFShell:
                 try:
                     delete_slice(slice_urn)
                     return 1  
-                except:
+                except Exception as e:
+                    print e
                     raise ""
 
 	def CreateSliver(self, requested_attributes, slice_urn, authority,expiration):
@@ -154,7 +155,7 @@ class OFShell:
 
         def get_raw_switches(self):
              try: 
-                 raise Exception("")
+                 #raise Exception("")
                  fv =  FVServerProxy.objects.all()[0]
                  switches = fv.get_switches()
              except Exception as e:
@@ -164,7 +165,7 @@ class OFShell:
 
         def get_raw_links(self):
              try:
-                 raise Exception("")
+                 #raise Exception("")
                  fv = FVServerProxy.objects.all()[0]  
                  links = fv.get_links()
              except Exception as e:
