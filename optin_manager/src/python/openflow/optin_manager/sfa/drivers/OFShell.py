@@ -127,7 +127,8 @@ class OFShell:
                     CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
                     if expiration:
                         #Since there is a synchronous connection, expiring_components table is easier to fill than VTAM
-                        ExpiringComponents.objects.create(slice=slice_urn, authority=authority, expires=expiration)
+                        #ExpiringComponents.objects.create(slice=slice_urn, authority=authority, expires=expiration)
+                        pass
 		return 1
 
         def SliverStatus(self, slice_urn):
@@ -137,7 +138,7 @@ class OFShell:
                 slice_leaf = xrn.get_leaf()
                 sliver_status = ['The requested flowspace for slice %s is still pending for approval' %slice_leaf]
             granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
-            return granted_fs
+            return [granted_fs]
 
         def check_req_switches(self, switch_slivers):
             available_switches = self.get_raw_switches()
