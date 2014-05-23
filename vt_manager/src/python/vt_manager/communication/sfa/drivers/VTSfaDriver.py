@@ -74,13 +74,12 @@ class VTSfaDriver:
 	
 	def sliver_status(self,slice_leaf,authority,options):
 
-		slice = self.shell.GetSlice(slice_leaf,authority)	
+		slice = self.shell.GetSlice(slice_leaf,authority)
 		result = dict()
 		List = list()
 		for vm in slice['vms']:
     			List.append({'vm-name':vm['vm-name'],'vm-ip':vm['vm-ip'],'vm-state': vm['vm-state'], 'node-name': vm['node-name']})
-		result['virtual-machines'] = List
-		return result
+		return List
 			
         def get_expiration(self,creds,slice_hrn):
                 for cred in creds:
