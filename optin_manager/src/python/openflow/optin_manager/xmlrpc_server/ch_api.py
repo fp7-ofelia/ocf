@@ -263,7 +263,7 @@ def create_slice(slice_id, project_name, project_description,
         except:
             remotely_created = True
             is_legacy_slice = True
-            e = Experiment.objects.filter(slice_id = slice_id)
+    e = Experiment.objects.filter(slice_id = slice_id)
 
     # If Experiment already existing => this is an update
     if (e.count()>0):
