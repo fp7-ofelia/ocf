@@ -23,7 +23,7 @@ class PluginCommunicator():
     __metaclass__ = Singleton
 
     @staticmethod
-    def get_object(slice, plugin_type, klass, **kwargs):
+    def get_objects(slice, plugin_type, klass, **kwargs):
         """
         Retrieves the id of a model belonging to another plugin
         and which is contained in the same slice than the 
@@ -46,9 +46,21 @@ class PluginCommunicator():
                 except:
                     pass    
             # Filters resources by slice (will not return any aggregate's resource from another slice)
-            object = model.objects.get(**kwargs)
-            if object != None and object.aggregate in slice._get_aggregates():
-                return object
+            objects = model.objects.filter(**kwargs)
+            #print "objects: %s" % str(objects)
+            for obj in objects:
+                if not (obj != None and obj.aggregate in slice._get_aggregates()):
+                    raise Exception
+            return objects
+        except Exception,e:
+            print "[ERROR] PluginCommunicator could not obtain object. Details: %s " % str(e)
+            return None
+
+    @staticmethod
+    def get_object(slice, plugin_type, klass, **kwargs):
+        objects = PluginCommunicator.get_objects(slice, plugin_type, klass, **kwargs)
+        try:
+            return objects[0]
         except Exception,e:
             print "[ERROR] PluginCommunicator could not obtain object. Details: %s " % str(e)
             return None

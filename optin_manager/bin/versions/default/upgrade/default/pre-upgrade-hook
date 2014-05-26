@@ -10,6 +10,8 @@
 #inform user
 printHeader "info#" "Using default pre-upgrade-hook module..."
 
+SRC_DIR=/opt/ofelia/optin_manager/
+
 #shutdown apache
 print "Shutting down apache2..."
 /usr/sbin/service apache2 stop
@@ -30,3 +32,6 @@ while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFEL
         fi
     done
 
+## Keeping database consistent
+print "Checking and fixing database consistency..."
+python $SRC_DIR/src/python/openflow/optin_manager/manage.py clean_inconsistent_db_entries

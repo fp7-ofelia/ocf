@@ -13,6 +13,7 @@ from openflow.optin_manager.xmlrpc_server.models import CallBackServerProxy, FVS
 from django.conf import settings 
 from openflow.optin_manager.sfa.openflow_utils.ServiceThread import ServiceThread
 from openflow.optin_manager.sfa.models import ExpiringComponents
+from openflow.optin_manager.sfa.openflow_utils.federationlinkmanager import FederationLinkManager
 
 #XXX TEST
 from openflow.optin_manager.sfa.tests.data_example import test_switches, test_links
@@ -48,15 +49,25 @@ class OFShell:
                 links = OFShell().get_raw_links()
 		link_list = list()
 		for link in links:
-			link_list.append({ 'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})
+			link_list.append({'src':{ 'dpid':link[0],'port':link[1]}, 'dst':{'dpid':link[2], 'port':link[3]}})
+                #for link in FederationLinkManager.get_federated_links():
+                #        link_list.append({'src':{'dpid':link['src_id'], 'port':link['src_port']}, 'dst':{'dpid':link['dst_id'],'port':link['dst_port']}})
 
 		return link_list
+
+        @staticmethod
+        def get_federation_links():
+                link_list = list()
+                for link in FederationLinkManager.get_federated_links():
+                        link_list.append({'src':{'dpid':link['src_id'], 'port':link['src_port']}, 'dst':{'dpid':link['dst_id'],'port':link['dst_port']}})
+                return link_list
 
 	def GetNodes(self,slice_urn=None,authority=None):
                 if not slice_urn:
 		    switch_list = self.get_switches()
 		    link_list = self.get_links()
-		    return {'switches':switch_list, 'links':link_list}
+                    federated_links = self.get_federation_links()
+		    return {'switches':switch_list, 'links':link_list, 'federated_links':federated_links}
                 else:
                     nodes = list()
                     experiments = Experiment.objects.filter(slice_id=slice_urn)
@@ -100,7 +111,8 @@ class OFShell:
                 try:
                     delete_slice(slice_urn)
                     return 1  
-                except:
+                except Exception as e:
+                    print e
                     raise ""
 
 	def CreateSliver(self, requested_attributes, slice_urn, authority,expiration):
@@ -116,7 +128,8 @@ class OFShell:
                     CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
                     if expiration:
                         #Since there is a synchronous connection, expiring_components table is easier to fill than VTAM
-                        ExpiringComponents.objects.create(slice=slice_urn, authority=authority, expires=expiration)
+                        #ExpiringComponents.objects.create(slice=slice_urn, authority=authority, expires=expiration)
+                        pass
 		return 1
 
         def SliverStatus(self, slice_urn):
@@ -126,7 +139,7 @@ class OFShell:
                 slice_leaf = xrn.get_leaf()
                 sliver_status = ['The requested flowspace for slice %s is still pending for approval' %slice_leaf]
             granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
-            return granted_fs
+            return [granted_fs]
 
         def check_req_switches(self, switch_slivers):
             available_switches = self.get_raw_switches()
@@ -142,7 +155,7 @@ class OFShell:
 
         def get_raw_switches(self):
              try: 
-                 raise Exception("")
+                 #raise Exception("")
                  fv =  FVServerProxy.objects.all()[0]
                  switches = fv.get_switches()
              except Exception as e:
@@ -152,7 +165,7 @@ class OFShell:
 
         def get_raw_links(self):
              try:
-                 raise Exception("")
+                 #raise Exception("")
                  fv = FVServerProxy.objects.all()[0]  
                  links = fv.get_links()
              except Exception as e:

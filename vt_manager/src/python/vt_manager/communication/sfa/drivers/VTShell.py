@@ -89,7 +89,9 @@ class VTShell:
 		    #processes.append(process)
 		    #process.start()
                     with threading.Lock():
+                        print "-----------------------------------provisioningRSpec", provisioningRSpec
                         SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM') #UrlUtils.getOwnCallbackURL())
+                        
                     if expiration:
                         ExpiringComponents.objects.create(slice=sliceName, authority=projectName, expires=expiration).save()
                          

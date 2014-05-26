@@ -2,7 +2,7 @@
 
    		{% if server %}
 			{% with server.getChildObject as server %} 
-    		<h1>VMs in  LALA{{ server.name }}</h1>
+    		<h1>VMs in {{ server.name }}</h1>
 			<div id = "div_vms">
     		{% if not server.vms.all %}
         		{{ server.name }} has no VMs at the moment

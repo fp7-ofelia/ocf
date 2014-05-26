@@ -4,24 +4,58 @@
 {% block title %}OpenFlow Slice Information for Slice {{ slice.name }}{% endblock title %}
 
 {% block content %}
-<div class="main">
+<div class="main" id="slice_openflow_controller_info">
 	<div class="title">
 		<h1>OpenFlow Information for Slice <font class="highlight">{{ slice.name }}</font></h1>
 	</div>
-	<form class="form" action="" method="POST">{% csrf_token %}
+	<form class="form" action="{% url openflow_aggregate_slice_controller_add aggregate.id slice.id %}" method="POST">{% csrf_token %}
 		{{ form.as_p }}
-        <p class="center">
+        <p class="left">
             <img align="bottom" src="{% url img_media 'warning.png' %}" />
             The following settings will apply to <strong>all</strong> OpenFlow
             aggregates <strong>after updating</strong> the slice.
+            <img align="bottom" src="{% url img_media 'warning.png' %}" />
+            When updating (or re-starting) the slice, <strong>VLAN(s) should be reserved</strong> again.
             <!-- {Known FlowVisor behavior}
             aggregates in the same slice automatically. There is no need to update the slice if it is started.
             -->
         </p>
-		<div class="center">
-			<input type="submit" value="Save" />
-               <input type="button" value="Cancel" onclick="javascript:document.location = '{% url slice_detail slice.id %}'" />
-		</div>
+        <div class="center">
+	    <input type="submit" value="Save" />
+	    <input type="submit" value="Remove" onclick="javascript: if (confirm('Controller will be unlinked from the slice and slice will be stopped.')) { changeFormActionURL('{% url openflow_aggregate_slice_controller_remove aggregate.id slice.id %}'); return true; } else { return false; }"/>
+            <input type="button" value="Cancel" onclick="javascript:document.location = '{% url slice_detail slice.id %}'" />
+	</div>
 	</form>
 </div>
+
+<script>
+    function hideControllerIP() {
+        if ($("#id_slice_vms").val() != "") {
+            $("#id_controller_ip").parent().hide();
+            $("#id_controller_ip").val("");
+        } else {
+            $("#id_controller_ip").parent().show();
+        }
+    }
+
+    // Dynamycally change the form action depending on the pressed button
+    function changeFormActionURL(url) {
+        form = $("#slice_openflow_controller_info form")[0];
+        form.action = url;
+    }
+
+    // Hides controller IP charfield if some VM was selected in the dropdown
+    $(document).ready(function() {
+        hideControllerIP();
+        $("#id_slice_vms").change(function() {
+            hideControllerIP();
+          });
+        $("#id_controller_ip").keypress(function() {
+            if ($("#id_controller_ip").val() != "") {
+                $("#id_slice_vms").val("");
+            }
+        });
+     });
+</script>
+
 {% endblock content %}

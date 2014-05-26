@@ -22,7 +22,7 @@ from expedient.clearinghouse.resources.models import Resource
 from expedient.clearinghouse.aggregate.models import Aggregate
 from models import OpenFlowAggregate, OpenFlowSliceInfo, OpenFlowConnection
 from models import NonOpenFlowConnection
-from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm
+from forms import OpenFlowAggregateForm, OpenFlowSliceInfoForm, OpenFlowSliceControllerForm
 from forms import OpenFlowStaticConnectionForm, OpenFlowConnectionSelectionForm
 from forms import NonOpenFlowStaticConnectionForm
 from expedient.common.permissions.shortcuts import give_permission_to,\
@@ -312,7 +312,7 @@ def handle_add_to_slice(request, aggregate, slice):
     return HttpResponseRedirect(next if next else reverse("slice_detail", args=[slice.id])) 
 
 def add_controller_to_slice(request, agg_id, slice_id):
-    """Perform the actual add_controllr_to_slice request."""
+    """Perform the actual add_controller_to_slice request."""
     aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
     slice = get_object_or_404(Slice, id=slice_id)   
 
@@ -347,9 +347,12 @@ def add_controller_to_slice(request, agg_id, slice_id):
             except Exception,e:
                 error_msg = str(e)
                 print e
+
     return generic_crud(
         request, id, OpenFlowSliceInfo,
-        form_class=OpenFlowSliceInfoForm,
+#        form_class=OpenFlowSliceInfoForm,
+        form_class=OpenFlowSliceControllerForm,
+        extra_form_params={"slice": slice},
         template="openflow_aggregate_add_to_slice.html",
         redirect=lambda instance: next if next else reverse(
             "slice_detail", args=[slice.id]),
@@ -361,6 +364,34 @@ def add_controller_to_slice(request, agg_id, slice_id):
         post_save=post_save,
         success_msg=lambda instance: "Successfully added OpenFlow controller to slice %s" % (slice.name),
     )
+
+def remove_controller_from_slice(request, agg_id, slice_id):
+    """Perform the actual remove_controller_from_slice request."""
+    aggregate = get_object_or_404(OpenFlowAggregate, id=agg_id)
+    slice = get_object_or_404(Slice, id=slice_id)
+
+    must_have_permission(request.user, aggregate, "can_use_aggregate")
+    must_have_permission(slice.project, aggregate, "can_use_aggregate")
+
+    # Check if there's info already and delete it.
+    error = ""
+    try:
+        OpenFlowSliceInfo.objects.get(slice=slice).delete()
+        # Also, stop slice (any started slice must have a controller)
+        if slice.started:
+            slice.stop(request.user)
+    except OpenFlowSliceInfo.DoesNotExist:
+        error = "OpentFlow plug-in: could not delete controller from slice. Details: no controller was already there"
+    except Exception as e:
+        error = "OpentFlow plug-in: could not delete controller from slice: %s. Details: %s" % (str(slice.id). str(e))
+    print error
+    
+    DatedMessage.objects.post_message_to_user(
+        error, request.user, msg_type=DatedMessage.TYPE_ERROR,
+    )
+    # Get back to slice detail page
+    return HttpResponseRedirect(reverse("slice_detail",
+                                            args=[slice_id]))
 
 def book_openflow(request, slice_id):
     """

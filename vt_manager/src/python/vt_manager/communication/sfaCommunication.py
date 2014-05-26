@@ -95,6 +95,7 @@ def SliverStatus(slice_xrn, creds, options):
     #authority = xrn.get_authority_hrn()
     pm.check_permissions('SliverStatus',locals())
     struct = aggregate.SliverStatus(slice_xrn,options)
+    struct = {'geni_resources':struct, 'geni_urn':slice_xrn, 'geni_status':'ready'} 
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': struct}
     return to_return#driver.sliver_status(slice_urn,authority,credentials,options)
 

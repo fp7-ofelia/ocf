@@ -10,16 +10,14 @@
 #inform user
 printHeader "info#" "Using default upgrade module..."
 
-SRC_DIR=/opt/ofelia/expedient/
-
 
 local TMP_PATH=$PWD
 
-cd $SRC_DIR/src/python/expedient/clearinghouse/ || error "Target directory does not exists anymore?"
+cd $EXECPATH/../src/python/expedient/clearinghouse/ || error "Target directory does not exists anymore?"
 
 #Syncing DB
 printHeader ">" "Syncing Database..."
-python manage.py syncdb || error "Could not synchronize database using manage.py..."
+python manage.py syncdb  || error "Could not synchronize database using manage.py..."
 
 #Evolving
 printHeader ">" "Evolving Database schema..."
