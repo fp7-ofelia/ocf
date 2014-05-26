@@ -13,7 +13,7 @@ printHeader "info#" "Using default upgrade module..."
 
 local TMP_PATH=$PWD
 
-cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exists anymore?"
+cd $EXECPATH/../src/python/vt_manager/ || error "Target directory does not exists anymore?"
 
 #Syncing DB
 printHeader ">" "Syncing Database..."
