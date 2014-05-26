@@ -377,6 +377,9 @@ def remove_controller_from_slice(request, agg_id, slice_id):
     error = ""
     try:
         OpenFlowSliceInfo.objects.get(slice=slice).delete()
+        # Also, stop slice (any started slice must have a controller)
+        if slice.started:
+            slice.stop(request.user)
     except OpenFlowSliceInfo.DoesNotExist:
         error = "OpentFlow plug-in: could not delete controller from slice. Details: no controller was already there"
     except Exception as e:
