@@ -25,6 +25,18 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.8.1
+--------------------------------------------------
+Released: 26/05/2014
+
+Change log:
+
+[B] OPT, VTA: Actions being kept unrelated to their referred VMs. Issue 221
+[B] EXP, VTA: Force Update VMs - Does not clean the interfaces. Issue 220
+[B] EXP, OPT, VTA: Error during upgrading from OCF 0.6.1 to 0.7. Issue 219
+[+] EXP: Choose OF controller from existing VMs at the slice. Issue 218
+
+--------------------------------------------------
 v0.8
 --------------------------------------------------
 Released: 31/03/2014
