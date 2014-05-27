@@ -49,7 +49,7 @@ case $action_arg in
         exit 1;
         ;;
 esac
-whiptail_checklist_description="Choose the modules by pressing SPACE key and then <Ok>"
+whiptail_checklist_description="Choose the modules by pressing SPACE key and then TAB to reach <Ok> or <Cancel>"
 whiptail_checklist_options=""
 
 function exit_on_null_arg()
