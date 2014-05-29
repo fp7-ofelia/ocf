@@ -17,7 +17,7 @@ class AggregateMonitoringThread(Thread):
     Make sure Agent is up and running
     and updates status
     """
-    def __updateAggregateStatus(self, aggregate):
+    def __update_aggregate_status(self, aggregate):
         try:
             agg = aggregate.as_leaf_class()
             # Get protocol or try no authentication at all
@@ -71,13 +71,13 @@ class AggregateMonitoringThread(Thread):
             aggregate.straightSave()
     
     @staticmethod
-    def monitorAggregateInNewThread(param):
+    def monitor_aggregate_in_new_thread(param):
         thread = AggregateMonitoringThread()	
         thread.startMethod(param)
         return thread
 
     def startMethod(self,param):
-        self.__method = self.__updateAggregateStatus 
+        self.__method = self.__update_aggregate_status 
         self.__param = param
         self.start()
 

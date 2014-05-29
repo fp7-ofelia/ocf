@@ -12,19 +12,15 @@ class SessionMonitoringThread(Thread):
 
     __method = None
 
-    '''
-    Description
-    '''
-
-
     def __cleanUpExpiredSessions(self):
         try:
-            #Recover expired sessions and delete them
-            print Session.objects.filter(expire_date__lt=datetime.datetime.now())
-            Session.objects.filter(expire_date__lt=datetime.datetime.now()).delete()
-            transaction.commit_unless_managed()
+            # Recover expired sessions and delete them
+            expired_sessions = Session.objects.filter(expire_date__lt = datetime.datetime.now())
+            for expired_session in expired_sessions:
+                expired_session.delete()
+                transaction.commit_unless_managed()
         except Exception as e:
-            print "Could not clean app db for expired sessions. Consider do it manually.\nException was: \n"+str(e)
+            print "Could not clean app db for expired sessions. Consider doing it manually.\nException was: %s\n" % str(e)
 
     @staticmethod
     def monitorSessionInNewThread():
