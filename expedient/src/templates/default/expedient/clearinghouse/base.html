@@ -88,10 +88,10 @@
 						<a href="{% url auth_logout %}">Logout</a>
 					</li>
 				{% else %}
+					<li>
+						<a href="{% url auth_login %}">Log in</a>
+					</li>
 					{% if allowLocalRegistration == 1 %}
-						<li>
-							<a href="{% url auth_login %}">Log in</a>
-						</li>
 						<li>
 							<a href="{% url registration_register %}">Register</a>
 						</li>

@@ -1,29 +1,45 @@
 from threading import Thread
 from expedient.clearinghouse.aggregate.models import *
-from expedient.clearinghouse.monitoring.XmlRpcClient import XmlRpcClient
+from expedient.common.clients import xmlrpc, geni
 
-'''
-author:msune
-Agent monitoring thread
-'''
+"""
+author: msune, CarolinaFernandez
+
+Agent monitoring thread.
+"""
 
 class AggregateMonitoringThread(Thread):
 	
     __method = None
     __param = None
 
-    '''
+    """
     Make sure Agent is up and running
     and updates status
-    '''
+    """
     def __updateAggregateStatus(self, aggregate):
-	print "MONITORING >>>> " + aggregate.name
         try:
             agg = aggregate.as_leaf_class()
-            agg_xmlrpc_server = "https://" + agg.client.username + ":" + agg.client.password + "@" + agg.client.url[8:]
+            # Get protocol or try no authentication at all
+            if "://" in agg.client.url:
+                agg_xmlrpc_server_protocol = agg.client.url.split("://")[0]
+                # Fill aggregate XMLRPC server URI
+                agg_xmlrpc_server_url = "".join(agg.client.url.split("://")[1:])
+            else: 
+                agg_xmlrpc_server_protocol = "http"
+                agg_xmlrpc_server_url = ":".join(agg.client.url.split("://")[1:])
+            agg_xmlrpc_server = "%s://" % agg_xmlrpc_server_protocol
+            if "https://" in agg_xmlrpc_server:
+                agg_xmlrpc_server += agg.client.username + ":" + agg.client.password + "@"
+            agg_xmlrpc_server += agg_xmlrpc_server_url
+            
+            # Server address and port for the aggregate
+            agg_server_address = agg_xmlrpc_server_url.split(":")[0]
+            agg_server_port = agg_xmlrpc_server_url.split(":")[1].split("/")[0]
+            
+            # Non-AMsoil AMs
             try:
-                agg_info = XmlRpcClient.callRPCMethod(agg_xmlrpc_server, "get_am_info", "")
-                print "agg info: " + str(agg_info)
+                agg_info = xmlrpc.XmlRpcClient.call_method(agg_xmlrpc_server, "get_am_info", "")
                 # Save fields only for OF AMs
                 if aggregate.leaf_name == "OpenFlowAggregate":
                     aggregate.openflowaggregate.vlan_auto_assignment = agg_info["vlan_auto_assignment"]
@@ -31,10 +47,16 @@ class AggregateMonitoringThread(Thread):
                     # Save specific OpenFlowAggregate object
                     aggregate.openflowaggregate.straightSave()
             except Exception as e:
+                # Basic method within API
 #                print "Aggregate " + aggregate.name + " did not offer information about automatic VLAN and flowspace granting"
-                # Older OF AM APIs shall not contain 'get_am_info' method. Try 'ping' in that case:
-                XmlRpcClient.callRPCMethod(agg_xmlrpc_server, "ping", "hello")
-            print "Aggregate " + aggregate.name + " is alive"
+                try:
+                    # Older OF AM APIs shall not contain 'get_am_info' method. Try 'ping' in that case:
+                    xmlrpc_result = xmlrpc.XmlRpcClient.call_method(agg_xmlrpc_server, "ping", "hello")
+                # AMsoil AMs
+                except Exception as e:
+                    client = geni.GENIClient(agg_server_address, agg_server_port)
+                    geni_result = client.call_method("GetVersion")
+            print "Aggregate: %s => ALIVE" % aggregate.name
             
             # If any of the above worked, mark as available
             aggregate.available = True
@@ -45,7 +67,7 @@ class AggregateMonitoringThread(Thread):
             print e
             aggregate.available = False
             #aggregate.save(permittee_kw = user.first_name)
-            print "Aggregate " + aggregate.name + " is DEAD!"
+            print "Aggregate: %s => DEAD" % aggregate.name
             aggregate.straightSave()
     
     @staticmethod
@@ -60,4 +82,4 @@ class AggregateMonitoringThread(Thread):
         self.start()
 
     def run(self):	
-        self.__method(self.__param)			
+        self.__method(self.__param)

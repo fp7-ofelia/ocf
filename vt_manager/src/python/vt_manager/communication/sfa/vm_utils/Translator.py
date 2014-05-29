@@ -29,6 +29,18 @@ class Translator:
 	
 #	ifaceClassEmpty = copy.deepcopy(IfaceXmlClass.interface[0])
 	#IfaceXmlClass.interface.pop()
+        if not ifaces:
+            ifaces = []
+            iface = dict()
+            iface['gw'] = None
+            iface['mac'] = None
+            iface['name'] = None
+            iface['dns1'] = None
+            iface['dns2'] = None
+            iface['ip'] = None
+            iface['mask'] = None               
+            ifaces.append(iface)
+
 	for iface in ifaces:
 	    ifaceClassEmpty = copy.deepcopy(IfaceXmlClass.interface[0])
 	    ifaceClassEmpty.gw = iface['gw']

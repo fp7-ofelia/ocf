@@ -24,7 +24,7 @@ class BackgroundMonitor():
 
         for aggregate in Aggregate.objects.all():
             #aggregate = aggregate.as_leaf_class()
-	    print "I am going to monitor: "+aggregate.name
+	    print "Now monitoring aggregate: " + aggregate.name
             AggregateMonitoringThread.monitorAggregateInNewThread(aggregate)
 
         #Wait for threads
@@ -41,7 +41,7 @@ class BackgroundMonitor():
     def monitor():
         sessionMultipler = 0
         while True:
-            print "MONITORING AGGREGATES..."
+            print "Monitoring aggregates..."
             BackgroundMonitor.__monitorAggregates()
             if sessionMultipler % SESSION_MULTIPLIER == 0:
                   sessionMultipler = 0

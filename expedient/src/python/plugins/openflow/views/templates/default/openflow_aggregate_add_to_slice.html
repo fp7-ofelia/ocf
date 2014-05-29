@@ -10,17 +10,19 @@
 	</div>
 	<form class="form" action="{% url openflow_aggregate_slice_controller_add aggregate.id slice.id %}" method="POST">{% csrf_token %}
 		{{ form.as_p }}
-        <p class="center">
+        <p class="left">
             <img align="bottom" src="{% url img_media 'warning.png' %}" />
             The following settings will apply to <strong>all</strong> OpenFlow
             aggregates <strong>after updating</strong> the slice.
+            <img align="bottom" src="{% url img_media 'warning.png' %}" />
+            When updating (or re-starting) the slice, <strong>VLAN(s) should be reserved</strong> again.
             <!-- {Known FlowVisor behavior}
             aggregates in the same slice automatically. There is no need to update the slice if it is started.
             -->
         </p>
         <div class="center">
 	    <input type="submit" value="Save" />
-	    <input type="submit" value="Remove" onclick="javascript: if (confirm('Controller will be unlinked from the slice.')) { changeFormActionURL('{% url openflow_aggregate_slice_controller_remove aggregate.id slice.id %}'); return true; } else { return false; }"/>
+	    <input type="submit" value="Remove" onclick="javascript: if (confirm('Controller will be unlinked from the slice and slice will be stopped.')) { changeFormActionURL('{% url openflow_aggregate_slice_controller_remove aggregate.id slice.id %}'); return true; } else { return false; }"/>
             <input type="button" value="Cancel" onclick="javascript:document.location = '{% url slice_detail slice.id %}'" />
 	</div>
 	</form>

@@ -1,3 +1,5 @@
+import uuid
+
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
 from django.db import transaction
@@ -8,20 +10,21 @@ from openflow.optin_manager.sfa.openflow_utils.ServiceThread import ServiceThrea
 
 '''Same "create_slice" function from xmlrpc_server/ch_api.py without decorators'''
 
-def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_description,controller_url,owner_email,owner_password,switch_slivers,**kwargs):
+def CreateOFSliver(slice_urn,project_name,project_description,slice_name,slice_description,controller_url,owner_email,owner_password,switch_slivers,**kwargs):
 
-    e = Experiment.objects.filter(slice_id=slice_id)
+    #slice_id = Experiment.objects.get(slice_urn=slice_urn).slice_id
+    e = Experiment.objects.filter(slice_urn=slice_urn)
      
     if (e.count()>0):
         old_e = e[0]
-        old_fv_name = old_e.get_fv_slice_name()
+        old_fv_name = old_e.slice_id
         update_exp = True
         old_exp_fs = ExperimentFLowSpace.objects.filter(exp=old_e)
     else:
         update_exp = False
         
     e = Experiment()
-        
+    slice_id = uuid.uuid4()    
     e.slice_id = slice_id
     e.project_name = project_name
     e.project_desc = project_description
@@ -30,6 +33,7 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
     e.controller_url = controller_url
     e.owner_email = owner_email
     e.owner_password = owner_password
+    e.slice_urn = slice_urn
     e.save()
        
     all_efs = [] 
@@ -101,7 +105,7 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
     # create the new experiment on FV
     try:   
         fv_success = fv.proxy.api.createSlice(
-            "%s" % e.get_fv_slice_name(),
+            "%s" % slice_id,
             "%s" % owner_password,
             "%s" % controller_url,
             "%s" % owner_email,
@@ -109,7 +113,7 @@ def CreateOFSliver(slice_id,project_name,project_description,slice_name,slice_de
         for fs in all_efs:
             fs.save()
         print "Created slice with %s %s %s %s" % (
-        e.get_fv_slice_name(), owner_password, controller_url, owner_email)
+        slice_id, owner_password, controller_url, owner_email)
     except Exception,exc:
         import traceback
         traceback.print_exc()
