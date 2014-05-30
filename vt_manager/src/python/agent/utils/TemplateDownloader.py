@@ -23,6 +23,7 @@ class TemplateDownloader():
         self._wget = self.execute(["which", "wget"])[0].strip()
         self.__dict__.update(self.arg_parse(args))
         self._chosen_templates = []
+        self._overwrite_template = False
         # Store templates info
         self.cache_templates_info()
     
@@ -34,8 +35,10 @@ class TemplateDownloader():
             return next((i for i,j in enumerate(lst) if predicate(j)), -1)
 
         parser = argparse.ArgumentParser(description="")
+        # Optional argument (with optional arguments)
         parser.add_argument("--ofelia", help="OFELIA (True) or Non-OFELIA (False) installation",
-                        type=int, default=1, required=True, choices=[1, 0])
+                        nargs="?", default=False, required=False)
+#                        type=int, default=1, required=True, choices=[1, 0])
         parser.add_argument("--save-path", help="Path where templates are saved",
                         type=str, default=self._templates_basepath, required=False)
         args = parser.parse_args(arguments)
@@ -45,6 +48,10 @@ class TemplateDownloader():
         for old_key in args.keys():
             if old_key == "save_path":
                 args["templates_basepath"] = args[old_key]
+            # If variable is present in the arguments, it means it is chosen
+            elif old_key == "ofelia":
+                if args["ofelia"] == None:
+                    args["ofelia"] = True
             new_key = "_%s" % old_key
             args[new_key] = args.pop(old_key)
         return args
@@ -154,7 +161,9 @@ class TemplateDownloader():
            
             hash_info = None
             temp_info = None
+            # Differentiate between hash and template
             try:
+                print "template_info: %s" % template_info
                 if template_info[0][0].endswith(".hash"):
                     try:
                         hash_info = template_info[0]
@@ -181,6 +190,12 @@ class TemplateDownloader():
                 self.templates_info_dict[template_no]["hash"] = dict()
                 self.templates_info_dict[template_no]["hash"]["filename"] = hash_info[0]
                 self.templates_info_dict[template_no]["hash"]["size"] = hash_info[1]
+                print "++++++++++++++++++before control check+++++++++++++++++++++++++++++++++++++"
+                # Useful to define a control version for templates
+                up_to_date = self.check_template_control_version(template_number)
+                print "************** up to date: ", up_to_date
+                self.templates_info_dict[template_no]["hash"]["remote_sync"] = up_to_date
+                print "************** up to date: ", self.templates_info_dict[template_no]["hash"]["remote_sync"]
             except:
                 pass
             
@@ -190,13 +205,15 @@ class TemplateDownloader():
                 self.templates_info_dict[template_no]["template"]["size"] = temp_info[1]
             except:
                 pass
+        
+        print "!!!!!!!!!! TEMPLATES_DICT: %s" % self.templates_info_dict
 
     # Menu
     def get_indent_for_template(self, template_name):
         if len(template_name) <= 15:
-            indent = "\t\t\t"
-        else:
             indent = "\t\t"
+        else:
+            indent = "\t"
         return indent
 
     def show_menu(self, filtered_templates=None):
@@ -208,25 +225,30 @@ class TemplateDownloader():
                 show_dict = {}
         else:
             show_dict = self.templates_info_dict
+        print "show_dict: %s" % show_dict
         templates_info_ord = collections.OrderedDict(sorted(show_dict.items()))
         for template, template_data in templates_info_ord.iteritems():
 #        for t in self.templates_info_dict.keys():
             sys.stdout.write("\n")
-            # At some point, images could lack a hash file. Ignore if that happens
-#            try:
-#                template_number = self.templates_info_dict[t]["number"]
-#                template_hash = self.templates_info_dict[t]["hash"]
-#                indent = self.get_indent_for_template(template_hash["filename"])
-#                sys.stdout.write("[%s] %s%s%s\n" % (str(template_number), str(template_hash["filename"]), indent, str(template_hash["size"])))
-#            except:
-#                pass
+            template_up_to_date = ""
+            try:
+                # At some point, images could lack a hash file. Ignore if that happens
+                template_hash = template_data["hash"]
+                print "template_hash: ", template_hash
+                template_up_to_date = getattr(template_hash, "remote_sync", "")
+                print "up to date: %s" % str(template_up_to_date)
+                if template_up_to_date:
+                    template_up_to_date = "[ %s ]" % template_up_to_date
+            except:
+                pass
             try:
                 template_number = template_data["number"]
                 template_file = template_data["template"]
                 # File extensions not shown
                 template_filename = template_file["filename"].split(".")[0]
                 indent = self.get_indent_for_template(template_file["filename"])
-                sys.stdout.write("[%s] %s%s%s" % (str(template_number), str(template_filename), indent, str(template_file["size"])))
+#                sys.stdout.write("[%s] %s%s%s" % (str(template_number), str(template_filename), indent, str(template_file["size"])))
+                sys.stdout.write("[%s] %s%s%s %s" % (template_number, template_filename, indent, template_file["size"]), template_up_to_date)
             except:
                 pass
 
@@ -240,31 +262,143 @@ class TemplateDownloader():
             os.makedirs(download_path)
         # Check if file exists prior to download
         if os.path.isfile(full_download_path):
-            sys.stdout.write("\nFile at %s already exists. " % full_download_path)
-            do_overwrite = self.ask_for_ok("Overwrite?")
-            if not do_overwrite:
-                return
-        else:
-            pass
+            # (1) Ask to replace when downloading ".hash" files; then download the template without further questions
+            if uri.endswith(".hash"):
+                sys.stdout.write("\nFile at %s already exists. " % full_download_path)
+                self._overwrite_template = self.ask_for_ok("Overwrite?")
+            # (2) When the template is processed, the flag is disabled
+            else:
+                # When flag is activated, download template
+                if self._overwrite_template:
+                    pass
+                # Otherwise, skip
+                else:
+                    self._overwrite_template = False
+                    return
         sys.stdout.write("\nDownloading file from %s. Please wait...\n" % uri)
         return self.wget(uri, os.path.join(self._template_server, folder_path))
 
-    def download_template_files(self, template_dict_id):
+    # Hash
+    def check_correct_download_template_files(self, template_dict_id):
+        template_paths = self.get_template_local_path(template_dict_id)
+        hash_index = [ i for i, template in enumerate(template_paths) if template.endswith(".hash") ][0]
+        # Check value of downloaded .hash file
+        downloaded_hash = open(template_paths[hash_index]).read().rstrip()
+        # Get only the first part (the hash, not the filename)
+        downloaded_hash = downloaded_hash.split(" ")[0]
+        template_index = [ i for i, template in enumerate(template_paths) if not template.endswith(".hash") ][0]
+        import hashlib
+        # XXX Works differently than the console's "md5sum"
+#        template_hash = hashlib.md5(template_paths[template_index]).hexdigest()
+        template_file = open(template_paths[template_index],"rb").read()
+        template_hash = hashlib.md5(template_file).hexdigest()
+        # If hash corresponds to the downloaded one, transmission was correct
+        if downloaded_hash == template_hash:
+            return True
+        else:
+            return False
+
+    def check_template_control_version(self, template_dict_id):
+        print "----------------------------------"
+        print "template_dict_id: ", template_dict_id
+        template_uris = self.get_template_remote_uris(template_dict_id)
+        print "template_uris: ", template_uris
+        # Retrieve data from remote hash
+        hash_index = [ i for i, template in enumerate(template_uris) if template.endswith(".hash") ][0]
+        print "hash_index: ", hash_index
+        hash_uri = template_uris[hash_index]
+        print "hash_uri: %s", hash_uri
+        remote_hash_contents = None
+        local_hash_contents = None
+        try:
+            import random
+            # Download into a temporal location, to be removed afterwards
+            temp_location_remote_hash = "/tmp/%s" % "".join(random.choice('0123456789ABCDEF') for i in range(16))
+            self.wget(hash_uri, temp_location_remote_hash)
+            # Retrieve remote hash contents
+            remote_hash_contents = open(temp_location_remote_hash).read().rstrip()
+            print "remote_hash_contents: ", remote_hash_contents
+            # Remove remote hash file
+            os.remove(temp_location_remote_hash)
+        except:
+            pass
+        try:
+            template_paths = self.get_template_local_path(template_dict_id)
+            hash_index = [ i for i, template in enumerate(template_paths) if template.endswith(".hash") ][0]
+            location_local_hash = template_paths[hash_index]
+            # Retrieve local hash contents
+            local_hash_contents = open(location_local_hash).read().rstrip()
+            print "local_hash_contents: ", local_hash_contents
+        except:
+            pass
+        # Check consistence between remote and local hash. If different, templates are either corrupt or not up-to-date
+        print "remote hash: ", remote_hash_contents
+        print "local hash: ", local_hash_contents
+        print "----------------------------------"
+        if remote_hash_contents == local_hash_contents:
+            print "[[ up to date ]]"
+            return "Up-to-date"
+        else:
+            # Previously not installed
+            if not local_hash_contents:
+                print "[[ not installed ]]"
+#                return "Not installed"
+                return ""
+            # Previously installed, but outdated
+            else:
+                print "[[ outdated ]]"
+                return "Outdated"
+
+    def get_template_local_path(self, template_dict_id):
+        template_dict_id = "template%s" % template_dict_id
         template_files = []
         template_files.append(self.templates_info_dict[template_dict_id]["hash"]["filename"])
         template_files.append(self.templates_info_dict[template_dict_id]["template"]["filename"])
+        template_paths = []
         for template_file in template_files:
+            template_name = template_file.split(".")[0]
+            # Construct local path
+            template_paths.append(os.path.join(self._templates_basepath, template_name, template_file))
+        return template_paths
+
+    def get_template_remote_uris(self, template_dict_id):
+        template_dict_id = "template%s" % template_dict_id
+        template_files = []
+        print "hash filename......................... ", self.templates_info_dict[template_dict_id]["hash"]["filename"]
+        template_files.append(self.templates_info_dict[template_dict_id]["hash"]["filename"])
+        template_files.append(self.templates_info_dict[template_dict_id]["template"]["filename"])
+        template_uris = []
+        for template_file in template_files:
+            print "checking get_template_remote_uris: ", template_file
             template_name = template_file.split(".")[0]
             # Construct template URI depending on if it is an OFELIA installation or not
             if self._ofelia:
-                template_uri = os.path.join(self._template_server, self._ofelia_templates_path, template_name, template_file)
+                template_uris.append(os.path.join(self._template_server, self._ofelia_templates_path, template_name, template_file))
             else:
-                template_uri = os.path.join(self._template_server, self._non_ofelia_templates_path, template_name, template_file)
+                template_uris.append(os.path.join(self._template_server, self._non_ofelia_templates_path, template_name, template_file))
+        return template_uris
+
+    def download_template_files(self, template_dict_id):
+        template_uris = self.get_template_remote_uris(template_dict_id)
+        for template_uri in template_uris:
+            template_file = template_uri.split("/")[-1]
+            template_name = template_file.split(".")[0]
             # Download path is provided by the user -- otherwise default is used
             # It is generated from user's input and part of the information carried on the template itself
             download_path = os.path.join(self._templates_basepath, template_name, template_file)
             self.download_template_file(template_uri, download_path)
-        # TODO Check that download is correct by checking .hash file
+        # Check that download is correct by checking .hash file
+        correct_transmission = self.check_correct_download_template_files(template_dict_id)
+        if correct_transmission:
+            sys.stdout.write("\nTemplate %s has been successfully downloaded\n" % template_name)
+        else:
+            sys.stdout.write("\nTemplate %s is probably corrupted\n" % template_name)
+            reattempt_download = self.ask_for_ok("Reattempt download?")
+            if reattempt_download:
+                sys.stdout.write("\nReattempting download for template %s. Please wait...\n" % template_name)
+                self.download_template_files(template_dict_id)
+            else:
+                sys.stdout.write("\nIgnoring failed download for template %s\n" % template_name)
 
     def download_chosen_templates(self):
         # Get files per chosen template
@@ -316,7 +450,10 @@ class TemplateDownloader():
             # Ensure that the chosen templates do exist within the templates dict
             template_number_to_select_parsed = self.ensure_existing_templates(template_number_to_select_parsed)
             # Show menu for selected templates
-            sys.stdout.write("\nChosen templates:\n")
+            if self._chosen_templates:
+                sys.stdout.write("\nChosen templates:\n")
+            else:
+                sys.stdout.write("\nNo templates chosen\n")
             self.show_menu(self._chosen_templates)
             sys.stdout.write("\n\n")
             templates_selected = self.ask_for_ok()
@@ -331,7 +468,6 @@ class TemplateDownloader():
         if do_exit in ["y", "Y"]:
             return True
         elif do_exit in ["n", "N"]:
-            print "nooooooooooo exiting!"
             return False
         else:
             return self.ask_for_exit()
@@ -348,9 +484,6 @@ class TemplateDownloader():
             return self.ask_for_ok()
 
 
-## TODO
-# * Implemente checking of template.hash against downloaded hash after download (OR DELEGATE TO CRON JOB??)
-
 def main():
     #template_downloader = TemplateDownloader(**template_arguments)
     template_downloader = TemplateDownloader(sys.argv[1:])
@@ -360,10 +493,10 @@ def main():
     except KeyboardInterrupt:
         raise
     except Exception as e:
-        print "EXCEPTION: ", e
-        do_exit = template_downloader.ask_for_exit()
-        if do_exit:
-            sys.exit(do_exit)
+        sys.stdout.write("\nException: %s" % e)
+#        do_exit = template_downloader.ask_for_exit()
+#        if do_exit:
+#            sys.exit(do_exit)
     return True
 
 if __name__ == "__main__":
