@@ -74,7 +74,7 @@ do_stop()
 #
 do_update_templates()
 {
-    # Check if installations is for OFELIA or not
+    # Check if installation is for an OFELIA island
     OFELIA="none"
     template_args=""
     while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]

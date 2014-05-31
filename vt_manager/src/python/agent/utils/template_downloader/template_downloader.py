@@ -262,7 +262,8 @@ class TemplateDownloader():
         if os.path.isfile(full_download_path):
             # (1) Ask to replace when downloading ".hash" files; then download the template without further questions
             if uri.endswith(".hash"):
-                sys.stdout.write("\nFile at %s already exists. " % full_download_path)
+                #sys.stdout.write("\nFile at %s already exists. " % full_download_path)
+                sys.stdout.write("\nFiles under %s already exist. " % download_path)
                 self._overwrite_template = self.ask_for_ok("Overwrite?")
                 perform_download = self._overwrite_template
             # (2) When the template is processed, the flag is disabled for later
@@ -380,25 +381,27 @@ class TemplateDownloader():
 
     def download_template_files(self, template_dict_id):
         template_uris = self.get_template_remote_uris(template_dict_id)
+        downloaded_template = False
         for template_uri in template_uris:
             template_file = template_uri.split("/")[-1]
             template_name = template_file.split(".")[0]
             # Download path is provided by the user -- otherwise default is used
             # It is generated from user's input and part of the information carried on the template itself
             download_path = os.path.join(self._templates_basepath, template_name, template_file)
-            self.download_template_file(template_uri, download_path)
-        # Check that download is correct by checking .hash file
-        correct_transmission = self.check_correct_download_template_files(template_dict_id)
-        if correct_transmission:
-            sys.stdout.write("\nTemplate %s has been successfully downloaded\n" % template_name)
-        else:
-            sys.stdout.write("\nTemplate %s is probably corrupted\n" % template_name)
-            reattempt_download = self.ask_for_ok("Reattempt download?")
-            if reattempt_download:
-                sys.stdout.write("\nReattempting download for template %s. Please wait...\n" % template_name)
-                self.download_template_files(template_dict_id)
+            downloaded_template = self.download_template_file(template_uri, download_path)
+        if downloaded_template:
+            # Check that download is correct by checking .hash file
+            correct_transmission = self.check_correct_download_template_files(template_dict_id)
+            if correct_transmission:
+                sys.stdout.write("\nTemplate %s has been successfully downloaded\n" % template_name)
             else:
-                sys.stdout.write("\nIgnoring failed download for template %s\n" % template_name)
+                sys.stdout.write("\nTemplate %s is probably corrupted\n" % template_name)
+                reattempt_download = self.ask_for_ok("Reattempt download?")
+                if reattempt_download:
+                    sys.stdout.write("\nReattempting download for template %s. Please wait...\n" % template_name)
+                    self.download_template_files(template_dict_id)
+                else:
+                    sys.stdout.write("\nIgnoring failed download for template %s\n" % template_name)
 
     def download_chosen_templates(self):
         # Get files per chosen template
