@@ -250,6 +250,8 @@ class TemplateDownloader():
 
     # Download templates
     def download_template_file(self, uri, folder_path=None):
+        # Flag to determine whether to download or not
+        perform_download = False
         full_download_path = os.path.realpath(os.path.join(self._templates_basepath, folder_path))
         # Get the parent directory where the file is to be saved...
         download_path = os.path.dirname(full_download_path)
@@ -262,20 +264,35 @@ class TemplateDownloader():
             if uri.endswith(".hash"):
                 sys.stdout.write("\nFile at %s already exists. " % full_download_path)
                 self._overwrite_template = self.ask_for_ok("Overwrite?")
-            # (2) When the template is processed, the flag is disabled
+                print "hash question: overwrite template: ", self._overwrite_template
+                perform_download = self._overwrite_template
+            # (2) When the template is processed, the flag is disabled for later
             else:
-                # When flag is activated, download template
+                print "template: overwrite template: ", self._overwrite_template
                 if self._overwrite_template:
-                    pass
-                # Otherwise, skip
-                else:
+                    perform_download = True
                     self._overwrite_template = False
-                    return
-        sys.stdout.write("\nDownloading file from %s. Please wait...\n" % uri)
-        return self.wget(uri, os.path.join(self._template_server, folder_path))
+        # If file does not exist on disk, it shall be downloaded
+        else:
+            perform_download = True
+        print "overwrite template: ", self._overwrite_template
+        print "perform download: ", perform_download
+        if perform_download:
+            sys.stdout.write("\nDownloading file from %s. Please wait...\n" % uri)
+            return self.wget(uri, os.path.join(self._template_server, folder_path))
 
     # Hash
     def check_correct_download_template_files(self, template_dict_id):
+        # Memory-efficient reading of files. Use in binary ("rb") mode
+        def md5_for_file(f, block_size=2**20):
+            md5 = hashlib.md5()
+            while True:
+                data = f.read(block_size)
+                if not data:
+                    break
+                md5.update(data)
+            return md5.hexdigest()
+
         template_paths = self.get_template_local_path(template_dict_id)
         hash_index = [ i for i, template in enumerate(template_paths) if template.endswith(".hash") ][0]
         # Check value of downloaded .hash file
@@ -286,8 +303,15 @@ class TemplateDownloader():
         import hashlib
         # XXX Works differently than the console's "md5sum"
 #        template_hash = hashlib.md5(template_paths[template_index]).hexdigest()
-        template_file = open(template_paths[template_index],"rb").read()
-        template_hash = hashlib.md5(template_file).hexdigest()
+        try:
+            template_file = open(template_paths[template_index],"rb")
+            # Not efficient, returns a "MemoryError" exception
+            #template_hash = hashlib.md5(template_file.read()).hexdigest()
+            template_hash = md5_for_file(template_file)
+        except:
+            # Any exception on this (except "MemoryError", which is now taken care of)
+            # may imply that the downloaded file is corrupt
+            template_hash = None
         # If hash corresponds to the downloaded one, transmission was correct
         if downloaded_hash == template_hash:
             return True
@@ -367,8 +391,10 @@ class TemplateDownloader():
             # It is generated from user's input and part of the information carried on the template itself
             download_path = os.path.join(self._templates_basepath, template_name, template_file)
             self.download_template_file(template_uri, download_path)
+            print "... .after attempting download...."
         # Check that download is correct by checking .hash file
         correct_transmission = self.check_correct_download_template_files(template_dict_id)
+        print "... after checking correct download..."
         if correct_transmission:
             sys.stdout.write("\nTemplate %s has been successfully downloaded\n" % template_name)
         else:
