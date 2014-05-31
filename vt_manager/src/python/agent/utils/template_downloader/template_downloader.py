@@ -90,7 +90,6 @@ class TemplateDownloader():
             return "0B"
     
     def list_folder(self, folder_path=""):
-        # FIXME Fix data format. Uncomment later. Test with dummy data to avoid reconnections to FTP.
         return self.curl(os.path.join(self._template_server, "%s/" % folder_path))
     
     def get_info_from_folder(self, folder_path=""):
@@ -119,37 +118,26 @@ class TemplateDownloader():
         return [ x[0] for x in contents_info ]
     
     # Specific methods
-    def get_templates(self):
+    def get_templates_path(self):
         if self._ofelia:
-            return self.get_ofelia_templates()
+            templates_path = self._ofelia_templates_path
         else:
-            return self.get_non_ofelia_templates()
+            templates_path = self._non_ofelia_templates_path
+        return templates_path
+
+    def get_templates(self):
+        templates_path = self.get_templates_path()
+        # Get contents from folder
+        templates = self.get_contents_from_folder(templates_path)
+        return templates
 
     def get_templates_info(self):
-        if self._ofelia:
-            return self.get_ofelia_templates_info()
-        else:
-            return self.get_non_ofelia_templates_info()
-
-    def get_ofelia_templates(self):
-        return self.get_contents_from_folder(self._ofelia_templates_path)
-
-    def get_ofelia_templates_info(self):
-        ofelia_templates = self.get_ofelia_templates()
-        ofelia_templates_info = []
-        for template in ofelia_templates:
-            ofelia_templates_info.append(self.get_info_from_folder(os.path.join(self._ofelia_templates_path, template)))
-        return ofelia_templates_info
-
-    def get_non_ofelia_templates(self):
-        return self.get_contents_from_folder(self._non_ofelia_templates_path)
-
-    def get_non_ofelia_templates_info(self):
-        non_ofelia_templates = self.get_non_ofelia_templates()
-        non_ofelia_templates_info = []
-        for template in non_ofelia_templates:
-            non_ofelia_templates_info.append(self.get_info_from_folder(os.path.join(self._non_ofelia_templates_path, template)))
-        return non_ofelia_templates_info
+        templates_path = self.get_templates_path()
+        templates = self.get_templates()
+        templates_info = []
+        for template in templates:
+            templates_info.append(self.get_info_from_folder(os.path.join(templates_path, template)))
+        return templates_info
 
     def cache_templates_info(self):
         templates_info = self.get_templates_info()
@@ -208,12 +196,17 @@ class TemplateDownloader():
                 pass
 
     # Menu
-    def get_indent_for_template(self, template_name):
+    def get_indents_for_template(self, template_name, template_size):
+        indents = []
         if len(template_name) <= 15:
-            indent = "\t\t"
+            indents.append("\t\t")
         else:
-            indent = "\t"
-        return indent
+            indents.append("\t")
+        if len(template_size) <= 6:
+            indents.append("\t\t")
+        else:
+            indents.append("\t")
+        return indents
 
     def show_menu(self, filtered_templates=None):
         #from collections import OrderedDict
@@ -242,9 +235,9 @@ class TemplateDownloader():
                 template_file = template_data["template"]
                 # File extensions not shown
                 template_filename = template_file["filename"].split(".")[0]
-                indent = self.get_indent_for_template(template_file["filename"])
+                indents = self.get_indents_for_template(template_file["filename"], template_file["size"])
 #                sys.stdout.write("[%s] %s%s%s" % (str(template_number), str(template_filename), indent, str(template_file["size"])))
-                sys.stdout.write("[%s] %s%s%s %s%s" % (template_number, template_filename, indent, template_file["size"], indent, template_up_to_date))
+                sys.stdout.write("[%s] %s%s%s %s%s" % (template_number, template_filename, indents[0], template_file["size"], indents[1], template_up_to_date))
             except:
                 pass
 
@@ -466,15 +459,6 @@ class TemplateDownloader():
         filter_existing_templates = lambda x: x in [ self.templates_info_dict[k]["number"] for k in self.templates_info_dict.keys() ]
         return filter(filter_existing_templates, list_template_numbers)
 
-    def ask_for_exit(self):
-        do_exit = raw_input("Are you sure you want to quit? [y/N]: ")
-        if do_exit in ["y", "Y"]:
-            return True
-        elif do_exit in ["n", "N"]:
-            return False
-        else:
-            return self.ask_for_exit()
-
     def ask_for_ok(self, message=None):
         if not message:
             message = "Is everything OK?"
@@ -486,7 +470,6 @@ class TemplateDownloader():
         else:
             return self.ask_for_ok()
 
-
 def main():
     #template_downloader = TemplateDownloader(**template_arguments)
     template_downloader = TemplateDownloader(sys.argv[1:])
@@ -497,9 +480,6 @@ def main():
         raise
     except Exception as e:
         sys.stdout.write("\nException: %s" % e)
-#        do_exit = template_downloader.ask_for_exit()
-#        if do_exit:
-#            sys.exit(do_exit)
     return True
 
 if __name__ == "__main__":
