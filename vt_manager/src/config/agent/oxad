@@ -27,9 +27,9 @@ fi
 
 # Is the service already running? If so, capture the process ID
 if [ -f $PIDFILE ]; then
-	PID=`cat $PIDFILE`
+    PID=`cat $PIDFILE`
 else
-	PID=""
+    PID=""
 fi
 
 # Define LSB log_* functions.
@@ -41,14 +41,12 @@ fi
 #
 do_start()
 {
-	# Return
-	#   0 if daemon has been started
-	#   1 if daemon was already running
-	#   2 if daemon could not be started
-	start-stop-daemon --start --quiet --exec $DAEMON --test > /dev/null \
-		|| return 1
-	start-stop-daemon --start --quiet --exec $DAEMON -- $DAEMON_ARGS \
-		|| return 2
+    # Return
+    #   0 if daemon has been started
+    #   1 if daemon was already running
+    #   2 if daemon could not be started
+    start-stop-daemon --start --quiet --exec $DAEMON --test > /dev/null \ || return 1
+    start-stop-daemon --start --quiet --exec $DAEMON -- $DAEMON_ARGS \ || return 2
 }
 
 #
@@ -56,19 +54,47 @@ do_start()
 #
 do_stop()
 {
-	# Return
-	#   0 if daemon has been stopped
-	#   1 if daemon was already stopped
-	#   2 if daemon could not be stopped
-	#   other if a failure occurred
-	start-stop-daemon --stop --signal 2 --retry 5 --quiet --pidfile $PIDFILE 
-	RETVAL="$?"
-	if [ "${PID}" != "" ]; then
-		kill ${PID} > /dev/null 2> /dev/null &
-	fi
+    # Return
+    #   0 if daemon has been stopped
+    #   1 if daemon was already stopped
+    #   2 if daemon could not be stopped
+    #   other if a failure occurred
+    start-stop-daemon --stop --signal 2 --retry 5 --quiet --pidfile $PIDFILE 
+    RETVAL="$?"
+    if [ "${PID}" != "" ]; then
+        kill ${PID} > /dev/null 2> /dev/null &
+    fi
         rm -f ${PIDFILE}
-	[ "$RETVAL" = 2 ] && return 2
-	return "$RETVAL"
+    [ "$RETVAL" = 2 ] && return 2
+    return "$RETVAL"
+}
+
+#
+# Function to update templates at disk
+#
+do_update_templates()
+{
+    # Check if installations is for OFELIA or not
+    OFELIA="none"
+    template_args=""
+    while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+    do
+        echo "Is this an OFELIA installation? (yes/no):"
+        read OFELIA
+        if [ $OFELIA = yes ]; then
+            OFELIA=1
+            template_args="--ofelia"
+        elif [ $OFELIA = no ]; then
+            OFELIA=0
+        else
+            echo "Not a valid option. Please say yes/no"
+        fi
+    done
+    
+    current_dir=$PWD
+    cd /opt/ofelia/oxa/bin/utils/template_downloader
+    python template_downloader.py $template_args
+    cd $current_dir
 }
 
 #
@@ -76,59 +102,61 @@ do_stop()
 #
 do_check_status()
 {
-	if [ "${PID}" != "" ]; then
-		STATUS="running (pid $PID)"
-	else
-		STATUS="NOT running"
-	fi
-	echo "$DESC $NAME is $STATUS."
+    if [ "${PID}" != "" ]; then
+        STATUS="running (pid $PID)"
+    else
+        STATUS="NOT running"
+    fi
+    echo "$DESC $NAME is $STATUS."
 }
 
 case "$1" in
   start)
-	log_daemon_msg "Starting $DESC" "$NAME"
-	do_start
-	case "$?" in
-		0|1) log_end_msg 0 ;;
-		2) log_end_msg 1 ;;
-	esac
-	;;
+    log_daemon_msg "Starting $DESC" "$NAME"
+    do_start
+    case "$?" in
+        0|1) log_end_msg 0 ;;
+        2) log_end_msg 1 ;;
+    esac
+    ;;
   stop)
-	log_daemon_msg "Stopping $DESC" "$NAME"
-	do_stop
-	case "$?" in
-		0|1) log_end_msg 0 ;;
-		2) log_end_msg 1 ;;
-	esac
-	;;
+    log_daemon_msg "Stopping $DESC" "$NAME"
+    do_stop
+    case "$?" in
+        0|1) log_end_msg 0 ;;
+        2) log_end_msg 1 ;;
+    esac
+    ;;
   restart|force-reload)
-	log_daemon_msg "Restarting $DESC" "$NAME"
-	do_stop
-	case "$?" in
-	  0|1)
-		do_start
-		case "$?" in
-			0) log_end_msg 0 ;;
-			1) log_end_msg 1 ;; # Old process is still running
-			*) log_end_msg 1 ;; # Failed to start
-		esac
-		;;
-	  *)
-	  	# Failed to stop
-		log_end_msg 1
-		;;
-	esac
-	;;
+    log_daemon_msg "Restarting $DESC" "$NAME"
+    do_stop
+    case "$?" in
+      0|1)
+        do_start
+        case "$?" in
+            0) log_end_msg 0 ;;
+            1) log_end_msg 1 ;; # Old process is still running
+            *) log_end_msg 1 ;; # Failed to start
+        esac
+        ;;
+      *)
+          # Failed to stop
+        log_end_msg 1
+        ;;
+    esac
+    ;;
+
+  update-templates)
+        do_update_templates; exit $?
+        ;;
 
   status)
-	do_check_status; exit $?
-	;;
+    do_check_status; exit $?
+    ;;
 
   *)
-	echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload|status}" >&2
-	exit 3
-	;;
+    echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload|update-templates|status}" >&2
+    exit 3
+    ;;
 esac
-
-:
 

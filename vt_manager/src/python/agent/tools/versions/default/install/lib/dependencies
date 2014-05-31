@@ -2,6 +2,6 @@
 
 #Used to define package dependencies
 
-DEBIAN_DEPENDENCIES="python-openssl python-lxml python-libxml2 python-jinja2 python-libxslt1 python-setuptools python-libvirt python-pyparsing build-essential xen-qemu-dm"
+DEBIAN_DEPENDENCIES="python-openssl python-lxml python-libxml2 python-jinja2 python-libxslt1 python-setuptools python-libvirt python-pyparsing build-essential xen-qemu-dm curl"
 
-EASY_INSTALL_DEPENDENCIES="generateDS"
+EASY_INSTALL_DEPENDENCIES="generateDS argparse"
