@@ -264,19 +264,15 @@ class TemplateDownloader():
             if uri.endswith(".hash"):
                 sys.stdout.write("\nFile at %s already exists. " % full_download_path)
                 self._overwrite_template = self.ask_for_ok("Overwrite?")
-                print "hash question: overwrite template: ", self._overwrite_template
                 perform_download = self._overwrite_template
             # (2) When the template is processed, the flag is disabled for later
             else:
-                print "template: overwrite template: ", self._overwrite_template
                 if self._overwrite_template:
                     perform_download = True
                     self._overwrite_template = False
         # If file does not exist on disk, it shall be downloaded
         else:
             perform_download = True
-        print "overwrite template: ", self._overwrite_template
-        print "perform download: ", perform_download
         if perform_download:
             sys.stdout.write("\nDownloading file from %s. Please wait...\n" % uri)
             return self.wget(uri, os.path.join(self._template_server, folder_path))
@@ -391,10 +387,8 @@ class TemplateDownloader():
             # It is generated from user's input and part of the information carried on the template itself
             download_path = os.path.join(self._templates_basepath, template_name, template_file)
             self.download_template_file(template_uri, download_path)
-            print "... .after attempting download...."
         # Check that download is correct by checking .hash file
         correct_transmission = self.check_correct_download_template_files(template_dict_id)
-        print "... after checking correct download..."
         if correct_transmission:
             sys.stdout.write("\nTemplate %s has been successfully downloaded\n" % template_name)
         else:
