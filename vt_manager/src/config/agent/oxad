@@ -20,8 +20,8 @@ PIDFILE="/var/run/OfeliaAgent.pid"
 # Exit if the package is not installed
 if [ ! -x "$DAEMON" ]; then
 {
-        echo "Couldn't find $DAEMON"
-        exit 99
+    echo "Couldn't find $DAEMON"
+    exit 99
 }
 fi
 
@@ -71,26 +71,33 @@ do_stop()
 
 #
 # Function to update templates at disk
+# Arguments: --ofelia (its presence indicates this is an OFELIA island)
 #
 do_update_templates()
 {
+    # Retrieve arguments for function ($1: function name, $2: function argument)
+    template_args=$2 #$@
     # Check if installation is for an OFELIA island
     OFELIA="none"
-    template_args=""
-    while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
-    do
-        echo "Is this an OFELIA installation? (yes/no):"
-        read OFELIA
-        if [ $OFELIA = yes ]; then
-            OFELIA=1
-            template_args="--ofelia"
-        elif [ $OFELIA = no ]; then
-            OFELIA=0
-        else
-            echo "Not a valid option. Please say yes/no"
-        fi
-    done
-    
+    # If "--ofelia" is already an argument, do not ask
+    #if [ "$args" =~ "ofelia" ]; then
+    if [ "$template_args" != "${--ofelia}" ]; then
+        OFELIA=1
+    else
+        while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
+        do
+            echo "Is this an OFELIA installation? (yes/no):"
+            read OFELIA
+            if [ $OFELIA = yes ]; then
+                OFELIA=1
+                template_args="--ofelia"
+            elif [ $OFELIA = no ]; then
+                OFELIA=0
+            else
+                echo "Not a valid option. Please say yes/no"
+            fi
+        done
+    fi
     current_dir=$PWD
     cd /opt/ofelia/oxa/bin/utils/template_downloader
     python template_downloader.py $template_args
@@ -147,8 +154,8 @@ case "$1" in
     ;;
 
   update-templates)
-        do_update_templates; exit $?
-        ;;
+    do_update_templates $@; exit $?
+    ;;
 
   status)
     do_check_status; exit $?

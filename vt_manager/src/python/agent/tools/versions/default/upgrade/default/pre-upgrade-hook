@@ -18,7 +18,7 @@ OFELIA="none"
 
 while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
     do
-        echo "Is this an OFELIA istallation? (yes/no):"
+        echo "Is this an OFELIA installation? (yes/no):"
         read OFELIA
         if [ $OFELIA == yes ]; then
             OFELIA=1
