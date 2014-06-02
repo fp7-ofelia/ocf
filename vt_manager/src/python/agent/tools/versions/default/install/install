@@ -42,11 +42,9 @@ source "$CURRENT_DIRECTORY/lib/daemon"
 printHeader ">" "Downloading templates..." 
 #source "$CURRENT_DIRECTORY/lib/template"
 # Retrieve type of installation (OFELIA/non-OFELIA)
-template_arguments=""
+template_arguments="--non-ofelia"
 if [[ $OFELIA == 1 ]]; then
     template_arguments="--ofelia"
-else
-    template_arguments="--non-ofelia"
 fi
 # Daemon already installed (in previous line)
 /etc/init.d/oxad update-templates $template_arguments || error "Could not update templates" $NO_RESCUE

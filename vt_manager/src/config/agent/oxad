@@ -79,12 +79,14 @@ do_update_templates()
     template_args=$2 #$@
     # Check if installation is for an OFELIA island
     OFELIA="none"
-    # If "--ofelia" or "--non-ofelia" are already an argument, do not ask further
-    #if [ "$args" =~ "ofelia" ]; then
-    if [ "$template_args" != "${--ofelia}" ]; then
-        OFELIA=1
-    elif [ "$template_args" != "${--non-ofelia}" ]; then
+    # If either "--ofelia" or "--non-ofelia" are already an argument, do not ask further
+    if [ "$template_args" != "${--non-ofelia}" ]; then
         OFELIA=0
+        # TemplateDownloader interprets lack of arguments as a non-OFELIA installation
+        template_args=""
+    #elif [ "$args" =~ "ofelia" ]; then
+    elif [ "$template_args" != "${--ofelia}" ]; then
+        OFELIA=1
     else
         while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
         do
@@ -95,7 +97,6 @@ do_update_templates()
                 template_args="--ofelia"
             elif [ $OFELIA = no ]; then
                 OFELIA=0
-                # TemplateDownloader interprets lack of arguments as a non-OFELIA installation
                 template_args=""
             else
                 echo "Not a valid option. Please say yes/no"
