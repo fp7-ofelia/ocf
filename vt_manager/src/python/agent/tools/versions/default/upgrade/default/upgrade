@@ -17,10 +17,12 @@ printHeader "info#" "Using default upgrade module..."
 print "Checking for new versions of the VM template..."
 #loadModule "lib/template" $NO_RESCUE
 #source "$CURRENT_DIRECTORY/lib/template"
-# Retrieve type of installation (OFELIA/NON-OFELIA)
+# Retrieve type of installation (OFELIA/non-OFELIA)
 template_arguments=""
 if [[ $OFELIA == 1 ]]; then
     template_arguments="--ofelia"
+else
+    template_arguments="--non-ofelia"
 fi
 # Daemon already installed
 /etc/init.d/oxad update-templates $template_arguments || error "Could not update templates" $NO_RESCUE
