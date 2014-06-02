@@ -82,11 +82,11 @@ do_update_templates()
     OFELIA="none"
     # --ofelia
     #if [ "$template_args" != "${--ofelia}" ]; then
-    if [ $template_args = "--ofelia" ]; then
+    if [ "$template_args" = "--ofelia" ]; then
     #if [ "$args" =~ "ofelia" ]; then
         OFELIA=1
     # --non-ofelia
-    elif [ $template_args = "--non-ofelia" ]; then
+    elif [ "$template_args" = "--non-ofelia" ]; then
         OFELIA=0
         # TemplateDownloader interprets lack of arguments as a non-OFELIA installation
         template_args=""
