@@ -42,5 +42,5 @@ source "$CURRENT_DIRECTORY/lib/daemon"
 printHeader ">" "Downloading templates..." 
 #source "$CURRENT_DIRECTORY/lib/template"
 # Daemon already installed (in previous line)
-/etc/init.d/oxad update-templates
+/etc/init.d/oxad update-templates || error "Could not update templates" $NO_RESCUE
 

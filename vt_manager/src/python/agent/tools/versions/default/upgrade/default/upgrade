@@ -18,4 +18,4 @@ print "Checking for new versions of the VM template..."
 #loadModule "lib/template" $NO_RESCUE
 #source "$CURRENT_DIRECTORY/lib/template"
 # Daemon already installed
-/etc/init.d/oxad update-templates
+/etc/init.d/oxad update-templates || error "Could not update templates" $NO_RESCUE
