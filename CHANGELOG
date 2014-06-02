@@ -25,6 +25,16 @@ VERSIONS
 ========
 
 --------------------------------------------------
+v0.8.2
+--------------------------------------------------
+Released: TBD
+
+Change log:
+
+[*] EXP: Cannot monitor status of AMsoil-based aggregates enhancement Expedient. Issue 217
+[+] AGN: Locate server to store VM images and develop a template downloader for virtualisation agent. Issue 203
+
+--------------------------------------------------
 v0.8.1
 --------------------------------------------------
 Released: 26/05/2014
