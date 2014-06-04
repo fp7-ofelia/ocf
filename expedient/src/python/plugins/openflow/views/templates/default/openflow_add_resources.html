@@ -299,6 +299,9 @@
 	<td class="label">Actions:</td>
 	<td>
 	    <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />
+            {% if not slice.started %}
+                <span style="font-size:10px"><img style="height:12px;" src="{% url img_media 'warning.png' %}" alt="Slice is stopped" title="Slice is stopped"/> Your Flowspace can only be granted if your slice is started</span>
+            {% endif %}
     {# {% else %} #}
 		<!--<input type="button" onClick="alert('Warning: OF Aggregate \'{{ agg.name }}\' is not available');" value="Book Openflow resources" />-->
   {# {% endif %} #}
