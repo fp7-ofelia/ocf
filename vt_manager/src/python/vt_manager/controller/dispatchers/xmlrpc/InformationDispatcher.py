@@ -91,30 +91,34 @@ class InformationDispatcher():
                         if not vms:
                             raise Exception("VM not Found")
                 xmlrpc_server = xmlrpclib.Server(server.getAgentURL())
-                vms_info = xmlrpc_server.force_list_active_vms(server.getAgentPassword(), vmID)
-                updated_vms = list()
-                simple_actions = dict() 
-                for vm in vms:
-                    if vm.getUUID() in vms_info.keys():
-                        vm.setState("running")
-                        vm.save()
-                        simple_actions[vm.getUUID()] = "running"
-                    else:
-                        if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown']:
-                            child = vm.getChildObject()
-                            server = vm.Server.get()
-                            #Action.objects.all().filter(objectUUID = vm.uuid).delete()
-                            server.deleteVM(vm)
-                            # Keep actions table up-to-date after each deletion
-                            vm_uuids = [ vm.uuid for vm in VirtualMachine.objects.all() ]
-                            Action.objects.all().exclude(objectUUID__in = vm_uuids).delete()
-                            simple_actions[vm.getUUID()] = "deleted"
-                        elif vm.getState() in ['running', "starting...", "stopping..."] :
-                            vm.setState('stopped')
+                # Handle safely the connection against the agent
+                try:
+                    vms_info = xmlrpc_server.force_list_active_vms(server.getAgentPassword(), vmID)
+                    updated_vms = list()
+                    simple_actions = dict() 
+                    for vm in vms:
+                        if vm.getUUID() in vms_info.keys():
+                            vm.setState("running")
                             vm.save()
-                            simple_actions[vm.getUUID()] = "stopped"
+                            simple_actions[vm.getUUID()] = "running"
                         else:
-                            continue
+                            if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown']:
+                                child = vm.getChildObject()
+                                server = vm.Server.get()
+                                #Action.objects.all().filter(objectUUID = vm.uuid).delete()
+                                server.deleteVM(vm)
+                                # Keep actions table up-to-date after each deletion
+                                vm_uuids = [ vm.uuid for vm in VirtualMachine.objects.all() ]
+                                Action.objects.all().exclude(objectUUID__in = vm_uuids).delete()
+                                simple_actions[vm.getUUID()] = "deleted"
+                            elif vm.getState() in ['running', "starting...", "stopping..."] :
+                                vm.setState('stopped')
+                                vm.save()
+                                simple_actions[vm.getUUID()] = "stopped"
+                            else:
+                                continue
+                except:
+                    vms_info = dict()
                 return vms_info
 
 	@staticmethod
