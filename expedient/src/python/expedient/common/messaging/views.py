@@ -63,6 +63,15 @@ def create(request):
         message_class = MessageForm
     else:
         message_class = MessageFormNoIM
+        # Non-IM user should not be able to impersonate anyone...
+        filtered_sender = User.objects.filter(username=request.user.username)
+        message_class.__dict__["base_fields"]["sender"].__dict__["_queryset"] = filtered_sender
+    # Exclude the user itself from the recipients' list
+    filtered_users = User.objects.exclude(username=request.user.username)
+    # Order users by name
+    message_class.__dict__["base_fields"]["users"].__dict__["_queryset"] = filtered_users.order_by("username")
+    filtered_senders = message_class.__dict__["base_fields"]["sender"].__dict__["_queryset"]
+    message_class.__dict__["base_fields"]["sender"].__dict__["_queryset"] = filtered_senders.order_by("username")
     
     # Original
 #    return create_message(
