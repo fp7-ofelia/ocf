@@ -115,7 +115,7 @@ def addGeniLink(rspec, link, federated=False):
     dpids.attrib["dpid"] = dpid
   def add_port(od, port):
     ps = ET.SubElement(od, "{%s}port" %(OFNSv3))
-    ps.attrib["port_num"] = link['src']['port']
+    ps.attrib["port_num"] = port
   def add_device(od, device):
     devices = ET.SubElement(od, "{%s}device" %(OFNSv3))
     devices.attrib["component_id"] = "urn:publicid:IDN+federation:%s+device+%s" % (config.HRN_URN, device)
@@ -130,7 +130,7 @@ def addGeniLink(rspec, link, federated=False):
   add(od, link['src']['dpid'])
   add_port(od, link['src']['port'])
   add(od,link['dst']['dpid'])
-  add(od,link['dst']['port']) 
+  add_port(od,link['dst']['port']) 
   
 
 def generateSwitchComponentID (dpid, tag = None):
