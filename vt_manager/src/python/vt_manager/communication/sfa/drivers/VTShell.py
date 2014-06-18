@@ -37,7 +37,13 @@ class VTShell:
 		else:
 		    slice_servers = list()
 		    for server in servers:
-			vms = server.getChildObject().getVMs(sliceName=slice, projectName = authority)
+                        if slice == None:
+			    vms = server.getChildObject().getVMs(projectName = authority)
+                        elif authority == None:
+                            vms = server.getChildObject().getVMs(sliceName=slice)
+                        else:
+                            vms = server.getChildObject().getVMs(sliceName=slice, projectName = authority)
+                        
                         if vms:
 			    slice_servers.append(server)
                     return slice_servers
@@ -50,7 +56,12 @@ class VTShell:
 		List = list()
 		for server in servers:
 			child_server = server.getChildObject()
-			vms = child_server.getVMs(sliceName=name, projectName = authority)
+                        if not authority:
+      				vms = child_server.getVMs(sliceName=name)
+                        elif not slicename:
+                                vms = child_server.getVMs(projectName = authority)
+                        else:
+                                vms = child_server.getVMs(sliceName=name, projectName = authority)
 			for vm in vms:
                                 ip = self.get_ip_from_vm(vm)
                                 state = vm.state
