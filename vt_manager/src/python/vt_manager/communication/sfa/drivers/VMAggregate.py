@@ -62,6 +62,8 @@ class VMAggregate:
 				nodes = new_nodes
 		else:
 	        	nodes = self.shell.GetNodes()
+
+                print "--------CREATED_VMS---------------",created_vms
 	        rspec_nodes = []
 	        for node in nodes:
 		    

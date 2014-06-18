@@ -67,7 +67,7 @@ class OFShell:
 		    switch_list = self.get_switches()
 		    link_list = self.get_links()
                     federated_links = self.get_federation_links()
-		    return {'switches':switch_list, 'links':link_list, 'federated_links':federated_links}
+		    return {'switches':switch_list, 'links':link_list, 'federation_links':federated_links}
                 else:
                     nodes = list()
                     experiments = Experiment.objects.filter(slice_id=slice_urn)

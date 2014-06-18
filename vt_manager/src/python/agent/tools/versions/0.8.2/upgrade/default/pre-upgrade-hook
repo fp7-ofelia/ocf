@@ -1,24 +1,30 @@
 #!/bin/bash
 
 ###
-#       @author: msune
+#       @author: CarolinaFernandez
 #	@organization: i2CAT
 #	@project: Ofelia FP7
 #	@description: pre-upgrade-module 
 ###
 
 #inform user
-printHeader "info#" "Using default pre-upgrade-hook module..."
+printHeader "info#" "Using 0.8.2 pre-upgrade-hook module..."
 
 #shutdown apache
 print "Nothing to do..."
+
+# Install arpgarse and curl for the template manager
+easy_install=$(which easy_install)
+$easy_install argparse
+apt=$(which apt-get)
+$apt install -y curl
 
 #Check for OFELIA installation
 OFELIA="none"
 
 while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFELIA != 0 ]
     do
-        echo "Is this an OFELIA installation? (yes/no):"
+        echo "Is this an OFELIA istallation? (yes/no):"
         read OFELIA
         if [ $OFELIA == yes ]; then
             OFELIA=1

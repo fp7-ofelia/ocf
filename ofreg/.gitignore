@@ -1,2 +1,5 @@
 *.pyc
 localsettings.py
+deploy/ssl/*.csr
+deploy/ssl/*.crt
+deploy/ssl/*.key

@@ -35,7 +35,7 @@ def getAdvertisement (nodes):
 
   devices = nodes['switches']#OFShell().get_switches(flow_visor)
   links = nodes['links']#OFShell().get_links(flow_visor)
-  federated_links = nodes['federated_links']
+  federated_links = nodes.get('federation_links')
  
   #links = FV.getLinkList()
   #devices =FV.getDeviceList()

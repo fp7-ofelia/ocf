@@ -56,20 +56,28 @@ class VMSfaManager:
 			vm['slice-id'] = virmach.sliceId
 
 	if not vm['slice-id']:
-		vm['slice-id'] = str(uuid.uuid4()) 
+		vm['slice-id'] = str(uuid.uuid4())
 
-	vm['slice-name']= sliceName	 
-	vm['uuid'] = str(uuid.uuid4())
+
+        vm['slice-name']= sliceName
+        vm['uuid'] = str(uuid.uuid4())
         vm['state'] = "on queue"
         #assign same virt technology as the server where vm created
         vm['virtualization-type'] = server.getVirtTech()
-	vm['server-id'] = server.getUUID()
+        vm['server-id'] = server.getUUID()
         vm['aggregate-id'] = 'aggregate-id'
         #assign parameters according to selected disc image
         vm['operating-system-type'] = 'GNU/Linux'
-        vm['operating-system-version'] = '6.0'
-        vm['operating-system-distribution'] = 'Debian'
-        vm['hd-origin-path'] = "legacy/legacy.tar.gz"
+
+        if (vm.get('hd-origin-path')== None): 
+                vm['operating-system-version'] = '6.0'
+                vm['operating-system-distribution'] = 'Debian'
+                vm['hd-origin-path'] = "legacy/legacy.tar.gz"
+        else:
+                vm['operating-system-version'] = '6.0'
+                vm['operating-system-distribution'] = 'Debian'
+                #XXX: HACK!
+                vm['hd-origin-path'] = "legacy/legacy.tar.gz" #"default/test/lenny" 
 
 	return vm
  

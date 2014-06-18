@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ###
-#       @author: msune
+#       @author: msune, CarolinaFernandez
 #	@organization: i2CAT
 #	@project: Ofelia FP7
 #	@description: install module 
@@ -23,30 +23,29 @@ source $CURRENT_DIRECTORY/lib/dependencies || error "Cannot import dependencies 
 /usr/bin/apt-get update || error "Could not update repositories (apt-get). Do you have connectivity?" $NO_RESCUE 
 /usr/bin/apt-get -y install $DEBIAN_DEPENDENCIES || error "Could not install dependencies (apt-get)" $NO_RESCUE 
 
-
 #printHeader ">" "Installing remaining dependencies through easy_install..."
-
 #/usr/bin/easy_install $EASY_INSTALL_DEPENDENCIES || error "Could not install dependencies (easy_install)" $NO_RESCUE 
 
 #Build ssl certs
-
 printHeader ">" "Creating directory structure"
-
 source $CURRENT_DIRECTORY/lib/directories
 
 printHeader ">" "Creating certificates for XMLRPC interface over HTTPS..."
-
 source $CURRENT_DIRECTORY/lib/ssl
-
 
 printHeader ">" "Configuring settings..."
 source $CURRENT_DIRECTORY/lib/settings
   
-printHeader ">" "Configuring Daemon..."
+printHeader ">" "Configuring daemon..."
 source "$CURRENT_DIRECTORY/lib/daemon"
 
-printHeader ">" "Download Template..." 
-source "$CURRENT_DIRECTORY/lib/template"
-
-
+printHeader ">" "Downloading templates..." 
+#source "$CURRENT_DIRECTORY/lib/template"
+# Retrieve type of installation (OFELIA/non-OFELIA)
+template_arguments="--non-ofelia"
+if [[ $OFELIA == 1 ]]; then
+    template_arguments="--ofelia"
+fi
+# Daemon already installed (in previous line)
+/etc/init.d/oxad update-templates $template_arguments || error "Could not update templates" $NO_RESCUE
 

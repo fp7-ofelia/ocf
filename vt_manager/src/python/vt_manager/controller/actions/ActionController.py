@@ -37,7 +37,7 @@ class ActionController():
 		except:
 	#	if vm_path == "default/default.tar.gz":
 	#		xen_configuration.configurator=""
-	#	elif vm_path == "spirent/spirentSTCVM.img":
+	#	elif vm_path == "spirentSTCVM/spirentSTCVM.img":
 	#		xen_configuration.configurator="SpirentCentOSVMConfigurator"
 	#	else:
 			xen_configuration.configurator=""

@@ -63,7 +63,7 @@ class VMcontroller():
             instance.operatingSystemType = 'GNU/Linux'
             instance.operatingSystemVersion = '6.2'
             instance.operatingSystemDistribution = 'CentOS'
-            instance.hdOriginPath = "spirent/spirentSTCVM.img"
+            instance.hdOriginPath = "spirentSTCVM/spirentSTCVM.img"
             instance.virtualization_setup_type = "hvm"
         if instance.disc_image == 'debian7':
             instance.operatingSystemType = 'GNU/Linux'

@@ -35,7 +35,7 @@ class AddMemberForm(forms.Form):
     roles = RoleModelMultipleChoiceField(
         ProjectRole.objects.get_empty_query_set(),
         widget=forms.CheckboxSelectMultiple,
-        help_text="Select the roles that the user should have in this project. Owner users can add memebers to the project, researchers can not."
+        help_text="Select the roles that the user should have in this project. Owner users can add members to the project, researchers can not."
     )
     #delegate = forms.BooleanField(required=False,
     #    help_text="Should the new member be able to give the new permissions"
