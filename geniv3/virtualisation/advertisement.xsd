@@ -36,14 +36,14 @@
             <xs:element type="xs:float" name="cpu_frequency" minOccurs="0"/>
             <xs:element type="xs:integer" name="virtual_memory_mb" minOccurs="0"/>
             <xs:element type="xs:float" name="hard_disk_space_gb" minOccurs="0"/>
-            <xs:element name="network_interfaces" type="NetworkInterfaces" />
+            <xs:element name="networks" type="Networking" />
             <xs:element name="disc_image_templates" type="DiscImageTemplates" />
         </xs:all>
     </xs:complexType>
 
     <xs:complexType name="Networking">
         <xs:all>
-            <xs:element name="network_interface" type="NetworkInterfaces" minOccurs="0"/>
+            <xs:element name="network_interfaces" type="NetworkInterfaces" minOccurs="0"/>
             <xs:element name="subscribed_mac_ranges" type="MacRanges" minOccurs="0"/>
             <xs:element name="subscribed_ip4_ranges" type="Ip4Ranges" minOccurs="0"/> 
        </xs:all>
