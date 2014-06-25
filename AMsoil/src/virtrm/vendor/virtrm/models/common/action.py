@@ -92,6 +92,10 @@ class Action(db.Model):
     def destroy(self):
         db.session.delete(self)
         db.session.commit()
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
     
     def check_action_is_present_and_unique(self):
         if len(Action.query.filter_by(uuid = self.uuid).all()) != 0:
@@ -129,8 +133,7 @@ class Action(db.Model):
         if status not in self.__possible_status:
             raise Exception("Status not valid")
         self.status = status
-        db.session.add(self)
-        db.session.commit()
+        self.save()
     
     def get_status(self):
         return self.status
@@ -139,8 +142,7 @@ class Action(db.Model):
         if type not in self.__possibleTypes:
             raise Exception("Action type not valid")
         self.type = type
-        db.session.add(self)
-        db.session.commit()
+        self.save()
     
     def get_type(self):
         return self.type
@@ -153,32 +155,28 @@ class Action(db.Model):
     
     def set_description(self, description):
         self.description = description
-        db.session.add(self)
-        db.session.commit()
+        self.save()
     
     def get_description(self):
         return self.descripion
     
     def set_uuid(self, uuid):
         self.uuid = uuid
-        db.session.add(self)
-        db.session.commit()
+        self.save()
     
     def get_uuid(self):
         return self.uuid
     
     def set_callback_url(self, url):
         self.url = url
-        db.session.add(self)
-        db.session.commit()
+        self.save()
     
     def get_callback_url(self):
         return self.url
     
     def set_object_uuid(self, obj_uuid):
         self.object_uuid = obj_uuid
-        db.session.add(self)
-        db.session.commit()
+        self.save()
         
     def get_object_uuid(self):
         return self.object_uuid
