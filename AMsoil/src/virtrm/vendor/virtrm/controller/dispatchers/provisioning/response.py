@@ -30,13 +30,12 @@ class ProvisioningResponseDispatcher():
                 logging.debug("The incoming response has id: %s and NEW status: %s",action_model.uuid,action_model.status)
                 action_model.status = action.status
                 action_model.description = action.description
-                db.session.add(action_model)
-                db.session.commit()
+                action_model.save()
                 # Complete information required for the Plugin: action type and VM
                 ActionController.complete_action_rspec(action, action_model)
                 # XXX: Implement this method or some other doing this job
                 vm = VTDriver.get_vm_by_uuid(action_model.get_object_uuid())
-                controller=VTDriver.get_driver(vm.vtserver.get_virt_tech())
+                controller=VTDriver.get_driver(vm.server.get_virtualization_technology())
                 # Update VM after obtaining a response code
                 fail_on_create_vm = ProvisioningResponseDispatcher.__update_vm_after_response(action_model, vm)
                 try:
@@ -52,7 +51,7 @@ class ProvisioningResponseDispatcher():
                 try:
                     # XXX: What should be done if this happen?
                     logging.error("Received response for an action in wrong state\n")
-                    XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.get_processing_response(Action.ACTION_STATUS_FAILED_TYPE, action, "Received response for an action in wrong state"))
+                    XmlRpcClient.callRPCMethod(vm.get_callback_url(), "sendAsync", XmlHelper.get_processing_response(Action.ACTION_STATUS_FAILED_TYPE, action, "Received response for an action in wrong state"))
                 except Exception as e:
                     logging.error(e)
                     return
