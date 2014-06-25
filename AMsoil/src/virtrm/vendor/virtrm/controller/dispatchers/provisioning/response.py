@@ -48,7 +48,7 @@ class ProvisioningResponseDispatcher():
                     vm.set_state(VirtualMachine.UNKNOWN_STATE)
                 try:
                     logging.debug("Sending response to Plugin in sendAsync")
-                    XmlRpcClient.callRPCMethod(vm.getCallBackURL(),"sendAsync",XmlHelper.craft_xml_class(rspec))
+                    XmlRpcClient.call_method(vm.get_callback_url(),"sendAsync",XmlHelper.craft_xml_class(rspec))
                     if failed_on_create:
                         controller.delete_vm(vm)
                         # Keep actions table up-to-date after each deletion
@@ -61,7 +61,7 @@ class ProvisioningResponseDispatcher():
                 try:
                     # XXX: What should be done if this happen?
                     logging.error("Received response for an action in wrong state\n")
-                    XmlRpcClient.callRPCMethod(vm.get_callback_url(), "sendAsync", XmlHelper.get_processing_response(Action.ACTION_STATUS_FAILED_TYPE, action, "Received response for an action in wrong state"))
+                    XmlRpcClient.call_method(vm.get_callback_url(), "sendAsync", XmlHelper.get_processing_response(Action.ACTION_STATUS_FAILED_TYPE, action, "Received response for an action in wrong state"))
                 except Exception as e:
                     logging.error(e)
                     return
