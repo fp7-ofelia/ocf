@@ -4,6 +4,7 @@ from controller.drivers.virt import VTDriver
 from models.common.action import Action
 from models.resources.virtualmachine import VirtualMachine
 from utils.base import db
+from utils.urlutils import UrlUtils
 from utils.xmlhelper import XmlHelper
 import logging
 
