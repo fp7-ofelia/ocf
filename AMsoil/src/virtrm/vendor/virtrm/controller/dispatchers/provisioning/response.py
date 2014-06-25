@@ -35,7 +35,7 @@ class ProvisioningResponseDispatcher():
                 ActionController.complete_action_rspec(action, action_model)
                 # XXX: Implement this method or some other doing this job
                 vm = VTDriver.get_vm_by_uuid(action_model.get_object_uuid())
-                controller=VTDriver.get_driver(vm.server.get_virtualization_technology())
+                controller=VTDriver.get_driver(vm.get_server().get_virtualization_technology())
                 # Update VM after obtaining a response code
                 fail_on_create_vm = ProvisioningResponseDispatcher.__update_vm_after_response(action_model, vm)
                 try:

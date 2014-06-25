@@ -115,7 +115,7 @@ class XenVM(VirtualMachine):
         self.auto_save()
     
     def get_server(self):
-        return self.xenserver[0]
+        return self.server[0]
     
     ''' Factories '''
     @staticmethod
