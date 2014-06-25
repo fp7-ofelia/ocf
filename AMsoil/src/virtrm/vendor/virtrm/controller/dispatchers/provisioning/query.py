@@ -68,6 +68,7 @@ class ProvisioningDispatcher():
                     logging.debug("***************************** C")
                     ProvisioningDispatcher.__delete_start_stop_reboot_vm(controller, action_model, action)
                     logging.debug("********************************* D")
+                logging.debug("**************************** XML TO AGENT => %s" % str(XmlHelper.craft_xml_class(XmlHelper.get_simple_action_query(action))))
                 XmlRpcClient.call_method(server.get_agent_url(), "send", UrlUtils.get_own_callback_url(), 1, server.get_agent_password(),XmlHelper.craft_xml_class(XmlHelper.get_simple_action_query(action)))
                 logging.debug("********************************* E")
             except Exception as e:

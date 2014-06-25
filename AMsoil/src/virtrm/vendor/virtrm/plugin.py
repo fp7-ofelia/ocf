@@ -32,6 +32,6 @@ def setup():
     from utils.base import set_up
     set_up()
     # Register Agent callback API as xmlrpc endpoint
-    from communication.southcomminterface import sendAsync as agent_api
+    import communication.southcomminterface as agent_api
     xmlrpc = pm.getService('xmlrpc')
     xmlrpc.registerXMLRPC('agent', agent_api, '/xmlrpc/agent')

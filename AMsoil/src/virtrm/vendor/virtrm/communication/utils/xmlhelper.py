@@ -28,7 +28,7 @@ class XmlParser(object):
     def parse_xml(rawXML):
         print "Parsing XML..."
         try:
-            object = vtRspecInterface.parse_string(rawXML)
+            object = vtRspecInterface.parseString(rawXML)
             print "Parsing of XML concluded without significant errors."
             return object
         except Exception as e:

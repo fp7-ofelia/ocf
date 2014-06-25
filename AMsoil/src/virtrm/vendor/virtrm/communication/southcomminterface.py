@@ -1,3 +1,4 @@
+from amsoil.core import serviceinterface
 from controller import *
 from utils.xmlhelper import *
 from utils.servicethread import *
@@ -6,6 +7,7 @@ import amsoil.core.log
 
 logging = amsoil.core.log.getLogger('SouthCommInterface')
 
+@serviceinterface
 def sendAsync(xml):
 	logging.debug("sendAsync launched")
 	rspec = XmlHelper.parse_xml_string(xml)
