@@ -46,8 +46,6 @@ class ProvisioningResponseDispatcher():
                     return ProvisioningResponseDispatcher.__update_vm_after_FAILED(action_model, vm)
                 else:
                     vm.set_state(VirtualMachine.UNKNOWN_STATE)
-
-= ProvisioningResponseDispatcher.__update_vm_after_response(action_model, vm)
                 try:
                     logging.debug("Sending response to Plugin in sendAsync")
                     XmlRpcClient.callRPCMethod(vm.getCallBackURL(),"sendAsync",XmlHelper.craft_xml_class(rspec))
