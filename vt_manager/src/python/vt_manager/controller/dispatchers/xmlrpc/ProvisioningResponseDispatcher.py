@@ -35,7 +35,8 @@ class ProvisioningResponseDispatcher():
 
 			if actionModel.getStatus() is Action.QUEUED_STATUS or Action.ONGOING_STATUS:
 				logging.debug("The incoming response has id: %s and NEW status: %s",actionModel.uuid,actionModel.status)
-				actionModel.status = action.status
+			        print "----------------------------------------------------", action.status
+                           	actionModel.status = action.status
 				actionModel.description = action.description
 				actionModel.save()
 				#Complete information required for the Plugin: action type and VM
@@ -43,6 +44,10 @@ class ProvisioningResponseDispatcher():
 
 				#XXX:Implement this method or some other doing this job
 				vm = VTDriver.getVMbyUUID(actionModel.getObjectUUID())
+                                print "-----------------------------STATE-STATE-----------------------", vm.state
+                                created = False
+                                if vm.state == "created (stopped)":
+                                    created = True
 				controller=VTDriver.getDriver(vm.Server.get().getVirtTech())
 				failedOnCreate = 0
 				if actionModel.getStatus() == Action.SUCCESS_STATUS:
@@ -56,16 +61,18 @@ class ProvisioningResponseDispatcher():
 
 				else:
 					vm.setState(VirtualMachine.UNKNOWN_STATE)
-
-
 				try:
-					logging.debug("Sending response to plug-in in sendAsync")
-					if str(actionModel.callBackUrl) == 'SFA.OCF.VTM':
-                                            if failedOnCreate:
-                                                expiring_slices = vm.objects.filter(sliceName=vm.sliceName,projectName=vm.projectName)
-                                                if len(expiring_slices) == 1:
-                                                    expiring_slices[0].delete()
-					    return
+                                        logging.debug("Sending response to plug-in in sendAsync")
+                                        print "------------------------------------------", created
+                                        if str(vm.callBackURL) == 'SFA.OCF.VTM':
+                                                print "-------------SFA CALL"
+                                                if created:
+                                                    pass
+                                                    #from vt_manager.communication.sfa.drivers.VTSfaDriver import VTSfaDriver
+                                                    #driver = VTSfaDriver(None)
+                                                    #driver.crud_slice(vm.sliceName,vm.projectName, "start_slice")
+                                                    #print "----------------------SLICE STARTED" 
+					        return
 					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))
 					if failedOnCreate == 1:
 						controller.deleteVM(vm)
