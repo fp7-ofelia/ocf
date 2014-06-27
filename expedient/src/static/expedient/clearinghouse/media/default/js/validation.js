@@ -113,7 +113,7 @@ function contains(substring, string) {
 }
 
 /* Bind validation check to the submit button */
-$(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create], :button[id^=form_update]").click(function() {
+$(":submit[id^=form_create], :submit[id^=form_request], :submit[id^=form_update], :button[id^=form_create], :button[id^=form_request], :button[id^=form_update]").click(function() {
     // First, get the form 'referer' (e.g. project, slice, etc) - to apply different validations if needed
     formID = "";
     try {
@@ -125,6 +125,8 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
     var submitID = $(this).attr("id") || "";
     if (contains("form_create_", submitID)) {
         submitID = submitID.split('form_create_').slice(1).join('')
+    } else if (contains("form_request_", submitID)) {
+        submitID = submitID.split('form_request_').slice(1).join('')
     } else if (contains("form_update_", submitID)) {
         submitID = submitID.split('form_update_').slice(1).join('')
     }
@@ -135,7 +137,8 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
     var results = Array();
     $("form input, form select, form textarea").each(function(index) {
         id = $(this).attr("id") || "";
-        type = $(this).attr("type") || "";
+        //type = $(this).attr("type") || "";
+        type = $(this).type ? $(this).type : $(this).prop("tagName").toLowerCase();
         // Correct by default (ignores fields non stated in the if/else block
         results[index] = true;
         if (contains("text",type)) {
@@ -150,6 +153,9 @@ $(":submit[id^=form_create], :submit[id^=form_update], :button[id^=form_create],
                 results[index] = checkDescription(id,submitID + " description");
             } else if (contains("description",id)) {
                 results[index] = checkRestrictedDescription(id,submitID + " description");
+            /* Project request (normal user) */
+            } else if (contains("message",id)) {
+                results[index] = checkRestrictedDescription(id,submitID + " message");
             } else if (contains("location",id)) {
                 results[index] = checkRestrictedDescription(id,submitID + " location");
             } else if (contains("memory",id)) {

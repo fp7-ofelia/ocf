@@ -55,36 +55,36 @@ img.perm_help {
 		{% for field in form %}
 		    <!-- Show project form only when current permission allows to create it -->
 		    {% if perm_name != obj_perm.permission.name or field.name != "permission_owner" %}
-				<p>
-					{{ field.errors }}
-				</p>
-				<p>
+			<p>
+				{{ field.errors }}
+			</p>
+			<p>
 				{{ field.label_tag }}:
-	       		{% if obj_perm.permission.name == "can_create_project"%}
-                   	{% if field.name == "name" or field.name == "organization" or field.name == "message" %}
-                       	<img id="perm_{{field.name}}_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
-                        <div class="tooltip perm_help" id="perm_{{field.name}}_help">
-                   		{% if field.name == "name" %}
-           	        		Provide a descriptive name for the project.
-           	        	{% endif %}
-           	        	{% if field.name == "organization" %}
-   	                	 	Make sure you set your affiliation.
-   	                	{% endif %}
-	                	{% if field.name == "message" %}
-                    	    Provide a short description for the project.
-                    	{% endif %}
+				{{ field }}
+	       			{% if obj_perm.permission.name == "can_create_project"%}
+                   			{% if field.name == "name" or field.name == "organization" or field.name == "message" %}
+                       				<!--<img id="perm_{{field.name}}_help_img" src="{% url img_media 'question_mark_15x15.png' %}" />
+			                        <div class="tooltip perm_help" id="perm_{{field.name}}_help">-->
+		                   		{% if field.name == "name" %}
+		           	        		Provide a descriptive name for the project.
+		           	        	{% endif %}
+		           	        	{% if field.name == "organization" %}
+		   	                	 	Make sure you set your affiliation.
+		   	                	{% endif %}
+			                	{% if field.name == "message" %}
+			                    	    Provide a short description for the project.
+			                    	{% endif %}
 						{% if field.name == "name" or field.name == "organization" or field.name == "message" %}
-				    	</div>
+				    	<!--</div>-->
 						{% endif %}
 					{% endif %}
 				{% endif %}
-				{{ field }}
 			{% endif %}
 			</p>
 		{% endfor %}
-	    <div>
-		    <input type="submit" value="Request" />
-		    <input type="button" onclick="javascript:document.location='{% url home %}'" value="Cancel" />
+	    <div class="center">
+		    <input id="form_request_project" type="submit" value="Request" />
+		    <input id="form_cancel_project" type="button" onclick="javascript:document.location='{% url home %}'" value="Cancel" />
 	    </div>
     </form>
 </div>

@@ -20,6 +20,7 @@ from expedient.common.utils.modelfields import LimitedDateTimeField
 from expedient.common.middleware import threadlocals
 from expedient.common.utils.validators import asciiValidator, descriptionLightValidator
 from expedient.clearinghouse.slice.utils import *
+from plugins.openflow.plugin.models import OpenFlowAggregate
 
 logger = logging.getLogger("slice.models")
 
@@ -137,7 +138,8 @@ class Slice(models.Model):
         Should be an idempotent operation on the aggregates.
         """
         for agg in self.aggregates.all():
-            agg.as_leaf_class().stop_slice(self)
+            if isinstance(agg.as_leaf_class(),OpenFlowAggregate)
+                agg.as_leaf_class().stop_slice(self)
         self.started = False
         self.save()
             
