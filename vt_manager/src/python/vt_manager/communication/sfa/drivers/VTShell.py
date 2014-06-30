@@ -13,6 +13,7 @@ from vt_manager.utils.SyncThread import SyncThread
 
 import threading
 import time
+import random
 
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
 from vt_manager.utils.UrlUtils import UrlUtils
@@ -93,6 +94,7 @@ class VTShell:
 
 	def CreateSliver(self,vm_params,projectName,sliceName,expiration):
 		#processes = list()
+                self.modify_sliver_names(vm_params,projectName, sliceName)
 		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params,projectName,sliceName)
 		for provisioningRSpec in provisioningRSpecs:
 		    #waiter,event = Pipe()
@@ -132,4 +134,14 @@ class VTShell:
                         if iface.isMgmt:
                             return iface.ip4s.all()[0].ip #IP
                 return "None" 
-                           
+
+        def modify_sliver_names(self, vm_params,authority, slice_name):
+                vms = VirtualMachine.objects.filter(sliceName=slice_name, projectName=authority)
+                names = list()
+                for vm in vms:
+                    names.append(vm.name)
+                for sliver in vm_params:
+                    for vm in sliver['slivers']:
+                         if vm['name'] in names:
+                             vm['name'] = vm['name'] + str(random.randint(0,999))
+                                  

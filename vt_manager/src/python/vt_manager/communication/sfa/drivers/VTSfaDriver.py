@@ -69,7 +69,6 @@ class VTSfaDriver:
 		return 1
 
         def create_sliver (self,slice_leaf,authority,rspec_string, users, options, expiration_date):
-                print "---------------Creating sliver LOL"
                 rspec = RSpec(rspec_string,'OcfVt')
                 requested_attributes = rspec.version.get_slice_attributes()
                 requested_attributes = self.shell.convert_to_uuid(requested_attributes) #Converts component_id URNs to UUIDs
@@ -86,7 +85,6 @@ class VTSfaDriver:
 					nodes.append(node)
                                 #ip = self.shell.get_ip_from_vm(vm_name=vm['name'],slice_name=vm['slice-name'],project=authority)
 				#created_vms.append({'vm-name':vm['name'],'vm-ip':ip,'vm-state':'ongoing','slice-name':slice_leaf,'node-name':node.name})
-	        print "----------------VM Stuff done"	
 		#add ssh keys to ldap of ssh gateway
 		if len(nodes)!=0:
 			session=ldapManager()
