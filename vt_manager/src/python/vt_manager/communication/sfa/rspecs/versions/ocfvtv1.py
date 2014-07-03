@@ -37,6 +37,9 @@ class OcfVt(RSpecVersion):
 
     def add_nodes(self, nodes, check_for_dupes=False):
         return OcfVtNode.add_nodes(self.xml, nodes)
+
+    def add_nodes_geni(self, nodes, check_for_dupes=False):
+        return OcfVtNode.add_nodes_geni(self.xml, nodes)
     
     def merge_node(self, source_node_tag):
         # this is untested

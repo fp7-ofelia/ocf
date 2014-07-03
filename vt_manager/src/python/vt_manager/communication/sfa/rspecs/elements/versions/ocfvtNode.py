@@ -4,6 +4,7 @@ from vt_manager.communication.sfa.util.xml import XpathFilter
 from vt_manager.communication.sfa.rspecs.elements.node import Node
 from vt_manager.communication.sfa.rspecs.elements.sliver import Sliver
 from vt_manager.communication.sfa.rspecs.elements.location import Location
+from vt_manager.communication.sfa.rspecs.elements.login import Login
 from vt_manager.communication.sfa.rspecs.elements.ocf_vt_server import OcfVtServer
 from vt_manager.communication.sfa.rspecs.elements.hardware_type import HardwareType
 from vt_manager.communication.sfa.rspecs.elements.disk_image import DiskImage
@@ -190,6 +191,97 @@ class OcfVtNode:
                 slivers = OcfVtSliverType.get_slivers(node.element)
                 for sliver in slivers:
                     node.element.remove(sliver.element) 
+    @staticmethod
+    def add_services(xml, services):
+        if not services:
+            return
+        for service in services:
+            service_elem = xml.add_element('services')
+            child_elements = Login.fields
+            service_elem.add_instance("login", services[0], child_elements)
+            #simple_elem.set_text(service[field])
+
+
+    
+    @staticmethod
+    def add_nodes_geni(xml, nodes):
+
+        network_elems = xml.xpath('//network')
+        if len(network_elems) > 0:
+            network_elem = network_elems[0]
+        elif len(nodes) > 0 and nodes[0].get('component_manager_id'):
+            network_urn = nodes[0]['component_manager_id']
+            network_elem = xml.add_element('network', name = Xrn(network_urn).get_hrn())
+        else:
+            network_elem = xml
+
+
+        node_elems = []
+        for node in nodes:
+            node_fields = ['component_manager_id', 'component_id', 'client_id', 'sliver_id', 'exclusive']
+            node_elem = network_elem.add_instance('node', node, node_fields)
+            node_elems.append(node_elem)
+            # set component name
+            if node.get('component_id'):
+                component_name = node['component_id']
+                node_elem.set('component_name', component_name)
+            if node.get('hostname'):
+                        simple_elem = node_elem.add_element('hostname')
+                        simple_elem.set_text(node['hostname'])
+            # set hardware types
+
+            if node.get('hardware_types'):
+                for hardware_type in node.get('hardware_types', []):
+                    for field in OcfVtServer.fields:
+                        #node_elem.add_instance(field,{field:hardware_type[field]},[])#XXX Ugly notation
+                        simple_elem = node_elem.add_element(field)
+                        simple_elem.set_text(hardware_type[field])
+            # set location
+            if node.get('location'):
+                node_elem.add_instance('location', node['location'], Location.fields)
+            # set interfaces
+            PGv2Interface.add_interfaces(node_elem, node.get('interfaces'))
+            #if node.get('interfaces'):
+            #    for interface in  node.get('interfaces', []):
+            #        node_elem.add_instance('interface', interface, ['component_id', 'client_id'])
+            # set available element
+            if node.get('boot_state'):
+                if node.get('boot_state').lower() == 'boot':
+                    available_elem = node_elem.add_element('available', now='true')
+                else:
+                    available_elem = node_elem.add_element('available', now='false')
+            # add services
+            #if node.get('services'):
+            #    for service in node.get('services',[]):
+            #       fields = service.fields
+            #       s = node_elem.add_element('service', type=str(service.__class__.__name__))
+            #       for field in fields:
+            #            if service[field]:
+            #                    simple_elem = s.add_element(field)#node_elem.add_element(field)
+            #                    simple_elem.set_text(service[field])
+            OcfVtNode.add_services(node_elem, node.get('services', [])) 
+            # add slivers
+            slivers = node.get('slivers', [])
+            if slivers:
+                for sliver in slivers:
+                        fields = sliver.fields
+                        s = node_elem.add_element('sliver', type=str(sliver.__class__.__name__))
+                        for field in fields:
+                                if sliver[field]:
+                                        simple_elem = s.add_element(field)#node_elem.add_element(field)
+                                        simple_elem.set_text(sliver[field])
+
+                # we must still advertise the available sliver types
+                #slivers = Sliver({'type': 'plab-vserver'})
+                # we must also advertise the available initscripts
+                #slivers['tags'] = []
+                #if node.get('pl_initscripts'): 
+                #    for initscript in node.get('pl_initscripts', []):
+                #        slivers['tags'].append({'name': 'initscript', 'value': initscript['name']})
+            #PGv2SliverType.add_slivers(node_elem, slivers)
+        return node_elem
+
+
 if __name__ == '__main__':
     from vt_manager.communication.sfa.rspecs.rspec import RSpec
     #import pdb
