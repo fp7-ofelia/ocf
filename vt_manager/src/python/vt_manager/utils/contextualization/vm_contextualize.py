@@ -1,16 +1,17 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 """
 Makes an attempt to contextualize to a VM.
 In the beginning phase, only the user's public keys are loaded into the target VM.
 
 @date: July 2, 2014
-@author: CarolinaFernandez
+@author: CarolinaFernandez, omoya
 """
 
-import argparse
-#from ConfigParser import ConfigParser
-import pexpect
+#import argparse
+#import pexpect
+import paramiko
+
 
 class VMContextualize(object):
 
@@ -18,34 +19,47 @@ class VMContextualize(object):
         self.vm_address = kwargs["vm_adress"]
         self.vm_user = kwargs["vm_user"]
         self.vm_user_password = kwargs["vm_password"]
+        self.ssh_client = None
     
     def ssh(self, context_command):
         #command = "ssh {0} \"%s\"" % str(args)
         #command = "ssh {0} \"%s\"".format("%s@%s" % (self.vm_user, self.vm_address)) % context_command
         #ssh_options = "-q -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l"
         ssh_options = "-q -o StrictHostKeyChecking=no -l"
-        command = "ssh %s %s %s \"%s\"" % (ssh_options, self.vm_user, self.vm_address, context_command)
+        command = "ssh %s %s %s -t \"%s\"" % (ssh_options, self.vm_user, self.vm_address, context_command)
         return command
     
     def vm_ssh_access(self, context_command):
-        #url = args.url
-        #root_user, host = url.split("@", 1)
-        #cfg_file = "vm_ssh.conf"
-        #cfg = ConfigParser()
-        #cfg.read(cfg_file)
-        #root_password = cfg.get(root_user, host)
-        #root_password = "openflow"
-        child = pexpect.spawn(self.ssh(context_command))
-        child.expect("password:")
-        child.sendline(self.vm_user_password)
-        return child.interact()
-    
-    def contextualize(self, context_command):
-        try:
-            return self.vm_ssh_access(context_command)
-        except Exception as e:
-            print "VMContextualize exception: %s" % str(e)
+        #child = pexpect.spawn(self.ssh(context_command))
+        #child.expect("password:")
+        #child.sendline(self.vm_user_password)
+        #return child.interact()
+        self.ssh_client = paramiko.SSHClient()
+        self.ssh_client.load_system_host_keys()
+        self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        self.ssh_client.connect(self.vm_address,username=self.vm_user, password=self.vm_user_password)
+        channel = self.ssh_client.invoke_shell()
+        stdin = channel.makefile('wb')
+        stdout = channel.makefile('rb')
+        stdin.write(context_command)
+        output = stdout.read()
+        #print output
+        stdout.close()
+        stdin.close()
 
+    def contextualize(self, context_command):
+        exec_ok = True
+        try:
+            self.vm_ssh_access(context_command)
+        except Exception as e:
+            exec_ok = False
+        finally:
+            # Either with or without errors, check SSH client and close when necessary
+            if self.ssh_client:
+                self.ssh_client.close()
+            print "VMContextualize exception: %s" % str(e)
+        return exec_ok
+    
     def contextualize_add_pub_key(self, user, key):
         #TODO: Place in a new class that inherits from VMContextualize
         commands = []
@@ -54,24 +68,29 @@ class VMContextualize(object):
         commands.append("mkdir /home/%s/.ssh" % user)
         commands.append("touch /home/%s/.ssh/authorized_keys" % user)
         commands.append("if [ -z $(grep '%s' /home/%s/.ssh/authorized_keys ) ]; then echo '%s' >> /home/%s/.ssh/authorized_keys; fi" % (key, user, key, user))
-        command = "; ".join(commands)
+        # Get out from the interactive mode
+        commands.append("exit\n")
+        # Use commands separated by newline to enable multiple commands being issued at a time
+        command = "\n".join(commands)
         return self.contextualize(command)
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     # With arguments
-    parser = argparse.ArgumentParser(description='Run ssh through pexpect')
-    parser.add_argument("--address", metavar="a", type=str, required=False,
-        help="Address of the VM")
-    parser.add_argument("--user", metavar="u", type=str, required=False,
-        help="User of the VM")
-    parser.add_argument("--password", metavar="p", type=str, required=False,
-        help="Password for the user of the VM")
-    args = parser.parse_args()
-    # Or using kwargs
-    params = {
-                "vm_adress": args.address or "10.216.12.28",
-                "vm_user": args.user or "root",
-                "vm_password": args.password or "openflow",
-            }
-    vm_context = VMContextualize(**params)
-    vm_context.contextualize_add_pub_key("carolina", open("/home/carolina/.ssh/id_dsa.pub").read())
+#    parser = argparse.ArgumentParser(description='Run ssh through pexpect')
+#    parser.add_argument("--address", metavar="a", type=str, required=True,
+#        help="Address of the VM")
+#    parser.add_argument("--user", metavar="u", type=str, required=True,
+#        help="User of the VM")
+#    parser.add_argument("--password", metavar="p", type=str, required=True,
+#        help="Password for the user of the VM")
+#    args = parser.parse_args()
+#    # Or using kwargs
+#    params = {
+#                "vm_adress": args.address,
+#                "vm_user": args.user,
+#                "vm_password": args.password,
+#            }
+#    vm_context = VMContextualize(**params)
+#    key_user = "unix_user"
+#    key_contents = "public_key contents"
+#    vm_context.contextualize_add_pub_key(key_user, key_contents)

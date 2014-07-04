@@ -1,7 +1,7 @@
 import time
 
 import datetime
-#
+
 from vt_manager.communication.sfa.util.faults import MissingSfaInfo, UnknownSfaType, \
     RecordNotFound, SfaNotImplemented, SliverDoesNotExist
 
@@ -86,6 +86,17 @@ class VTSfaDriver:
 				#node = self.shell.GetNodes(uuid=vm['server-id'])
 				if not node in nodes:
 					nodes.append(node)
+                                try:
+                                       for user in users:
+                                           xrn = Xrn(user['urn'], 'user')
+                                           user_name = xrn.get_leaf()
+                                           # Store user SSH key for future use
+                                           for user_key in user['keys']:
+                                               if not VirtualMachineKeys.objects.filter(project_uuid=vm["project-id"], slice_uuid=vm["slice-id"], vm_uuid=vm['uuid'],user_name=user_name ,ssh_key=user_key):
+                                                   key_entry = VirtualMachineKeys(project_uuid=vm["project-id"], slice_uuid=vm["slice-id"], vm_uuid=vm['uuid'],user_name=user_name ,ssh_key=user_key)
+                                                   key_entry.save()
+                                except Exception as e:
+                                           logging.error("create_sliver > Could not store user SSH key. Details: %s" % str(e))     
 				#ip = self.shell.get_ip_from_vm(vm_name=vm['name'],slice_name=vm['slice-name'],project=authority)
 				#created_vms.append({'vm-name':vm['name'],'vm-ip':ip,'vm-state':'ongoing','slice-name':slice_leaf,'node-name':node.name})
 		#add ssh keys to ldap of ssh gateway
@@ -97,17 +108,6 @@ class VTSfaDriver:
 			if con:
 				logging.warning("LDAP: trying to create the following users: %s" % str(users))
 				for user in users:
-					try:
-                                                xrn = Xrn(user['urn'], 'user')
-                                                user_name = xrn.get_leaf()
-						# Store user SSH key for future use
-						for user_key in user['keys']:
-                                                        
-							key_entry = VirtualMachineKeys(project_uuid=vm.projectId, slice_uuid=vm.sliceId, vm_uuid=vm.id,user_name=user_name ,key=user_key)
-							key_entry.save()
-					except Exception as e:
-						logging.error("create_sliver > Could not store user SSH key. Details: %s" % str(e))
-					
 					logging.warning("Sending users to LDAP")
 					#logging.error("project: "+str(projectName)+" slicename"+str(sliceName))
 					ldapprj = "%s.%s" % (projectName, sliceName)
