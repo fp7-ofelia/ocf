@@ -74,9 +74,6 @@ class VTShell:
 		return slices	
 
 	def StartSlice(self,server_uuid,vm_id):
-                print "-------------------------------------------------------------------------------------------VM_ID"
-                print "-------------------------------------------------------------------------------------------VM_ID"
-                print "-------------------------------------------------------------------------------------------VM_ID", vm_id
                 vm = VirtualMachine.objects.get(id=vm_id)
                 if "stopped" in vm.state:
 		        return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_START_TYPE)
@@ -107,7 +104,6 @@ class VTShell:
 		    #processes.append(process)
 		    #process.start()
                     with threading.Lock():
-                        print "-----------------------------------provisioningRSpec", provisioningRSpec
                         SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning,provisioningRSpec,'SFA.OCF.VTM') #UrlUtils.getOwnCallbackURL())
                         
                     if expiration:
