@@ -24,6 +24,7 @@ class VMContextualize(object):
     def ssh(self, context_command):
         #command = "ssh {0} \"%s\"" % str(args)
         #command = "ssh {0} \"%s\"".format("%s@%s" % (self.vm_user, self.vm_address)) % context_command
+        # Avoid checking key fingerprint for the connected VM
         #ssh_options = "-q -o BatchMode=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -l"
         ssh_options = "-q -o StrictHostKeyChecking=no -l"
         command = "ssh %s %s %s -t \"%s\"" % (ssh_options, self.vm_user, self.vm_address, context_command)
