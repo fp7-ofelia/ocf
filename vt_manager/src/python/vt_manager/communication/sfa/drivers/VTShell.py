@@ -74,7 +74,12 @@ class VTShell:
 		return slices	
 
 	def StartSlice(self,server_uuid,vm_id):
-		return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_START_TYPE)
+                print "-------------------------------------------------------------------------------------------VM_ID"
+                print "-------------------------------------------------------------------------------------------VM_ID"
+                print "-------------------------------------------------------------------------------------------VM_ID", vm_id
+                vm = VirtualMachine.objects.get(id=vm_id)
+                if "stopped" in vm.state:
+		        return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_START_TYPE)
 
 	def StopSlice(self,server_uuid,vm_id):
 		return self.__crudVM(server_uuid,vm_id,Action.PROVISIONING_VM_STOP_TYPE)
