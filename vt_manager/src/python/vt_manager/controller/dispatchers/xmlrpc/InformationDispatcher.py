@@ -86,10 +86,12 @@ class InformationDispatcher():
                             for vm in server.getVMs():
                                 print vm.name, vm.id, int(vmID), type(vm.id), vm.id==int(vmID)  
                             vms = server.getVMs(id=int(vmID))
+                            if not vms:
+                                raise Exception("No VMs found in server")
                             vmID = vms[0].getUUID()
                             break
                         if not vms:
-                            raise Exception("VM not Found")
+                            raise Exception("VM not found")
                 xmlrpc_server = xmlrpclib.Server(server.getAgentURL())
                 # Handle safely the connection against the agent
                 try:

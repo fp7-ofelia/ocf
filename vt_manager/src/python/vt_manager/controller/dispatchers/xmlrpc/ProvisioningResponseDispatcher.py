@@ -8,6 +8,10 @@ from vt_manager.controller.actions.ActionController import ActionController
 
 from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
 from vt_manager.common.middleware.thread_local import thread_locals, pull
+
+# SSH keys for easy user access
+from vt_manager.models.VirtualMachineKeys import VirtualMachineKeys
+
 class ProvisioningResponseDispatcher():
 
 	'''
@@ -63,12 +67,22 @@ class ProvisioningResponseDispatcher():
                                         created = False
                                         if vm.state == "created (stopped)":
                                             created = True
+                                        elif vm.state == "running":
+                                            vm_started = True
                                         logging.debug("Sending response to plug-in in sendAsync")
                                         if str(vm.callBackURL) == 'SFA.OCF.VTM':
+                                                print "\n\n\n\nSFA.VM = %s\n\n\n\n" % str(vm.__dict__)
+                                                # Start VM jut after creating sliver/VM
                                                 if created and was_creating:
                                                     from vt_manager.communication.sfa.drivers.VTSfaDriver import VTSfaDriver
                                                     driver = VTSfaDriver(None)
                                                     driver.crud_slice(vm.sliceName,vm.projectName, "start_slice")
+                                                # Send user SSH keys to VM
+                                                if vm_started:
+                                                    print "\n\n\n\nSFA.VM is started!\n\n\n\n"
+                                                    # TODO: set pass of SSH keys here
+                                                    vm_keys = VirtualMachineKeys.objects.filter(name=vm.name, slice_uuid=vm.sliceId, project_uuid, vm.projectId)
+                                                    
 					        return
 					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))
 					if failedOnCreate == 1:
@@ -80,7 +94,6 @@ class ProvisioningResponseDispatcher():
 					return
 			
 			#If response is for a finished action
-		
 			else:
 				try:
 					#XXX: What should be done if this happen?

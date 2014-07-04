@@ -24,10 +24,14 @@ LATITUDE = 41.38732694954646
 #Get Version Params
 ###################
 #Main params
-URN = 'urn:publicid:IDN+' + OCF_ISLAND_AUTHORITY + '+' + OCF_AM_TYPE  + '+authority+sa' 
+
+HRN = 'i2cat.vtam'
+HRN_URN = HRN#.replace(".",":")
+URN = 'urn:publicid:IDN+virtualization.%s+authority+cm' % HRN_URN
+
 HOSTNAME = settings.SITE_DOMAIN
 TESTBED = 'Ofelia Control Framework'
-EXPERIMENT_VTAM_IP = "10.216.12.5" #Add public one here
+EXPERIMENT_VTAM_IP = "10.216.12.4" #Add public one here
 
 #Geni API
 GENI_API_VERSION = 2

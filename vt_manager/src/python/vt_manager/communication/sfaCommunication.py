@@ -58,7 +58,7 @@ def GetVersion():
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
 def ListResources(credentials, options, **kwargs):
-    pm.check_permissions('ListResources',locals())
+    #pm.check_permissions('ListResources',locals())
     rspec = aggregate.ListResources(options,**kwargs)
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
     return to_return 
@@ -71,7 +71,7 @@ def ListSlices(self, creds, options):
 
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="sfa")
 def CreateSliver(slice_xrn, creds, rspec, users, options):
-    pm.check_permissions('CreateSliver',locals())
+    #pm.check_permissions('CreateSliver',locals())
     rspec = aggregate.CreateSliver(slice_xrn,rspec,users,creds,options)
     #xrn = Xrn(slice_urn, 'slice')
     #slice_leaf = xrn.get_leaf()
