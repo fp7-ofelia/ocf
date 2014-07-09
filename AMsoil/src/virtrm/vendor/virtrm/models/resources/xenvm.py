@@ -123,3 +123,28 @@ class XenVM(VirtualMachine):
         logging.debug("************************************* XENVM 1")
         xen_vm =  XenVM(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save)
         return xen_vm
+
+    @staticmethod
+    def update(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save):
+        logging.debug("************************************* XENVM 1")
+        self.do_save = False
+        # Set common fields
+        self.set_name(name)
+        logging.debug("******************************** XENVM - NAME IS %s" % name)
+        self.set_uuid(uuid)
+        logging.debug("******************************** XENVM - UUID IS %s" % uuid)
+        self.set_project_id(project_id)
+        self.set_project_name(project_name)
+        self.set_slice_id(slice_id)
+        self.set_slice_name(slice_name)
+        self.set_os_type(os_type)
+        self.set_os_version(os_version)
+        self.set_os_distribution(os_dist)
+        self.set_memory_mb(memory)
+        self.set_disc_space_gb(disc_space_gb)
+        self.set_number_of_cpus(number_of_cpus)
+        self.set_callback_url(callback_url)
+        self.set_state(self.UNKNOWN_STATE)
+        self.auto_save()
+        return xen_vm
+

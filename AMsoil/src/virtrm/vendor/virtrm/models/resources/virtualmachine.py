@@ -281,7 +281,7 @@ class VirtualMachine(db.Model):
     def destroy(self):
         db.session.delete(self)
         db.session.commit()
-
+ 
 
 class VMNetworkInterfaces(db.Model):
     """Network interfaces related to a Virtual Machine"""

@@ -50,7 +50,31 @@ class XenDriver(VTDriver):
             return server, vm_model
         except Exception as e:
             raise e
-    
+
+    @staticmethod
+    def get_server_and_provision_vm(self, action, callbackurl=None):
+        try:
+            if not callbackurl:
+                callbackurl = threading.currentThread().callBackURL
+            logging.debug("*************************** XEN PROVISIONING...")
+            vm_model = VirtualMachine.query.filter_by(uuid=action.server.virtual_machines[0].uuid)
+            vm = vm_model.get_child_object()
+            vm_model.set_type("xen")
+            vm.destroy()
+            name, uuid, project_id, project_name, slice_id, slice_name, os_type, os_version, os_dist, memory, disc_space_gb, number_of_cpus, callback_url, hd_setup_type, hd_origin_path, virt_setup_type, save = XenDriver.xen_vm_to_model(action.server.virtual_machines[0], callbackurl, save = True)
+            logging.debug("*************************** XEN VM MODEL OBTAINED...")
+            try:
+                logging.debug("*************************** STARTING VM CREATION WITH MODEL...")
+                vm_model.update_vm(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,hd_setup_type,hd_origin_path,virt_setup_type,save)
+            except Exception as e:
+                logging.debug("*************************** GO FAIL " + str(e))
+                raise e
+            logging.debug("*************************** GO 4")
+            return vm_model
+        except Exception as e:
+            raise e
+   
+ 
     @staticmethod
     def create_or_update_server_from_post(request, instance):
         #return XenServer.constructor(server.getName(),server.getOSType(),server.getOSDistribution(),server.getOSVersion(),server.getAgentURL(),save=True)

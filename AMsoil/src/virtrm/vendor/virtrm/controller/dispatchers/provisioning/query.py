@@ -13,7 +13,7 @@ logging=amsoil.core.log.getLogger('ProvisioningDispatcher')
 
 class ProvisioningDispatcher():        
     @staticmethod
-    def process(provisioning, callback_url=None):
+    def process(provisioning, callback_url=None, provision=False):
         """
         Process provisioning query.
         """
@@ -59,7 +59,10 @@ class ProvisioningDispatcher():
                     logging.debug("************ CREATE...")
                     try:
                         logging.debug("*********************************** CREATING VM...")
-                        vm = ProvisioningDispatcher.__create_vm(controller, action_model, action, callback_url)
+                        if provision:
+                            vm = ProvisioningDispatcher.__provision_vm(controller, action_model, action, callback_url)
+                        else:
+                            vm = ProvisioningDispatcher.__create_vm(controller, action_model, action, callback_url)
                     except:
                         vm = None
                         raise
@@ -104,6 +107,22 @@ class ProvisioningDispatcher():
             return VMmodel
         except:
             raise
+
+    @staticmethod
+    def __provision_vm(controller, action_model, action, callback_url=None):
+        try:
+            logging.debug("**************************** CREATE_VM METHOD - STARTING...")
+            action_model.check_action_is_present_and_unique()
+            logging.debug("**************************** CREATE_VM METHOD - CHECK UNIQUE ACTION...")
+            VMmodel = controller.get_server_and_provision_vm(action, callback_url)
+            action_model.set_object_uuid(VMmodel.get_uuid())
+            logging.debug("**************************** CREATE_VM METHOD - VM BOUND TO ACTION")
+            db.session.add(action_model)
+            db.session.commit()
+            return VMmodel
+        except:
+            raise
+
     
     @staticmethod
     def __delete_start_stop_reboot_vm(controller, action_model, action):
