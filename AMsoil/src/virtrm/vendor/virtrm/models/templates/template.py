@@ -7,7 +7,7 @@ import common
 import amsoil.core.pluginmanager as pm
 import inspect
 from sqlalchemy.ext.associationproxy import association_proxy
-from templates.extendeddata import ExtendedData
+from models.templates.extendeddata import ExtendedData
 import uuid
 
 '''

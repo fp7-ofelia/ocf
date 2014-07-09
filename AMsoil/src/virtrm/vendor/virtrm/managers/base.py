@@ -10,7 +10,7 @@ from models.resources.allocatedvm import AllocatedVM
 from models.resources.vtserver import VTServer
 from models.resources.xenserver import XenServer
 from models.resources.xenvm import XenVM
-from templates.manager import TemplateManager
+from utils.templatemanager import TemplateManager
 from utils.base import db
 from utils.expirationmanager import ExpirationManager
 from utils.servicethread import ServiceThread
