@@ -402,14 +402,14 @@ class VTResourceManager(object):
         dictionary['vm'] = vm_dict
         logging.debug("********** DICTIONARY CREATED...")
         # Deallocate the current VM
-#        logging.debug("********** DEALLOCATING VM %s WITH UUID %s" % (vm_dict['name'], vm_dict['uuid']))
-#        try:
-#            logging.debug("********** DEALLOCATING...")
-#            self.delete_vm_by_uuid(vm_uuid)
-#            logging.debug("********** DEALLOCATED...")
-#        except Exception as e:
-#            logging.debug("********** DEALLOCATION FAILED ***********")
-#            raise e
+        logging.debug("********** DEALLOCATING VM %s WITH UUID %s" % (vm_dict['name'], vm_dict['uuid']))
+        try:
+            logging.debug("********** DEALLOCATING...")
+            self.delete_vm_by_uuid(vm_uuid)
+            logging.debug("********** DEALLOCATED...")
+        except Exception as e:
+            logging.debug("********** DEALLOCATION FAILED ***********")
+            raise e
         # Once deallocated, start the vm creation
         try: 
             logging.debug("********** PROVISIONING...")
@@ -461,16 +461,16 @@ class VTResourceManager(object):
         except:
             raise virt_exception.VirtMaxVMDurationExceeded(end_time)
         # Make sure VM with the given name exists in the Container with the given GID and prefix.
-#        try:
-#            container = self.get_container_for_given_vm(args_dict["vm"]["name"], container_gid, prefix)
-#        except Exception as e:
-#            raise e
+        try:
+            container = self.get_container_for_given_vm(args_dict["vm"]["name"], container_gid, prefix)
+        except Exception as e:
+            raise e
         # Obtain the provisioning RSpec from the dictionary
         provisioning_rspec = self.get_provisioning_rspec_from_dict(copy.deepcopy(args_dict))
         # Once we have the provisioning Rspec, call the Provisioning Dispatcher
         try:
             logging.debug("*************** CALL AGENT...")
-            ProvisioningDispatcher.process(provisioning_rspec.query.provisioning, 'SFA.OCF.VTM', True)
+            ProvisioningDispatcher.process(provisioning_rspec.query.provisioning, 'SFA.OCF.VTM')
         except Exception as e:
             # If the provisioning fails at any point, try tho destroy the created VM
             db.session.rollback()
@@ -494,13 +494,13 @@ class VTResourceManager(object):
         except Exception as e:
             raise e
         # Attach the VM to a Container
-        #container.vms.append(vm)
-        #container.save()
+        container.vms.append(vm)
+        container.save()
         # Attach the Template Information to the VM
-        #try:
-        #    self.template_manager.add_template_to_vm(vm.get_uuid(), template)
-        #except Exception as e:
-        #    raise e
+        try:
+            self.template_manager.add_template_to_vm(vm.get_uuid(), template)
+        except Exception as e:
+            raise e
         # Add the URN
         logging.debug("******************* ALL OK AT THIS POINT")
         logging.debug("******************* VM DICT => %s" % str(args_dict))
