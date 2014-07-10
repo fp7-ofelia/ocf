@@ -54,16 +54,20 @@ ln -sf /etc/apache2/sites-available/optinmgr.conf /etc/apache2/sites-enabled/ ||
 
 #Create application folder for error log
 mkdir -p /var/log/apache2/openflow/optin_manager
+# Set proper permissions to log files under /var/log/apache
+for log_file in $(find /var/log/apache2 -name "*error_log")
+do
+    chmod 755 $log_file
+    chown www-data $log_file
+done
 
 #Change permissions of the code
 #printHeader ">" "Setting correct file permissions..."
 #chmod -f a+w $SRC_DIR/src/python/expedient/clearinghouse/gcf-x509*
 #chown -f $APACHE_USER $SRC_DIR/src/ -R
 
-
 #Django settings 
 source $CURRENT_DIRECTORY/lib/django-settings
-
 
 #Django database
 source $CURRENT_DIRECTORY/lib/django-db

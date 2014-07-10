@@ -10,7 +10,6 @@
 #inform user
 printHeader "info#" "Using default upgrade module..."
 
-
 local TMP_PATH=$PWD
 
 cd $EXECPATH/../src/python/expedient/clearinghouse/ || error "Target directory does not exists anymore?"
@@ -26,6 +25,13 @@ python manage.py evolve --hint -x || error "Could not evolve database..."
 # Clean cache
 printHeader ">" "Cleaning UI's cache hash values..."
 python $TMP_PATH/versions/default/upgrade/tools/cleanCache.py || error "Could not clean UI's hashes..."
+
+# Set proper permissions to log files under /var/log/apache
+for log_file in $(find /var/log/apache2 -name "*error_log")
+do
+    chmod 755 $log_file
+    chown www-data $log_file
+done
 
 cd $TMP_PATH
 
