@@ -57,6 +57,7 @@ do
     chmod 755 $log_file
     chown www-data $log_file
 done
+chown www-data:www-data /var/log/apache2
 #If it does not exist, expedient creates it with root user and then it crashes
 touch /var/log/sfa_access.log
 

@@ -60,6 +60,7 @@ do
     chmod 755 $log_file
     chown www-data $log_file
 done
+chown www-data:www-data /var/log/apache2
 
 #Change permissions of the code
 #printHeader ">" "Setting correct file permissions..."
