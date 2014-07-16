@@ -21,6 +21,7 @@ class ProvisioningDispatcher():
         if not callback_url:
 #            callback_url = threading.currentThread().callBackURL
             callback_url = UrlUtils.get_own_callback_url()
+#        agent_api_url = UrlUtils.get_agent_api_url()
         logging.debug("PROVISIONING STARTED...\n")
         for action in provisioning.action:
             action_model = ActionController.action_to_model(action, "provisioning")
@@ -34,8 +35,9 @@ class ProvisioningDispatcher():
                 a = str(e)
                 if len(a)>200:
                     a = a[0:199]
-                XmlRpcClient.call_method(callback_url, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, a)))
+#                XmlRpcClient.call_method(agent_api_url, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, a)))
 #                XmlRpcClient.call_method(threading.currentThread().callBackURL, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, a)))
+                raise Exception()
                 return None
             try:
                 logging.debug("************ OBTAIN DRIVER...")
@@ -85,7 +87,7 @@ class ProvisioningDispatcher():
                         controller.delete_vm(vm)
                     except Exception as e:
                         print "Could not delete VM. Exception: %s" % str(e)
-                        XmlRpcClient.call_method(callback_url, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, str(e))))
+#                        XmlRpcClient.call_method(callback_url, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, str(e))))
 #                        XmlRpcClient.call_method(threading.currentThread().callBackURL, "sendAsync", XmlHelper.craft_xml_class(XmlHelper.get_processing_response(Action.FAILED_STATUS, action, str(e))))
         logging.debug("PROVISIONING FINISHED...")
         

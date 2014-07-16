@@ -203,7 +203,11 @@ class VTDriver():
     @staticmethod
     def propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, action):
         from models.resources.virtualmachine import VirtualMachine
+        logging.debug("************** ENTRO AQUI")
         vm = VirtualMachine.query.get(vm_id).get_child_object()
         rspec = XmlHelper.get_simple_action_specific_query(action, server_uuid)
+        logging.debug("************** RSPEC CREATED")
         ActionController.populate_new_action_with_vm(rspec.query.provisioning.action[0], vm)
-        ServiceThread.start_method_in_new_thread(DispatcherLauncher.process_query, rspec)
+        logging.debug("************** RSPEC POPULATED")
+        return rspec
+        #ServiceThread.start_method_in_new_thread(DispatcherLauncher.process_query, rspec)

@@ -188,9 +188,10 @@ class VTResourceManager(object):
         if not "server_uuid" in vm_dict.keys():
             vm_dict["server_uuid"] = server.get_uuid()
         logging.debug("*********** SERVER INFORMATION ADDED...")
-        container_gid = self.get_vm_container(vm.get_urn())
+        container_gid = self.get_vm_container(vm_dict["urn"])
         if container_gid:
             vm_dict["container_urn"] = container_gid
+        logging.debug("*********** CONTAINER INFORMATION ADDED...")
         return vm_dict
     
     def get_vm(self, vm_uuid):
@@ -285,7 +286,7 @@ class VTResourceManager(object):
             vms_in_container.append(vm_in_container)
         return vms_in_container
 
-    def get_provisioned_vms_in_containter(self, container_gid, prefix=""):
+    def get_provisioned_vms_in_container(self, container_gid, prefix=""):
         provisioned_vms = list()
         try:
             vms = self.get_provisioned_vm_objects_in_container(container_gid, prefix)
@@ -399,6 +400,7 @@ class VTResourceManager(object):
         dictionary['xen_configuration'] = vm_dict.pop('disc_image')
         dictionary['xen_configuration']['memory_mb'] = vm_dict.pop('memory_mb')
         dictionary['xen_configuration']['hd_origin_path'] = 'default/default.tar.gz'
+        dictionary['xen_configuration']['hd_size_mb'] = 8200
         dictionary['vm'] = vm_dict
         logging.debug("********** DICTIONARY CREATED...")
         # Deallocate the current VM
@@ -413,7 +415,7 @@ class VTResourceManager(object):
         # Once deallocated, start the vm creation
         try: 
             logging.debug("********** PROVISIONING...")
-            provisioned_vm = self.create_vm(dictionary, end_time) 
+            provisioned_vm = self.create_vm(dictionary, template, container_gid, container_prefix, end_time) 
             logging.debug("********** PROVISIONED...")
         except Exception as e:
             raise e
@@ -451,15 +453,15 @@ class VTResourceManager(object):
                     break
         return result_container 
 
-    def create_vm(self, args_dict, end_time=None):
+    def create_vm(self, args_dict, template, container_gid, prefix="", end_time=None):
         """
         Create a new VM with the given information related to a Container.
         """
         # First make sure that the requested end_time is a valid expiration time
-        try:
-            self.expiration_manager.check_valid_reservation_time(end_time)
-        except:
-            raise virt_exception.VirtMaxVMDurationExceeded(end_time)
+    #    try:
+    #        self.expiration_manager.check_valid_reservation_time(end_time)
+    #    except:
+    #        raise virt_exception.VirtMaxVMDurationExceeded(end_time)
         # Make sure VM with the given name exists in the Container with the given GID and prefix.
         try:
             container = self.get_container_for_given_vm(args_dict["vm"]["name"], container_gid, prefix)
@@ -490,7 +492,7 @@ class VTResourceManager(object):
             raise VirtVMCreationError(vm_class.uuid)
         # Attach the Expiration time to the VM
         try:
-            self.expiration_manager.update_expiration_by_vm_uuid(vm.get_uuid(), end_time)
+            self.expiration_manager.add_expiration_to_vm_by_uuid(vm.get_uuid(), end_time)
         except Exception as e:
             raise e
         # Attach the VM to a Container
@@ -577,37 +579,48 @@ class VTResourceManager(object):
 #        return vm_results
     
     # VM status methods
-    def crud_vm_by_urn(self, vm_urn):
+    def crud_vm_by_urn(self, vm_urn, action):
         try:
             vm = self.get_vm_object_by_urn(vm_urn)
-            result_vm = self.crud_vm(vm)
+            result_vm = self.crud_vm(vm, action)
         except Exception as e:
             raise e
         return result_vm
 
     def crud_vm(self, vm, action):
+        logging.debug("****************** CRUD ACTION STARTED")
         try:
-            vm_id = vm.get_id()
+            logging.debug("****************** VM IS " + str(vm))
+            logging.debug("****************** SERVER IS " + str(vm.get_server()))
+            vm_id = vm.id
             server_uuid = vm.get_server().get_uuid()
         except Exception as e:
             raise virt_exception.VirtDatabaseError()
+        logging.debug("****************** OBTAINED DATA")
         try:
             if action == "start":
-                self.start_vm()
+                logging.debug("****************** START VM")
+                self.start_vm(vm_id, server_uuid)
             elif action == "stop":
-                self.stop_vm()
+                self.stop_vm(vm_id, server_uuid)
             elif action == "restart":
-                self.restart_vm()
+                self.restart_vm(vm_id, server_uuid)
             else:
                 raise virt_exception.VirtUnsupportedAction(action)
         except Exception as e:
             raise e
-        result_vm = get_vm_info(vm)
+        logging.debug("************************** OK HERE!")
+        vm_started = VirtualMachine.query.get(vm_id)
+        logging.debug("************************* VM IS " + str(vm_started))
+        result_vm = self.get_vm_info(vm_started)
+        logging.debug("****************** CRUD FINISHED")
         return result_vm
 
     def start_vm(self, vm_id, server_uuid):
         try:
-            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_START_TYPE)
+            rspec = VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_START_TYPE)
+            result = ProvisioningDispatcher.process(rspec.query.provisioning, 'SFA.OCF.VTM')   
+            logging.debug("***************** FINISED START")
         except Exception as e:
             raise virt_exception.VirtOperationalError(vm_id)
     
@@ -621,13 +634,15 @@ class VTResourceManager(object):
     
     def stop_vm(self, vm_id, server_uuid):
         try:
-            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_STOP_TYPE)
+            rspec = VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_STOP_TYPE)
+            result = ProvisioningDispatcher.process(rspec.query.provisioning, 'SFA.OCF.VTM')
         except Exception as e:
             raise virt_exception.VirtOperationalError(vm_id)
     
     def restart_vm(self, vm_id, server_uuid):
         try:
-            VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
+            rspec = VTDriver.propagate_action_to_provisioning_dispatcher(vm_id, server_uuid, Action.PROVISIONING_VM_REBOOT_TYPE)
+            result = ProvisioningDispatcher.process(rspec.query.provisioning, 'SFA.OCF.VTM')
         except Exception as e:
             raise virt_exception.VirtOperationalError(vm_id)
     

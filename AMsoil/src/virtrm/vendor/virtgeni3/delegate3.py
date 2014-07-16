@@ -22,7 +22,7 @@ virt_exception = pm.getService('virtexceptions')
 GENIv3_prefix = "GENIv3"
 
 # VIRTRM ACTIONS
-VIRTM_START = "start"
+VIRTRM_START = "start"
 VIRTRM_STOP = "stop"
 VIRTRM_RESTART = "restart"
 
@@ -31,6 +31,7 @@ ACTION_ALLOCATE = "allocate"
 ACTION_PROVISIONING = "provisioning"
 ACTION_RENEW = "renew"
 ACTION_DELETE = "delete"
+ACTION_PERFORM_ACTION = "action"
 
 class VTDelegate3(GENIv3DelegateBase):
     """
@@ -387,6 +388,8 @@ class VTDelegate3(GENIv3DelegateBase):
                 raise geniv3_exception.GENIv3SearchFailedError("There are no resources in the given slice(s)")
         for provisioned_vm in provisioned_vms:
             try:
+                logging.debug("*************** ACTION IS " + action)
+                logging.debug("*************** DESIRED ACTION IS " + self.OPERATIONAL_ACTION_START)
                 if action == self.OPERATIONAL_ACTION_START:
                     crud_action = VIRTRM_START
                 elif action == self.OPERATIONAL_ACTION_STOP:
@@ -394,10 +397,10 @@ class VTDelegate3(GENIv3DelegateBase):
                 elif action == self.OPERATIONAL_ACTION_RESTART:
                     crud_action = VIRTRM_RESTART
                 else:
-                    raise geniv3_exception.GENIv3BadArgsError("Action not suported in this AM" % (urn,))
+                    raise geniv3_exception.GENIv3BadArgsError("Action not suported in this AM")
                 try:
                     vm = self._resource_manager.crud_vm_by_urn(provisioned_vm['urn'], crud_action)
-                    vms.extend(vm)
+                    vms.append(vm)
                 except Exception as e:
                     raise ExceptionTranslator.virtexception2GENIv3exception(type(e), urn=urn, default=urn)
             except Exception as e:
@@ -504,7 +507,7 @@ class VTDelegate3(GENIv3DelegateBase):
                   'geni_expires'    : sliver['expiration_time'] if 'expiration_time' in sliver.keys() else None,
                   'geni_allocation_status' : self.ALLOCATION_STATE_ALLOCATED if sliver['state'] == "allocated" else self.ALLOCATION_STATE_UNALLOCATED if sliver['state'] == "deleted" else self.ALLOCATION_STATE_PROVISIONED}
         if include_operational_status: 
-            result['geni_operational_status'] = self.OPERATIONAL_STATE_NOTREADY if sliver['state'] is "ongoing" or "allocated" else self.OPERATIONAL_STATE_FAILED if 'error_message' in sliver.keys() else self.OPERATIONAL_STATE_READY
+            result['geni_operational_status'] = self.OPERATIONAL_STATE_NOTREADY if sliver['state'] == "creating..." else self.OPERATIONAL_STATE_NOTREADY if sliver['state'] ==  "allocated" else self.OPERATIONAL_STATE_FAILED if 'error_message' in sliver.keys() else self.OPERATIONAL_STATE_READY
         try:
             result['geni_error'] = sliver['error_message']
         except:
