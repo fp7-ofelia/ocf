@@ -298,7 +298,8 @@
     <tr>
 	<td class="label">Actions:</td>
 	<td>
-	    <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />
+	    <!--<input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Book Openflow resources" />-->
+	    <input type="button" onClick='document.location="{% url book_openflow slice.id %}"' value="Select flowspace (virtual topology)" />
             {% if not slice.started %}
                 <span style="font-size:10px"><img style="height:12px;" src="{% url img_media 'warning.png' %}" alt="Slice is stopped" title="Slice is stopped"/> Your Flowspace can only be granted if your slice is started</span>
             {% endif %}
