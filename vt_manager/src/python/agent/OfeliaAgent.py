@@ -73,7 +73,8 @@ def processXmlQuery(notificationCallBackUrl,xml):
 			
 	#Parse
 	try:
-#		logger.debug(xml)
+		# Debug: show received RSpec in agent
+		logger.debug(xml)
 		rspecValue = XmlParser.parseXML(xml)
 	except Exception as e:
 		logger.error(e)	
