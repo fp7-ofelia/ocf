@@ -1,5 +1,5 @@
 '''
-Created on Oct 1, 2010
+Created on Oct 6, 2010
 
 @author: jnaous
 '''
@@ -11,7 +11,7 @@ from django.conf import settings
 from decorator import decorator
 from openflow.plugin.gapi import gapi
 from expedient.clearinghouse.slice.models import Slice
-from openflow.plugin.gapi.gapi import DuplicateSliceNameException
+from expedient.clearinghouse.geni.gopenflow.tests.models import DummyOFAggregate
 
 logger = logging.getLogger("openflow.plugin.gapi.rpc")
 
@@ -32,20 +32,12 @@ PRIVS_MAP = dict(
     CreateSliver=('createsliver',),
     DeleteSliver=('deleteslice',),
     SliverStatus=('getsliceresources',),
-    Shutdown=('shutdown',),
 )
 
 def no_such_slice(slice_urn):
     "Raise a no such slice exception."
     fault_code = 'No such slice.'
     fault_string = 'The slice named by %s does not exist' % (slice_urn)
-    raise xmlrpclib.Fault(fault_code, fault_string)
-
-def duplicate_slice_name(slice_name):
-    "Raise duplicate slice name exception."
-    fault_code = "Duplicate slice name."
-    fault_string = "The slice name is already in use. Please choose a" \
-        " different slice name."
     raise xmlrpclib.Fault(fault_code, fault_string)
 
 def require_creds(use_slice_urn):
@@ -75,70 +67,57 @@ def require_creds(use_slice_urn):
         
     return decorator(require_creds)
     
-@rpcmethod(signature=['string', 'string'], url_name="openflow_gapi")
+@rpcmethod(signature=['string', 'string'], url_name="dummy_gopenflow")
 def ping(str, **kwargs):
     return "PONG: %s" % str
 
-@rpcmethod(signature=[VERSION_TYPE], url_name="openflow_gapi")
+@rpcmethod(signature=[VERSION_TYPE], url_name="dummy_gopenflow")
 def GetVersion(**kwargs):
     logger.debug("Called GetVersion")
     return gapi.GetVersion()
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],
-           url_name="openflow_gapi")
+           url_name="dummy_gopenflow")
 @require_creds(False)
 def ListResources(credentials, options, **kwargs):
     logger.debug("Called ListResources")
-    return gapi.ListResources(options, kwargs["request"].user)
+    return DummyOFAggregate.objects.all()[0].adv_rspec
 
 @require_creds(True)
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE],
-           url_name="openflow_gapi")
+           url_name="dummy_gopenflow")
 def CreateSliver(slice_urn, credentials, rspec, users, **kwargs):
     logger.debug("Called CreateSliver for user %s" % kwargs["request"].user)
-    try:
-        return gapi.CreateSliver(slice_urn, rspec, kwargs["request"].user)
-    except Slice.DoesNotExist:
-        no_such_slice(slice_urn)
-    except DuplicateSliceNameException as e:
-        duplicate_slice_name(e.slice_name)
-    
+    agg = DummyOFAggregate.objects.all()[0]
+    agg.resv_rspec = rspec
+    agg.save()
+    return rspec
+
 @require_creds(True)
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE],
-           url_name="openflow_gapi")
+           url_name="dummy_gopenflow")
 def DeleteSliver(slice_urn, credentials, **kwargs):
     logger.debug("Called DeleteSliver")
-    try:
-        return gapi.DeleteSliver(slice_urn, kwargs["request"].user)
-    except Slice.DoesNotExist:
-        no_such_slice(slice_urn)
+    agg = DummyOFAggregate.objects.all()[0]
+    agg.resv_rspec = None
+    agg.save()
+    return True
 
 @require_creds(True)
 @rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE],
-           url_name="openflow_gapi")
+           url_name="dummy_gopenflow")
 def SliverStatus(slice_urn, credentials, **kwargs):
     logger.debug("Called SliverStatus")
-    try:
-        return gapi.SliverStatus(slice_urn)
-    except Slice.DoesNotExist:
-        no_such_slice(slice_urn)
+    return {}
         
 @require_creds(True)
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, TIME_TYPE],
-           url_name="openflow_gapi")
+           url_name="dummy_gopenflow")
 def RenewSliver(slice_urn, credentials, expiration_time, **kwargs):
-    logger.debug("Called RenewSliver")
-    try:
-        return gapi.RenewSliver(slice_urn, expiration_time)
-    except Slice.DoesNotExist:
-        no_such_slice(slice_urn)
-    
+    return True
+
 @require_creds(True)
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE],
-           url_name="openflow_gapi")
+           url_name="dummy_gopenflow")
 def Shutdown(slice_urn, credentials, **kwargs):
-    logger.debug("Called Shutdown")
-    try:
-        return gapi.Shutdown(slice_urn, kwargs["request"].user)
-    except Slice.DoesNotExist:
-        no_such_slice(slice_urn)
+    return True

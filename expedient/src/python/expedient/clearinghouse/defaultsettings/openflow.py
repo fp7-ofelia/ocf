@@ -16,7 +16,7 @@ the full HRN used for the URNs. Default is "openflow".
 '''
 
 OPENFLOW_OTHER_RESOURCES = (
-    ("expedient_geni.planetlab", "PlanetLabNode"),
+    ("expedient.clearinghouse.geni.planetlab", "PlanetLabNode"),
 )
 '''Which types of non-OpenFlow resources do OpenFlow Interface connect to?
 

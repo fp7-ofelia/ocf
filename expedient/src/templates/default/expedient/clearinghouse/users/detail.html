@@ -41,11 +41,10 @@
             <input type="submit" class="centered" value="Save info">
             {# Loads Jinja filters for ch_extras - in order to check superuser #}
             {% load ch_extras %}
-            {% if curr_user|is_super_user %}
-                <div class="centered data_below_submit">
+            <div class="center centered data_below_submit">
+                {% if curr_user|is_super_user %}
                     <a href="{% url users_delete curr_user.pk %}">Delete</a> |
-                    <a id="geni_user_cert_link" href="{% url gcf_cert_manage curr_user.pk %}">Certificates</a> |
-                    <a href="{% url users_home %}">Manage Users</a>
+                    <a href="{% url users_home %}">Manage Users</a> |
                     <div class="tooltip" id="cert_mgmt_help">
                         Click to manage the user's GENI Control Framework certificate.
                         <br /><br />
@@ -54,8 +53,10 @@
                         other than Expedient's Web interface. This includes the
                         PlanetLab interface and GPO's omni client.
                     </div>
-                </div>
+                {% else %}
+                    <input type="button" id="geni_user_cert_link" value="Manage certificates" onclick="document.location='{% url gcf_cert_manage curr_user.pk %}'"/>
             {% endif %}
+            </div>
         </form>
     </div>
 </div>

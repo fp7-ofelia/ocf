@@ -34,7 +34,7 @@ from openflow.plugin.vlan.utils import create_slice_with_vlan_range
 from openflow.plugin.models import OpenFlowAggregate, OpenFlowSwitch,\
     OpenFlowInterface, OpenFlowInterfaceSliver, FlowSpaceRule,\
     OpenFlowConnection, NonOpenFlowConnection
-from expedient_geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
+from expedient.clearinghouse.geni.planetlab.models import PlanetLabNode, PlanetLabSliver,\
     PlanetLabAggregate
 
 from expedient.common.utils.plugins.resources.node import Node

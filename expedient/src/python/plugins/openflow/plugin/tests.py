@@ -27,16 +27,16 @@ from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.permissions.shortcuts import give_permission_to
 from expedient.common.middleware import threadlocals
 from openflow.plugin.gapi import rspec as rspec_mod
-from expedient_geni.utils import create_x509_cert, get_user_urn
-from expedient_geni import clearinghouse
+from expedient.clearinghouse.geni.utils import create_x509_cert, get_user_urn
+from expedient.clearinghouse.geni import clearinghouse as geni_clearinghouse
 from expedient.clearinghouse.users.models import UserProfile
 import random
-from sfa.trust import credential
-from expedient_geni.models import GENISliceInfo
+from expedient.common.federation.sfa.trust import credential
+from expedient.clearinghouse.geni.models import GENISliceInfo
 import xmlrpclib
 from expedient.common.utils.transport import TestClientTransport
 from expedient.common.utils import create_or_update
-from geni.util.urn_util import publicid_to_urn
+from expedient.common.federation.geni.util.urn_util import publicid_to_urn
 from xmlrpclib import Fault
 
 logger = logging.getLogger("OpenFlowPluginTests")
@@ -130,7 +130,7 @@ class Tests(SettingsTestCase):
         self.user_cert, self.user_key = create_x509_cert(self.user_urn)
         
         # get slice creds
-        self.slice_cred = clearinghouse.CreateSlice(
+        self.slice_cred = geni_clearinghouse.CreateSlice(
             self.user_cert.save_to_string())
         self.slice_gid = credential.Credential(
             string=self.slice_cred).get_gid_object()
@@ -875,7 +875,7 @@ class Tests(SettingsTestCase):
         resv_rspec = self.test_gapi_CreateSliver()
         
         # get new credentials with new urn
-        self.slice_cred = clearinghouse.CreateSlice(
+        self.slice_cred = geni_clearinghouse.CreateSlice(
             self.user_cert.save_to_string())
         self.slice_gid = credential.Credential(
             string=self.slice_cred).get_gid_object()

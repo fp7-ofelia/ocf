@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Manage User Certificate{% endblock title %}
+
+{% block content %}
+<div class="main center">
+	<h1>Manage user {{ curr_user.username }}'s GENI certificate</h1>
+	{% if cert %}
+	<table class="formtable">
+		<tr>
+			<th>Uniform Resource Name (URN)</th><th>:</th><td>{{ cert.get_urn }}</td>
+		</tr>
+		<tr>
+			<th>Human Readable Name (HRN)</th><th>:</th><td>{{ cert.get_hrn }}</td>
+		</tr>
+		{% if cert.parent %}
+		<tr>
+			<th>Issuer URN</th><th>:</th><td>{{ cert.parent.get_urn }}</td>
+		</tr>
+		<tr>
+			<th>Issuer HRN</th><th>:</th><td>{{ cert.parent.get_hrn }}</td>
+		</tr>
+		{% else %}
+		<tr>
+			<th>Issuer URN</th><th>:</th><td><i>self</i></td>
+		</tr>
+		<tr>
+			<th>Issuer HRN</th><th>:</th><td><i>self</i></td>
+		</tr>
+		{% endif %}
+	</table>
+	{% else %}
+		<p>This user currently has no GENI user certificates. Click "Generate" below to create a new one.</p>
+	{% endif %}
+	<div class="center">
+		{% if cert %}
+			<input type="button" id="download_cert" value="Download cert" onclick="document.location='{% url gcf_cert_download curr_user.pk %}'"/>
+			<input type="button" id="download_key" value="Download key" onclick="document.location='{% url gcf_key_download curr_user.pk %}'"/>
+			<input type="button" id="regenerate_credentials" value="Regenerate" onclick="document.location='{% url gcf_cert_generate curr_user.pk %}'"/>
+		{% else %}
+			<input type="button" id="generate_credentials" value="Generate" onclick="document.location='{% url gcf_cert_generate curr_user.pk %}'">
+		{% endif %}
+		<input type="button" id="upload_credentials" value="Upload credentials" onclick="document.location='{% url gcf_cert_upload curr_user.pk %}'">
+		<input type="button" id="cancel_certs" value="Cancel" onclick="document.location='{% url users_detail curr_user.pk %}'">
+	</div>
+</div>
+{% endblock content %}

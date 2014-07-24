@@ -102,9 +102,15 @@ This needs to be overridden.
 '''
 
 # List of callables that know how to import templates from various sources.
+#TEMPLATE_LOADERS = [
+#    'django.template.loaders.filesystem.load_template_source',
+#    'django.template.loaders.app_directories.load_template_source',
+#]
 TEMPLATE_LOADERS = [
-    'django.template.loaders.filesystem.load_template_source',
-    'django.template.loaders.app_directories.load_template_source',
+        ('django.template.loaders.cached.Loader',(
+            'django.template.loaders.filesystem.Loader',
+            'django.template.loaders.app_directories.Loader',
+            )),
 ]
 append_to_local_setting(
     "TEMPLATE_LOADERS", TEMPLATE_LOADERS, globals())
@@ -121,7 +127,7 @@ MIDDLEWARE_CLASSES = [
     'expedient.common.middleware.sitelockdown.SiteLockDown',
     'expedient.common.middleware.threadlocals.ThreadLocals',
     'expedient.common.permissions.middleware.PermissionMiddleware',
-    'expedient_geni.middleware.CreateUserGID',
+    'expedient.clearinghouse.geni.middleware.CreateUserGID',
 ]
 append_to_local_setting(
     "MIDDLEWARE_CLASSES", MIDDLEWARE_CLASSES, globals(), at_start=True,
@@ -129,7 +135,7 @@ append_to_local_setting(
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'expedient_geni.backends.GENIRemoteUserBackend',
+    'expedient.clearinghouse.geni.backends.GENIRemoteUserBackend',
 ]
 if ENABLE_LDAP_BACKEND:
     AUTHENTICATION_BACKENDS.insert(1,'django_auth_ldap.backend.LDAPBackend')
@@ -180,9 +186,9 @@ INSTALLED_APPS = [
     'expedient.clearinghouse.users',
     'expedient.clearinghouse.permissionmgmt',
 #    'openflow.plugin',
-    'expedient_geni',
-    'expedient_geni.planetlab',
-    'expedient_geni.gopenflow',
+    'expedient.clearinghouse.geni',
+    'expedient.clearinghouse.geni.planetlab',
+    'expedient.clearinghouse.geni.gopenflow',
 #    'expedient.ui.html',
     'expedient.ui.rspec',
 #    'vt_plugin',
@@ -201,7 +207,8 @@ AUTH_PROFILE_MODULE = "users.UserProfile"
 ACCOUNT_ACTIVATION_DAYS = 3
 '''Number of days account activation links are valid.'''
 
-AGGREGATE_LOGOS_DIR = "aggregate_logos/"
+#AGGREGATE_LOGOS_DIR = "aggregate_logos/"
+AGGREGATE_LOGOS_DIR = "default/img/aggregates/"
 '''Directory relative to MEDIA_ROOT where all aggregate logos are uploaded.'''
 
 TEMPLATE_CONTEXT_PROCESSORS = [

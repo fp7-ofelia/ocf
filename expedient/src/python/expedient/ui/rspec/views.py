@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from expedient.ui.rspec.forms import UploadRSpecForm
 from openflow.plugin.gapi.rspec import create_resv_rspec
 from openflow.plugin.gapi import gapi, rspec
-from expedient_geni.models import GENISliceInfo
+from expedient.clearinghouse.geni.models import GENISliceInfo
 from expedient.common.messaging.models import DatedMessage
 from django.http import HttpResponseRedirect, HttpResponse
 from django.views.generic import simple

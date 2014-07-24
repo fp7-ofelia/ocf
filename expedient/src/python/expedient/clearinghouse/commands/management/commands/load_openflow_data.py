@@ -7,8 +7,8 @@ Created on Oct 7, 2010
 import re
 from django.core.management.base import NoArgsCommand
 from expedient.clearinghouse.project.models import Project
-from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
-from expedient_geni.models import GENISliceInfo
+from expedient.clearinghouse.geni.gopenflow.models import GCFOpenFlowAggregate
+from expedient.clearinghouse.geni.models import GENISliceInfo
 try:
     from json import load
 except ImportError:
