@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from abc import abstractmethod
 
-class HandlerBase:
+class DelegateBase:
     
     """
     Handle internal exceptions to pass to the handler

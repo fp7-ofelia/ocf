@@ -11,7 +11,7 @@ from src.ambase.exceptions import UnsupportedState
 from src.ambase.exceptions import PerformOperationalStateError
 
 class GeniV3Handler:
-    
+       
     def __init__(self):
         self.__delegate= None
         self.__credential_manager = None
@@ -229,3 +229,33 @@ class GeniV3Handler:
             if requested > now:
                 expires.append(self._naiveUTC(requested))
         return min(expires)
+    def get_delegate(self):
+        return self.__delegate
+
+
+    def get_credential_manager(self):
+        return self.__credential_manager
+
+
+    def get_rspec_manager(self):
+        return self.__rspec_manager
+
+
+    def get_geni_exception_manager(self):
+        return self.__geni_exception_manager
+
+
+    def set_delegate(self, value):
+        self.__delegate = value
+
+
+    def set_credential_manager(self, value):
+        self.__credential_manager = value
+
+
+    def set_rspec_manager(self, value):
+        self.__rspec_manager = value
+
+
+    def set_geni_exception_manager(self, value):
+        self.__geni_exception_manager = value
