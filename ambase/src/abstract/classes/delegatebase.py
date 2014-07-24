@@ -22,10 +22,12 @@ class DelegateBase:
         return
 
     @abstractmethod
-    def reserve(self, slice_urn="", resources):
+    def reserve(self, slice_urn, resources):
         """
         Allocate slivers
         """
+        # If there is no value, use empty string
+        #slice_urn = slice_urn or ""
         return
     
     @abstractmethod    
