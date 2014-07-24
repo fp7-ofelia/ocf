@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from abc import abstractmethod
 
-class HandlerBase:
+class DelegateBase:
     
     __metaclass__= ABCMeta
     
