@@ -38,24 +38,24 @@
             {{ user_form.as_p }}
             {{ userprofile_form.as_p }}
             
-            <input type="submit" class="centered" value="Save info">
+            <div class="center">
+              <input type="submit" value="Save info">
+              <input type="button" id="delete_users" value="Delete" onclick="document.location='{% url users_delete curr_user.pk %}'"/>
+            </div>
             {# Loads Jinja filters for ch_extras - in order to check superuser #}
             {% load ch_extras %}
             <div class="center centered data_below_submit">
                 {% if curr_user|is_super_user %}
-                    <a href="{% url users_delete curr_user.pk %}">Delete</a> |
-                    <a href="{% url users_home %}">Manage Users</a> |
-                    <div class="tooltip" id="cert_mgmt_help">
-                        Click to manage the user's GENI Control Framework certificate.
-                        <br /><br />
-                        This certificate can be used to log into Expedient without
-                        typing a password and for creating slices through interfaces
-                        other than Expedient's Web interface. This includes the
-                        PlanetLab interface and GPO's omni client.
-                    </div>
-                {% else %}
-                    <input type="button" id="geni_user_cert_link" value="Manage certificates" onclick="document.location='{% url gcf_cert_manage curr_user.pk %}'"/>
-            {% endif %}
+                    <input type="button" id="manage_users" value="Manage users" onclick="document.location='{% url users_home %}'"/>
+                {% endif %}
+                <div class="tooltip" id="cert_mgmt_help" style="display: none;">
+                    <p>Click to manage the user's GENI Control Framework certificate.</p>
+                    This certificate can be used to log into Expedient without
+                    typing a password and for creating slices through interfaces
+                    other than Expedient's Web interface. This includes the
+                    PlanetLab interface and GPO's omni client.
+                </div>
+                <input type="button" id="geni_user_cert_link" value="Manage certificates" onclick="document.location='{% url gcf_cert_manage curr_user.pk %}'"/>
             </div>
         </form>
     </div>
