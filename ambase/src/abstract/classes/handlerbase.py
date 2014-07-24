@@ -3,10 +3,18 @@ from abc import abstractmethod
 
 class HandlerBase:
     
+    """
+    1. Handle credentials & options
+    2. Translate RSpecs to {aggregate, slice, sliver, resource} instances
+    """
+    
     __metaclass__= ABCMeta
     
     @abstractmethod
     def GetVersion(self, options=dict()):
+        """
+        Does not require credentials
+        """
         return
     
     @abstractmethod
@@ -14,7 +22,7 @@ class HandlerBase:
         return
     
     @abstractmethod    
-    def Describe(self, urns=dict(),credentials=dict(),options=dict()):
+    def Describe(self, urns=dict(), credentials=dict(),options=dict()):
         return
 
     @abstractmethod
@@ -27,7 +35,7 @@ class HandlerBase:
     
     @abstractmethod
     def Delete(self, urns=list(), credentials=list(), options=dict()):
-        return  
+        return
     
     @abstractmethod
     def PerformOperationalAction(self, urns=list(), credentials=list(), action=None, options=dict()):
@@ -35,15 +43,13 @@ class HandlerBase:
     
     @abstractmethod            
     def Status(self, urns=list(), credentials=list(), options=dict()):
-        return 
+        return
         
     @abstractmethod
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
-        return 
+        return
         
     @abstractmethod
     def ShutDown(self, urns=list(), credentials=list(), options=list()):
         return 
-        
-    
-    
+

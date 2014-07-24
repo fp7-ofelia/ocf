@@ -15,3 +15,4 @@ class RSpecManager:
     @abstractmethod
     def parse_request(self, rspec):
         return
+

@@ -9,4 +9,5 @@ class CredentialManager:
     def validate_for(self, credentials, method):
         return ""
     
-    #TODO add methods this class  
+    #TODO add methods to this class
+

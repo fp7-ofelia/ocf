@@ -3,6 +3,10 @@ from abc import abstractmethod
 
 class HandlerBase:
     
+    """
+    Handle internal exceptions to pass to the handler
+    """
+    
     __metaclass__= ABCMeta
     
     @abstractmethod
@@ -14,20 +18,26 @@ class HandlerBase:
         return
     
     @abstractmethod    
-    def describe(self, urns=dict(),credentials=dict(),options=dict()):
+    def describe(self, urns=dict()):
         return
 
     @abstractmethod
     def reserve(self, slice_urn="", resources):
+        """
+        Allocate slivers
+        """
         return
     
     @abstractmethod    
     def create(self, urns=list()):
+        """
+        Provision slivers
+        """
         return
     
     @abstractmethod
     def delete(self, urns=list()):
-        return  
+        return
     
     @abstractmethod
     def perform_operational_action(self, urns=list(), action=None, geni_besteffort=True):
@@ -35,12 +45,13 @@ class HandlerBase:
     
     @abstractmethod            
     def status(self, urns=list()):
-        return 
+        return
         
     @abstractmethod
     def renew(self, urns=list(), expiration_time=None):
-        return 
+        return
         
     @abstractmethod
     def shut_down(self, urns=list()):
-        return 
+        return
+

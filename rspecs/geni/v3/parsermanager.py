@@ -1,8 +1,8 @@
 from xml.dom.minidom import parseString
+from geni.v3.container.aggregate import Aggregate
+from geni.v3.container.resource import Resource
 from geni.v3.container.slice import Slice
 from geni.v3.container.sliver import Sliver
-from geni.v3.container.resource import Resource
-from geni.v3.container.aggregate import Aggregate
 
 class ParserManager:
     
@@ -23,7 +23,7 @@ class ParserManager:
         print "---------SLICE,", slice
         am.set_slices([slice])
         return am
-        
+    
     def parse_nodes(self, nodes):
         sliver = Sliver()
         vms = list()
@@ -39,10 +39,4 @@ class ParserManager:
             vms.append(resource)
         sliver.set_resources(vms)
         return sliver
-        
-    
-    
-            
-                            
-                
-                     
+       
