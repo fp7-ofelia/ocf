@@ -95,7 +95,7 @@ def aggregate_crud(request, agg_id=None):
                 info = aggregate.client.proxy.get_am_info()
                 aggregate.vlan_auto_assignment = info["vlan_auto_assignment"]
                 aggregate.flowspace_auto_approval = info["flowspace_auto_approval"]
-            except Exception as e:
+            except:
 #                logger.debug("Aggregate %s: could not check automatic resource assignment" % str(aggregate.name))
                 pass
             

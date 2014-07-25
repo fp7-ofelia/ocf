@@ -728,11 +728,14 @@ def get_automatic_settings(args=None):
     Get status of the automatic granting of VLANs and approval of Flowspaces
     """
     info = dict()
-    auto_approve_settings = FlowSpaceAutoApproveScript.objects.filter(admin=User.objects.filter(is_superuser=True))[0]
+    # Control missing choice here (older versions) => if setting not set, it means it was manual approval and still is
+    try:
+        auto_approve_settings = FlowSpaceAutoApproveScript.objects.filter(admin=User.objects.filter(is_superuser=True))[0]
+    except:
+        auto_approve_settings = None
+    # If "auto_approve_settings" object does not exist in models, default value ("False") will take its place
     info["vlan_auto_assignment"] = getattr(auto_approve_settings, "vlan_auto_grant", False)
-#    info["vlan_auto_assignment"] = getattr(settings, "VLAN_AUTO_ASSIGNMENT", False)
     info["flowspace_auto_approval"] = getattr(auto_approve_settings, "flowspace_auto_approval", False)
-#    info["flowspace_auto_approval"] = getattr(settings, "FLOWSPACE_AUTO_APPROVAL", False)
     return info
 
 @check_fv_set
