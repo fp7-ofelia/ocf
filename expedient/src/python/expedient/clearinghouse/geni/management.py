@@ -9,7 +9,7 @@ import logging
 from django.db.models import signals
 from expedient.clearinghouse.geni.utils import get_ch_urn, create_x509_cert, create_slice_urn,\
     create_slice_credential
-from expdient.common.federation.sfa.trust.gid import GID
+from expedient.common.federation.sfa.trust.gid import GID
 
 logger = logging.getLogger("geni.management")
 
