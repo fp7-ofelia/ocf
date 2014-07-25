@@ -12,10 +12,12 @@ printHeader "info#" "Using specific 0.8.3 upgrade module..."
 
 local TMP_PATH=$PWD
 
-cd $EXECPATH/../src/python/vt_manager/ || error "Target directory does not exists anymore?"
+# Needed for sfa-settings update
+SRC_DIR=$EXECPATH/..
+cd $SRC_DIR/src/python/vt_manager/ || error "Target directory does not exists anymore?"
 
 # SFA settings
-source $CURRENT_DIRECTORY/lib/sfa-settings
+source $EXECPATH/versions/default/install/lib/sfa-settings || error "Could not update SFA settings file..."
 
 # Syncing DB
 printHeader ">" "Syncing Database..."
