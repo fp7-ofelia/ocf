@@ -5,7 +5,7 @@ Created on Aug 19, 2010
 @author: jnaous
 '''
 
-DATABASE_ENGINE = 'mysql'
+DATABASE_ENGINE = "mysql"
 '''It is possible to use sqlite, but for many of the tests to pass, we
 need a database that allows concurrent accesses such as MySQL. See Django's
 documentation for more information on this setting.
@@ -28,3 +28,4 @@ DATABASE_HOST = ''
 
 DATABASE_PORT = ''
 '''Set to empty string for default. Not used with sqlite3.'''
+
