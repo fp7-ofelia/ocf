@@ -22,7 +22,7 @@ class UserProfile(models.Model):
     user                   = models.ForeignKey(auth.models.User, unique=True, related_name = 'profile')
     is_net_admin           = models.BooleanField("Can Confirm Flow Space Requests", default=False)
     is_clearinghouse_user  = models.BooleanField("Clearinghouse account", default=False)
-    max_priority_level     = models.IntegerField()
+    max_priority_level     = models.IntegerField(null=True) # Otherwise will complain
     supervisor             = models.ForeignKey(auth.models.User, related_name = 'supervisor')
     admin_position         = models.CharField(max_length = 1024, default="")
 
