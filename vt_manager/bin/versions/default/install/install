@@ -70,6 +70,9 @@ chown -f $APACHE_USER $SRC_DIR/src/python/vt_manager/controller/policies/utils/l
 #Django settings 
 source $CURRENT_DIRECTORY/lib/django-settings
 
+#SFA settings
+source $CURRENT_DIRECTORY/lib/sfa-settings
+
 #Django database
 source $CURRENT_DIRECTORY/lib/django-db
 
