@@ -9,8 +9,7 @@ function installSSLCertificates(){
 	local DAYS=3650
 
 	mkdir /etc/apache2/ssl.crt/ /etc/apache2/ssl.crt/ca_clients/ /etc/apache2/ssl.key/ /etc/apache2/ssl.crl || warning "Could not mkdir ssl directories under /etc/apache2 (maybe already there?). Proceeding with installation..."
-	touch /etc/apache2/ssl.crt/ca_clients.crt || warning "Could not touch ca_clients file under /etc/apache2/ssl.crt (maybe already there?). Proceeding with installation..."
-
+	
 	print ""
 	print "Generating CA certificate..."
 	print "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -25,7 +24,6 @@ function installSSLCertificates(){
 	print "Generating CA Request certificate..."
 	warning "You will be promted for several information. Please make sure CommonName (CN) is correct (correct IP or domain name). Do not enter extra information as it seems apache2/openssl is buggy?¿)"
 	print ""
-
 
 	#Request
 	openssl req  -passin pass:donotcare -new -x509 -days $DAYS -key /etc/apache2/ssl.crt/ca.key -out /etc/apache2/ssl.crt/ca.crt || error "Could not generate Request certificate."
@@ -62,6 +60,10 @@ function installSSLCertificates(){
 	mv /etc/apache2/ssl.key/server.key.insecure /etc/apache2/ssl.key/server.key|| error "Could not move keys."
 	mv /etc/apache2/ssl.key/server.crt /etc/apache2/ssl.crt/|| error "Could not move server certificate."
 	
+	# Prepare ca_clients.crt for first use
+	if [ ! -f /etc/apache2/ssl.crt/ca_clients.crt ]; then
+		cat /etc/apache2/ssl.crt/ca.crt >> /etc/apache2/ssl.crt/ca_clients.crt || warning "Could not touch ca_clients.crt file under /etc/apache2/ssl.crt (maybe already there?). Proceeding with installation..."
+	fi
 }
 
 #Routine
