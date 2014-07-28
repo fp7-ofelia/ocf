@@ -44,14 +44,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', 'expedient.clearinghouse.views.home', name='home'),
-
-#    url(r'^help/$',
-#        direct_to_template,
-#        {'template': 'help/index.html'},
-#        name='help'),
-
 #    (r'^favicon\.ico$', 'django.views.generic.simple.redirect_to', {'url': '../../static/default/img/favicon.ico'}),
-
     (r'^administration/', include('expedient.clearinghouse.administration.urls')),         
     (r'^users/', include('expedient.clearinghouse.users.urls')),
     (r'^aggregate/', include('expedient.clearinghouse.aggregate.urls')),
@@ -102,9 +95,6 @@ else:
         name='registration_complete'),
     url(r'^accounts/', include('registration.urls')),
     )
-
-
-
 
 # Add the plugin URLs:
 for plugin in getattr(settings, "UI_PLUGINS", []):
