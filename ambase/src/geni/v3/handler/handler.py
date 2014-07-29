@@ -17,6 +17,8 @@ class GeniV3Handler:
         self.__credential_manager = None
         self.__rspec_manager = None
         self.__geni_exception_manager = None
+        
+        self.__am_type = None
 
     def GetVersion(self, options=dict()):
         version=dict()
@@ -28,10 +30,13 @@ class GeniV3Handler:
         try:
             self.__credential_manager.validate_for("list_resources", credentials)
         except Exception as e:
-            return self.error_result(self.__geni_exception_manager.FORBIDDEN)
+            return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
         #Options Validation
-        required_options = set(['geni_rspec_version','type', 'version'])
+        if not options.has_key("geni_rspec_version"):
+            return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version required in options')
+
+        required_options = set(['type', 'version'])
         option_list = set(options['geni_rspec_version'].keys())
         if not required_options.issubset(option_list):
             return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
@@ -83,18 +88,18 @@ class GeniV3Handler:
         try:
             self.__credential_manager.validate_for("allocate", credentials)
         except Exception as e:
-            return self.error_result(self.__geni_exception_manager.FORBIDDEN)
+            return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
-        am = self.__rspec_manager.parse_request()
-        expiration = self.min_expiration()
+        am = self.__rspec_manager.parse_request(rspec)
+        expiration = self.get_expiration()
         try:
-            allocated_slivers = self.__delegate.allocate(slice_urn, am, expiration)    
-        except SliceAlreadyExists:
-            return self.error_result(self.__geni_exception_manager.ALREADYEXISTs)
-        except AllocationError:
-            return self.error_result(self.__geni_exception_manager.ERROR)
+            allocated_slivers = self.__delegate.reserve(slice_urn, am, expiration)    
+        except SliceAlreadyExists as e:
+            return self.error_result(self.__geni_exception_manager.ALREADYEXISTS, e)
+        except AllocationError as i:
+            return self.error_result(self.__geni_exception_manager.ERROR, i)
 
-        manifest = self.__rspec_manager.manifest_resources()
+        manifest = self.__rspec_manager.manifest_slivers(allocated_slivers)
         
         return self.success_result(manifest)
         
@@ -132,7 +137,7 @@ class GeniV3Handler:
         try:
             result = self.__delegate.delete(urns)
         except DeleteError as e:
-            self.error_result(self.__geni_exception_manager.ERROR, e, am_code)
+            self.error_result(self.__geni_exception_manager.ERROR, e)
         except ShutDown as e:
             self.error_result(self.__geni_exception_manager.UNAVAILABLE)
         
@@ -207,28 +212,33 @@ class GeniV3Handler:
         
     #Helper Functions
     
-    def success_result(self, value):
-        code_dict = dict(geni_code=0, am_type=self._am_type, am_code=0)
-        return dict(code=code_dict, value=value, output="")
-    
-    def error_result(self,code, output, am_code=None):
-        code_dict = dict(geni_code=code, am_type=self._am_type)
-        if am_code is not None:
-            code_dict['am_code'] = am_code
-        return dict(code=code_dict, value="", output=output)
-    
-    def min_expiration(self, creds, max_duration=None, requested=None):
-
+    def get_expiration(self, max_duration=None, requested=None):
+        ''' Max duration is a datetime.timedelta Object'''
         now = datetime.datetime.utcnow()
-        expires = [self._naiveUTC(c.expiration) for c in creds]
+        expires = self.__credential_manager.get_expiration_list()
         if max_duration:
             expires.append(now + max_duration)
-        if requested:
-            requested = self._naiveUTC(dateutil.parser.parse(str(requested), tzinfos=tzd))
-            # Ignore requested time in the past.
-            if requested > now:
-                expires.append(self._naiveUTC(requested))
         return min(expires)
+    
+    def success_result(self, value):
+        return self.build_property_list(0, value=value)
+    
+    def error_result(self,code, output):
+        return self.build_property_list(code, output=output)
+        
+    def build_property_list(self, geni_code, value=None, output=None):
+        result = {}
+        result["code"] = {'geni_code': geni_code}
+        # Non-zero geni_code implies error: output is required, value is optional
+        if geni_code:
+            result["output"] = output
+            if value:
+                result["value"] = value
+        # Zero geni_code implies success: value is required, output is optional
+        else:
+            result["value"] = value
+        return result
+    
     def get_delegate(self):
         return self.__delegate
 

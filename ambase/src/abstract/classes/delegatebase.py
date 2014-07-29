@@ -22,7 +22,7 @@ class DelegateBase:
         return
 
     @abstractmethod
-    def reserve(self, slice_urn, resources):
+    def reserve(self, slice_urn, am,expiration):
         """
         Allocate slivers
         """

@@ -23,7 +23,8 @@ class DeleteTest(unittest.TestCase):
         self.handler = None
         
     def test_should_delete(self):
-        pass
+        value = self.handler.Delete(None,None,{})
+        self.assertEquals(GENIExceptionManager.SUCCESS, value.get('code').get('geni_code'))
     
     def test_should_fail_when_deleting_wrong_sliver(self):
         pass

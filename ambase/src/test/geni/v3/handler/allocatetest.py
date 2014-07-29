@@ -14,29 +14,31 @@ class AllocateTest(unittest.TestCase):
     
     def setUp(self):
         self.handler = GeniV3Handler()
-        self.handler.set_credential_manager(MockCredentialManager)
-        self.handler.set_rspec_manager(MockRSpecManager)
-        self.handler.set_delegate(MockDelegate)
-        self.handler.set_geni_exception_manager(GENIExceptionManager) #is too simple to mock it
+        self.handler.set_credential_manager(MockCredentialManager())
+        self.handler.set_rspec_manager(MockRSpecManager())
+        self.handler.set_delegate(MockDelegate())
+        self.handler.set_geni_exception_manager(GENIExceptionManager()) #is too simple to mock it
         
     def tearDown(self):
         self.handler = None
         
     def test_should_allocate(self):
-        pass
+        value = self.handler.Allocate(None, None, None, {})
+        self.assertEquals(GENIExceptionManager.SUCCESS, value.get('code').get('geni_code'))
     
     def test_should_fail_when_invalid_credentials(self):
-        pass
+        self.handler.set_credential_manager(MockCredentialManager(False))
+        value = self.handler.Allocate(None, None, None, {})
+        self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get('code').get('geni_code'))
     
-    def should_catch_already_exist_error(self):
-        pass
+    def test_should_catch_already_exist_error(self):
+        self.handler.set_delegate(MockDelegate(True,True))
+        value = self.handler.Allocate(None,None,None, {})
+        self.assertEquals(GENIExceptionManager.ALREADYEXISTS, value.get('code').get('geni_code'))
     
-    def should_catch_allocation_error(self):
-        pass
-    
-    def should_send_responses_correctly_formatted(self):
-        pass
-    
-    def should_respond_error_when_error(self):
-        pass
+    def test_should_catch_allocation_error(self):
+        self.handler.set_delegate(MockDelegate(False,False))
+        value = self.handler.Allocate()
+        self.assertEquals(GENIExceptionManager.ERROR, value.get('code').get('geni_code'))
+        
     
