@@ -40,5 +40,4 @@ class AllocateTest(unittest.TestCase):
         self.handler.set_delegate(MockDelegate(False,False))
         value = self.handler.Allocate()
         self.assertEquals(GENIExceptionManager.ERROR, value.get('code').get('geni_code'))
-        
     
