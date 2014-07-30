@@ -1,6 +1,6 @@
 import ldap
 # Configuration values for LDAP
-from vt_manager.communication.sfa.sfa_config import config as CONFIG
+from vt_manager.communication.sfa.sfa_config import config
 
 class ldapManager:
 
@@ -10,6 +10,7 @@ class ldapManager:
         self.base_dn = config.LDAP_BASE_DN
         self.pw = config.LDAP_PASSWORD
         self.attrs = config.LDAP_ATTRIBUTES
+        self.timeout = 25 # Seconds (ldap.timeout >= tcp.timeout)
         self.filter = config.LDAP_FILTER
         self.keystore = config.LDAP_KEYSTORE
     
@@ -17,6 +18,8 @@ class ldapManager:
         try:
             connection = ldap.initialize(self.server)
             #connection.start_tls_s()
+            connection.set_option(ldap.OPT_NETWORK_TIMEOUT, self.timeout)
+            connection.set_option(ldap.OPT_TIMEOUT, self.timeout)
             connection.simple_bind_s(self.dn, self.pw)
             print "Successful bind to LDAP"
             return connection
