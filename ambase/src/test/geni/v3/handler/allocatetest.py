@@ -7,21 +7,21 @@ from src.geni.exceptions.manager import GENIExceptionManager
 
 
 class AllocateTest(unittest.TestCase):
-    ''' Testing Very Basic behaviour to see 
+    """ Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
-    '''
+    """
     
     def setUp(self):
         self.handler = GeniV3Handler()
         self.handler.set_credential_manager(MockCredentialManager())
         self.handler.set_rspec_manager(MockRSpecManager())
         self.handler.set_delegate(MockDelegate())
-        self.handler.set_geni_exception_manager(GENIExceptionManager()) #is too simple to mock it
-        
+        self.handler.set_geni_exception_manager(GENIExceptionManager()) # Too simple to mock
+    
     def tearDown(self):
         self.handler = None
-        
+    
     def test_should_allocate(self):
         value = self.handler.Allocate(None, None, None, {})
         self.assertEquals(GENIExceptionManager.SUCCESS, value.get('code').get('geni_code'))
@@ -40,4 +40,3 @@ class AllocateTest(unittest.TestCase):
         self.handler.set_delegate(MockDelegate(False,False))
         value = self.handler.Allocate()
         self.assertEquals(GENIExceptionManager.ERROR, value.get('code').get('geni_code'))
-    

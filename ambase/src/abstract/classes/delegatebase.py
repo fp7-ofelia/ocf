@@ -39,6 +39,9 @@ class DelegateBase:
     
     @abstractmethod
     def delete(self, urns=list()):
+        """
+        Delete slivers
+        """
         return
     
     @abstractmethod
