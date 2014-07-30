@@ -40,3 +40,6 @@ class ProvisionTest(unittest.TestCase):
         self.handler.set_delegate(MockDelegate(False))
         value = self.handler.Provision([], [], self.options)
         self.assertEquals(GENIExceptionManager.ERROR, value.get('code').get('geni_code'))
+
+if __name__ == "__main__":
+    unittest.main()

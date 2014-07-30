@@ -15,5 +15,5 @@ class MockCredentialManager(CredentialManager):
         return []
     
     def get_expiration_list(self):
-        return [0]    
+        return []    
     

@@ -4,6 +4,7 @@ from src.test.utils.mockcredentialmanager import MockCredentialManager
 from src.test.utils.mockrspecmanager import MockRSpecManager
 from src.test.utils.mockdelegate import MockDelegate
 from src.geni.exceptions.manager import GENIExceptionManager
+import datetime
 
 
 class RenewTest(unittest.TestCase):
@@ -14,26 +15,31 @@ class RenewTest(unittest.TestCase):
     
     def setUp(self):
         self.handler = GeniV3Handler()
-        self.handler.set_credential_manager(MockCredentialManager)
-        self.handler.set_rspec_manager(MockRSpecManager)
-        self.handler.set_delegate(MockDelegate)
-        self.handler.set_geni_exception_manager(GENIExceptionManager) #is too simple to mock it
+        self.handler.set_credential_manager(MockCredentialManager())
+        self.handler.set_rspec_manager(MockRSpecManager())
+        self.handler.set_delegate(MockDelegate())
+        self.handler.set_geni_exception_manager(GENIExceptionManager()) #is too simple to mock it
+        self.expiration = datetime.datetime.utcnow()
+        self.expiration = self.expiration.replace(hour = ((self.expiration.hour + 1) % 24))
         
     def tearDown(self):
         self.handler = None
         
     def test_should_renew(self):
-        pass
+        value = self.handler.Renew([], [], self.expiration, {})
+        self.assertEquals(GENIExceptionManager.SUCCESS, value.get('code').get('geni_code'))
     
     def test_should_fail_when_invalid_credentials(self):
-        pass
+        self.handler.set_credential_manager(MockCredentialManager(False))
+        value = self.handler.Renew([], [], self.expiration, {})
+        self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get('code').get('geni_code'))
     
     def test_should_fail_when_inconsistent_expiration(self):
-        pass
-    
-    def test_should_send_correctly_formatted_output(self):
-        pass
-    
-    def test_should_send_correctly_formatted_error(self):
-        pass
+        self.expiration = datetime.datetime.utcnow()
+        self.expiration = self.expiration.replace(year = 2013, month=1, day=1)
+        value = self.handler.Renew([], [], self.expiration, {})
+        self.assertEquals(GENIExceptionManager.OUTOFRANGE, value.get('code').get('geni_code'))
+        
+if __name__ == "__main__":
+    unittest.main()
         

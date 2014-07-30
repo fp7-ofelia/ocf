@@ -17,3 +17,4 @@ class GENIExceptionManager:
     EXPIRED=15
     INPORGRESS=16
     ALREADYEXISTS=17
+    OUTOFRANGE = 19

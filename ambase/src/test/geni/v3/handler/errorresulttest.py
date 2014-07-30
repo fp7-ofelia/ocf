@@ -1,7 +1,7 @@
 import unittest
 from src.geni.v3.handler.handler import GeniV3Handler
 
-class ErrorMessageTest(unittest.TestCase):
+class ErrorResultTest(unittest.TestCase):
 
     def setUp(self):
         self.handler = GeniV3Handler()

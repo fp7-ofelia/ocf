@@ -6,7 +6,7 @@ from src.test.utils.mockdelegate import MockDelegate
 from src.geni.exceptions.manager import GENIExceptionManager
 
 
-class DeleteTest(unittest.TestCase):
+class PerformOperationalActionTest(unittest.TestCase):
     ''' Testing Very Basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  

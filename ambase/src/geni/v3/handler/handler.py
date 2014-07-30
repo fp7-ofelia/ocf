@@ -17,12 +17,15 @@ class GeniV3Handler:
         self.__credential_manager = None
         self.__rspec_manager = None
         self.__geni_exception_manager = None
-        
+
         self.__am_type = None
 
     def GetVersion(self, options=dict()):
-        version=dict()
-        return self.success_result(version)
+        try:
+            value = self.__delegate.get_version()
+        except Exception as e:
+            return self.error_result(self.__geni_exception_manager.ERROR, e) 
+        return self.success_result(value)
 
     def ListResources(self, credentials=list(), options=dict()):
         
@@ -144,7 +147,6 @@ class GeniV3Handler:
         # return a list of previous slivers that have since been deleted, or may even 
         # return an error (e.g. SEARCHFAILED or `EXPIRED); details are aggregate specific.
         
-        # TODO check if the slice is shutDown (XXX WHAT FOR?)
         try:
             result = self.__delegate.delete(urns)
         # Return error codes depending on given exception
@@ -183,8 +185,11 @@ class GeniV3Handler:
             self.__credential_manager.validate_for("Status", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        
-        result = self.__delegate.status(urns)
+        try:
+            result = self.__delegate.status(urns)
+        except Exception as e:
+            return self.error_result(self.__geni_exception_manager.ERROR, e)
+            
         
         return self.success_result(result)
     
@@ -194,39 +199,43 @@ class GeniV3Handler:
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
-        expiration = self.min_expiration(credentials, self.max_lease)
+        expiration = self.get_expiration()
         now = datetime.datetime.utcnow()
         
         if 'geni_extend_alap' in options and options['geni_extend_alap']:
             if expiration < expiration_time:
                 expiration= expiration_time
         
-        if expiration > expiration:
+        if expiration < expiration_time:
             # Fail the call, the requested expiration exceeds the slice expir.
             msg = (("Out of range: Expiration %s is out of range"
                    + " (past last credential expiration of %s).")
                    % (expiration_time, expiration))
             return self.error_result(self.__geni_exception_manager.OUTOFRANGE, msg)
-        elif expiration < now:
+        elif expiration_time < now:
             msg = (("Out of range: Expiration %s is out of range"
                    + " (prior to now %s).")
                    % (expiration_time, now.isoformat()))
-
-            return self.error_result(self.__geni_exception_manager.OUT_OF_RANGE, msg)
+            print "What I am doing?"
+            return self.error_result(self.__geni_exception_manager.OUTOFRANGE, msg)
         else:
             result = self.__delegate.renew(urns, expiration)
         
         return self.success_result(result)
     
     def ShutDown(self, urns=list(), credentials=list(), options=list()):
-        return self.error_result(self.__geni_exception_manager.FORBIDDEN, output)
+        return self.error_result(self.__geni_exception_manager.FORBIDDEN, "ShutDown Method is only available for the AM administrators")
+    
+    def __get_max_expiration(self):
+        six_months = datetime.timedelta(weeks = 6 * 4) #6 months
+        return six_months
     
     # Helper functions
-    
-    def get_expiration(self, max_duration=None, requested=None):
+    def get_expiration(self):
         ''' Max duration is a datetime.timedelta Object'''
         now = datetime.datetime.utcnow()
         expires = self.__credential_manager.get_expiration_list()
+        max_duration = self.__get_max_expiration()
         if max_duration:
             expires.append(now + max_duration)
         return min(expires)
