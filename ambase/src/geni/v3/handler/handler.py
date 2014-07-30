@@ -2,22 +2,23 @@ import base64
 import zlib
 import datetime
 
+# XXX Isn't this supposed to be used this way?
+from src.abstract.classes.handlerbase import HandlerBase
 from src.ambase.exceptions import SliceAlreadyExists
 from src.ambase.exceptions import AllocationError
 from src.ambase.exceptions import ProvisionError
 from src.ambase.exceptions import DeleteError
 from src.ambase.exceptions import ShutDown
-from src.ambase.exceptions import UnsupportedState
+#from src.ambase.exceptions import UnsupportedState
 from src.ambase.exceptions import PerformOperationalStateError
 
-class GeniV3Handler:
+class GeniV3Handler(HandlerBase):
        
     def __init__(self):
         self.__delegate= None
         self.__credential_manager = None
         self.__rspec_manager = None
         self.__geni_exception_manager = None
-
         self.__am_type = None
 
     def GetVersion(self, options=dict()):
@@ -28,7 +29,6 @@ class GeniV3Handler:
         return self.success_result(value)
 
     def ListResources(self, credentials=list(), options=dict()):
-        
         # Credential validation
         try:
             self.__credential_manager.validate_for("list_resources", credentials)
@@ -62,7 +62,6 @@ class GeniV3Handler:
         return self.success_result(output)
         
     def Describe(self, urns=dict(),credentials=dict(),options=dict()):
-        
         # Credential validation
         try:
             self.__credential_manager.validate_for("describe", credentials)
