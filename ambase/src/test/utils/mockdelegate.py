@@ -1,5 +1,6 @@
 from src.abstract.classes.delegatebase import DelegateBase
-from src.ambase.exceptions import AllocationError, DeleteError
+from src.ambase.exceptions import AllocationError, DeleteError,\
+    PerformOperationalStateError, ProvisionError
 from src.ambase.exceptions import SliceAlreadyExists
 
 
@@ -41,7 +42,7 @@ class MockDelegate(DelegateBase):
         if self.success_mode:
             return True
         else:
-            raise Exception("Mock error")
+            raise ProvisionError("Mock error")
     
     def delete(self, urns=list()):
         if self.success_mode:
@@ -53,7 +54,7 @@ class MockDelegate(DelegateBase):
         if self.success_mode:
             return True
         else:
-            raise Exception("Mock error")
+            raise PerformOperationalStateError("Mock error")
     
     def status(self, urns=list()):
         if self.success_mode:

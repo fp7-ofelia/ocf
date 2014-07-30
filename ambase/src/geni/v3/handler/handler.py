@@ -65,9 +65,10 @@ class GeniV3Handler:
             self.__credential_manager.validate_for("describe", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        
+        if not options.get('geni_rspec_version'):
+            return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
         # Options validation
-        required_options = set(['geni_rspec_version','type', 'version'])
+        required_options = set(['type', 'version'])
         option_list = set(options['geni_rspec_version'].keys())
         if not required_options.issubset(option_list):
             return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
@@ -109,20 +110,22 @@ class GeniV3Handler:
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
          
-        expiration = self.min_expiration()
+        expiration = self.get_expiration()
         
+        if not options.get('geni_rspec_version'):
+            return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
         # Options validation
-        required_options = set(['geni_rspec_version','type', 'version'])
+        required_options = set(['type', 'version'])
         option_list = set(options['geni_rspec_version'].keys())
         if not required_options.issubset(option_list):
             return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
 
         try:
-            slivers = self.__delegate.provision(urns)
+            slivers = self.__delegate.create(urns)
         except ProvisionError as e:
-            self.error_result(self.__geni_exception_manager.ERROR, e)
+            return self.error_result(self.__geni_exception_manager.ERROR, e)
         
-        manifest = self.__rspec_manager.manifest_rspec(slivers)
+        manifest = self.__rspec_manager.manifest_slivers(slivers)
         
         return self.success_result(manifest)
     
@@ -161,19 +164,19 @@ class GeniV3Handler:
         
         actions = ['geni_start', 'geni_restart', 'geni_stop']
         if action not in actions:
-            return self.error_result(self.__geni_exception_manager.UNSUPPORTED, output)
+            return self.error_result(self.__geni_exception_manager.UNSUPPORTED, "Unsupported Action")
         
-        if options.get('geni_best_effor'):
+        if options.get('geni_best_effort'):
             best_effort = True
         else:
             best_effort = False
         
         try:
             result = self.__delegate.perform_operational_action(urns, action, best_effort)
-        except UnsupportedState as e:
-            return self.error_result(self.__geni_exception_manager.UNSUPPORTED, e)
         except PerformOperationalStateError as e:
-            return self.error_result(self.__geni_exception_manager.UNSUPPORTED, e)
+            return self.error_result(self.__geni_exception_manager.BADARGS, e)
+        
+        return self.success_result(action)
      
     def Status(self, urns=list(), credentials=list(), options=dict()):
         try:

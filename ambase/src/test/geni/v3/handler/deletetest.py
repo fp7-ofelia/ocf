@@ -35,8 +35,6 @@ class AllocateTest(unittest.TestCase):
         self.handler.set_delegate(MockDelegate(False))
         value = self.handler.Delete(None, None, {})
         self.assertEquals(GENIExceptionManager.ERROR, value.get('code').get('geni_code'))
-    
-    def test_should_send_correctly_formatted_output(self):
-        self.handler.set_delegate(MockDelegate(True))
-        value = self.handler.Delete(None, None, {})
-        self.assertEquals(GENIExceptionManager.SUCCESS, value.get('code').get('geni_code'))
+
+if __name__ == "__main__":
+    unittest.main()    

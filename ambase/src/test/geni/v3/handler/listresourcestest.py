@@ -43,7 +43,6 @@ class ListResourcesTest(unittest.TestCase):
         value = self.handler.ListResources(None, self.options)
         self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get('code').get('geni_code'))
         
-    
 if __name__ == "__main__":
     unittest.main()
 
