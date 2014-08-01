@@ -1,7 +1,7 @@
 import unittest
-from federation.rspecs.src.geni.test.expected_outputs import DEFAULT_AM_OUTPUT
+from federation.rspecs.test.geni.v3.expected_outputs import DEFAULT_AM_OUTPUT
 from federation.rspecs.src.geni.v3.parsermanager import ParserManager
-from federation.rspecs.src.geni.test.examples import REQUEST_EXAMPLE
+from federation.rspecs.test.geni.v3.examples import REQUEST_EXAMPLE
 
 class requestTest(unittest.TestCase):
     

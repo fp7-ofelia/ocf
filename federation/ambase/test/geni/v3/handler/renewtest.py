@@ -1,17 +1,17 @@
-import unittest
-from federation.ambase.src.geni.v3.handler.handler import GeniV3Handler
-from federation.ambase.src.test.utils.mockcredentialmanager import MockCredentialManager
-from federation.ambase.src.test.utils.mockrspecmanager import MockRSpecManager
-from federation.ambase.src.test.utils.mockdelegate import MockDelegate
 from federation.ambase.src.geni.exceptions.manager import GENIExceptionManager
+from federation.ambase.src.geni.v3.handler.handler import GeniV3Handler
+from federation.ambase.test.utils.mockcredentialmanager import MockCredentialManager
+from federation.ambase.test.utils.mockdelegate import MockDelegate
+from federation.ambase.test.utils.mockrspecmanager import MockRSpecManager
 import datetime
+import unittest
 
 
 class RenewTest(unittest.TestCase):
-    ''' Testing Very Basic behaviour to see 
+    """ Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
-    '''
+    """
     
     def setUp(self):
         self.handler = GeniV3Handler()

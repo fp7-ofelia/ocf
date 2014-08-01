@@ -1,8 +1,8 @@
 import unittest
 from federation.rspecs.src.geni.v3.container.resource import Resource
 from federation.rspecs.src.geni.v3.craftermanager import CrafterRSpecManager
-from federation.rspecs.src.geni.test.examples import RAW_NODES
-from federation.rspecs.src.geni.test.examples import AD_RSPEC
+from federation.rspecs.test.geni.v3.examples import RAW_NODES
+from federation.rspecs.test.geni.v3.examples import AD_RSPEC
 
 class advertisementTest(unittest.TestCase):
     

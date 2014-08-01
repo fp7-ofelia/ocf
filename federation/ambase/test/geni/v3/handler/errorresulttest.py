@@ -1,5 +1,6 @@
-import unittest
 from federation.ambase.src.geni.v3.handler.handler import GeniV3Handler
+import unittest
+
 
 class ErrorResultTest(unittest.TestCase):
 

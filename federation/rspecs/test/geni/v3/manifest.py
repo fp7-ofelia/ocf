@@ -3,8 +3,8 @@ from federation.rspecs.src.geni.v3.container.resource import Resource
 from federation.rspecs.src.geni.v3.container.sliver import Sliver
 from federation.rspecs.src.geni.v3.container.slice import Slice
 from federation.rspecs.src.geni.v3.craftermanager import CrafterRSpecManager
-from federation.rspecs.src.geni.test.examples import RAW_MANIFEST
-from federation.rspecs.src.geni.test.examples import FULL_MANIFEST
+from federation.rspecs.test.geni.v3.examples import RAW_MANIFEST
+from federation.rspecs.test.geni.v3.examples import FULL_MANIFEST
 
 class ManifestTests(unittest.TestCase):
     
