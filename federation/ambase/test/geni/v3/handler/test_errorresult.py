@@ -1,9 +1,9 @@
 from federation.ambase.src.geni.v3.handler.handler import GeniV3Handler
-import unittest
+from federation.ambase.test.utils import testcase
 
 
-class ErrorResultTest(unittest.TestCase):
-
+class TestErrorResult(testcase.TestCase):
+    
     def setUp(self):
         self.handler = GeniV3Handler()
         self.message = "This was NOT OK"
@@ -13,6 +13,7 @@ class ErrorResultTest(unittest.TestCase):
              
     def test_should_return_success_result(self):
         self.assertEqual(self.expected, self.handler.error_result(self.code, self.message))
-        
+    
 if __name__ == "__main__":
-    unittest.main()
+    # Allows to run in stand-alone mode
+    testcase.main()

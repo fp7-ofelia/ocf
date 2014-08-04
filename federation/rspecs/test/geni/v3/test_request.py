@@ -1,9 +1,10 @@
-import unittest
-from federation.rspecs.test.geni.v3.expected_outputs import DEFAULT_AM_OUTPUT
 from federation.rspecs.src.geni.v3.parsermanager import ParserManager
 from federation.rspecs.test.geni.v3.examples import REQUEST_EXAMPLE
+from federation.rspecs.test.utils import testcase
+from federation.rspecs.test.geni.v3.expected_outputs import DEFAULT_AM_OUTPUT
 
-class requestTest(unittest.TestCase):
+
+class TestRequest(testcase.TestCase):
     
     def setUp(self):
         self.manager = ParserManager()
@@ -13,11 +14,7 @@ class requestTest(unittest.TestCase):
         am = self.manager.parse_request_rspec("MYURN", self.request)
         print "-------",am
         self.assertEquals(DEFAULT_AM_OUTPUT, am)
-        
-        
-        
-if __name__== "__main__":
-    unittest.main()
-        
-        
-        
+    
+if __name__ == '__main__':
+    # Allows to run in stand-alone mode
+    testcase.main()

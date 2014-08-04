@@ -1,12 +1,13 @@
-import unittest
 from federation.rspecs.src.geni.v3.container.resource import Resource
 from federation.rspecs.src.geni.v3.container.sliver import Sliver
 from federation.rspecs.src.geni.v3.container.slice import Slice
 from federation.rspecs.src.geni.v3.craftermanager import CrafterRSpecManager
 from federation.rspecs.test.geni.v3.examples import RAW_MANIFEST
 from federation.rspecs.test.geni.v3.examples import FULL_MANIFEST
+from federation.rspecs.test.utils import testcase
 
-class ManifestTests(unittest.TestCase):
+
+class TestManifest(testcase.TestCase):
     
     def setUp(self):
         resources = self.set_up_resources()
@@ -22,7 +23,6 @@ class ManifestTests(unittest.TestCase):
             resource.set_exclusive(True)
             resource.set_urn("urn:publicID:ResourceURN%d" %i)
             resources.append(resource)
-            
         return resources
     
     def set_up_slivers(self, resources):
@@ -44,16 +44,16 @@ class ManifestTests(unittest.TestCase):
     
     def test_raw_manifest(self):
         self.assertEquals(self.format_rspec(RAW_MANIFEST), self.format_rspec(self.manager.manifest_slice(self.slice)))
-
+    
     def test_full_manifest(self):
         full_manifest = self.manager.manifest_header()
         full_manifest += self.manager.manifest_slice(self.slice)
         full_manifest += self.manager.manifest_footer()
         self.assertEquals(self.format_rspec(FULL_MANIFEST),self.format_rspec(full_manifest))
-        
+    
     def format_rspec(self, string):
         return string.replace(" ", "").replace("\n","")
-        
-if __name__ == "__main__":
-    unittest.main()
     
+if __name__ == '__main__':
+    # Allows to run in stand-alone mode
+    testcase.main()

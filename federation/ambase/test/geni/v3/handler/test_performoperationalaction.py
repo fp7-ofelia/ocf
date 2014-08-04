@@ -1,12 +1,12 @@
 from federation.ambase.src.geni.exceptions.manager import GENIExceptionManager
 from federation.ambase.src.geni.v3.handler.handler import GeniV3Handler
+from federation.ambase.test.utils import testcase
 from federation.ambase.test.utils.mockcredentialmanager import MockCredentialManager
 from federation.ambase.test.utils.mockdelegate import MockDelegate
 from federation.ambase.test.utils.mockrspecmanager import MockRSpecManager
-import unittest
 
 
-class PerformOperationalActionTest(unittest.TestCase):
+class TestPerformOperationalAction(testcase.TestCase):
     """ Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
@@ -50,7 +50,5 @@ class PerformOperationalActionTest(unittest.TestCase):
         self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get('code').get('geni_code'))
     
 if __name__ == "__main__":
-    unittest.main()
-    
-    
-        
+    # Allows to run in stand-alone mode
+    testcase.main()
