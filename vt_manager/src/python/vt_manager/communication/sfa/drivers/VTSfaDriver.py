@@ -53,7 +53,7 @@ class VTSfaDriver:
 			elif action == 'delete_slice':
 				self.shell.DeleteSlice(vm['node-id'],vm['vm-id'])
 				try:
-					logging.error("LDAP: deleting project in LDAP of SSH gateway")
+					logging.info("LDAP: deleting project in LDAP of SSH gateway")
 					session = ldapManager()
 					con = session.bind()
 					if con:
@@ -101,10 +101,10 @@ class VTSfaDriver:
 				#created_vms.append({'vm-name':vm['name'],'vm-ip':ip,'vm-state':'ongoing','slice-name':slice_leaf,'node-name':node.name})
 		#add ssh keys to ldap of ssh gateway
 		if len(nodes):
-			logging.warning("create_slice > Connecting to LDAP")
+			logging.info("create_slice > Connecting to LDAP")
 			session = ldapManager()
 			con = session.bind()
-			logging.warning("create_slice > Connected to LDAP. Connection: %s" % str(con))
+			logging.info("create_slice > Connected to LDAP. Connection: %s" % str(con))
 			if con:
 				logging.warning("LDAP: trying to create the following users: %s" % str(users))
 				for user in users:
