@@ -241,9 +241,11 @@ class Tests(SettingsTestCase):
                     slice=slice, resource=p))
                 kw = {}
                 for k, r in fs.items():
-                    if r[0]: kw[k+"_start"] = r[0]
-                    if r[1]: kw[k+"_end"] = r[1]
-                    
+                    if r[0]:
+                        kw[k+"_start"] = r[0]
+                    if r[1]:
+                        kw[k+"_end"] = r[1]
+            
             rule = FlowSpaceRule.objects.create(**kw)
             for s in slivers:
                 rule.slivers.add(s)

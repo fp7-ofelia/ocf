@@ -259,7 +259,8 @@ def sshkey_file(request, slice_id, type):
     data = getattr(slice.geni_slice_info, type)
 
     filename = "id_rsa"
-    if type == "ssh_public_key": filename = filename + ".pub"
+    if type == "ssh_public_key":
+        filename = filename + ".pub"
 
     response = HttpResponse(data, mimetype="application/x-download")
     response["Content-Disposition"] = 'attachment;filename=%s' % filename

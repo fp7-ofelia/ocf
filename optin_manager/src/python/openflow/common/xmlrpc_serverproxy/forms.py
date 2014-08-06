@@ -24,7 +24,8 @@ explicitly specify the port. e.g. https://hostname:portnum/xmlrpc/xmlrpc/")
             raise forms.ValidationError("Invalid port number 0.") 
         u = parsed.geturl()
         logger.debug("parsed url: %s" % u)
-        if not u.endswith("/"): u += "/"
+        if not u.endswith("/"):
+            u += "/"
         return u
 
     def clean(self):
@@ -32,7 +33,8 @@ explicitly specify the port. e.g. https://hostname:portnum/xmlrpc/xmlrpc/")
         if self._errors:
             return self.cleaned_data
         d = dict(self.cleaned_data)
-        if "password2" in d: del d["password2"]
+        if "password2" in d:
+            del d["password2"]
         p = self._meta.model(**d)
         avail, msg = p.is_available(get_info=True)
         if not avail:

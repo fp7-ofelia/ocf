@@ -10,7 +10,8 @@ register = template.Library()
 def get_links(trail):
     ret = ""
     for name, url in trail:
-        if ret: ret += ' &gt; '
+        if ret:
+            ret += ' &gt; '
         ret += '<a href="%s">%s</a>' % (url, name)
     return ret
 

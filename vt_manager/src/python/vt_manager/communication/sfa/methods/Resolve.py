@@ -33,8 +33,10 @@ class Resolve(Method):
     def call(self, xrns, creds, options={}):
         # use details=False by default, only when explicitly specified do we want 
         # to mess with the testbed details
-        if 'details' in options: details=options['details']
-        else:                    details=False
+        if 'details' in options:
+            details=options['details']
+        else:
+            details=False
         type = None
         if not isinstance(xrns, types.ListType):
             type = Xrn(xrns).get_type()

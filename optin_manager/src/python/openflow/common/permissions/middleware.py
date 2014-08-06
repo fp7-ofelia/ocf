@@ -30,7 +30,8 @@ class PermissionMiddleware(object):
             # Make sure there's a view for the permission before redirecting
             view = ExpedientPermission.objects.filter(
                 name=exception.perm_name).values_list("view", flat=True)
-            if not view[0]: return False
+            if not view[0]:
+                return False
             
             if isinstance(exception.user, PermissionUser):
                 user = exception.user.user

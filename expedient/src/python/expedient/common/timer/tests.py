@@ -29,12 +29,18 @@ def jobx_call(i):
     times["job%s_time" % i] = datetime.now()
     logger.debug("Timer %s called." % i)
 
-def job1_call(): jobx_call(1)
-def job2_call(): jobx_call(2)
-def job3_call(): jobx_call(3)
-def job4_call(): jobx_call(4)
-def job5_call(): jobx_call(5)
-def job6_call(): jobx_call(6)
+def job1_call():
+    jobx_call(1)
+def job2_call():
+    jobx_call(2)
+def job3_call():
+    jobx_call(3)
+def job4_call():
+    jobx_call(4)
+def job5_call():
+    jobx_call(5)
+def job6_call():
+    jobx_call(6)
 
 Job.objects.schedule_post_syncdb(4, job5_call)
 Job.objects.schedule_post_syncdb(4, job6_call)

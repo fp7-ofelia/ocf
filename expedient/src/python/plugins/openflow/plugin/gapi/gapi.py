@@ -24,7 +24,8 @@ import dateutil
 
 logger = logging.getLogger("openflow.plugin.gapi.gapi")
 
-class OpenFlowGAPIException(Exception): pass
+class OpenFlowGAPIException(Exception):
+    pass
 
 class DuplicateSliceNameException(OpenFlowGAPIException):
     def __init__(self, slice_name):

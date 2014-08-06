@@ -237,7 +237,8 @@ class OpenFlowStaticConnectionForm(forms.Form):
                 dst_iface = self.cleaned_data["remote_interface"],
             ),
         )
-        if not created: cnxn1 = None
+        if not created:
+            cnxn1 = None
         
         cnxn2, created = create_or_update(
             OpenFlowConnection,
@@ -246,7 +247,8 @@ class OpenFlowStaticConnectionForm(forms.Form):
                 src_iface = self.cleaned_data["remote_interface"],
             ),
         )
-        if not created: cnxn2 = None
+        if not created:
+            cnxn2 = None
         
         return (cnxn1, cnxn2)
 

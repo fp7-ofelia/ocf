@@ -28,17 +28,20 @@ class Intervals(object):
         @param iend: end of interval
         @return: True if [istart,iend] is a completely contained in the set of intervals.
         '''
-        if (istart > iend): return False
+        if (istart > iend):
+            return False
         self.intervals.sort(lambda x,y:cmp(x[0],y[0]))
         current_point = istart
         while (True):
             actives = filter(lambda x:x[0] <= current_point and
                               x[1] >= current_point,self.intervals)
-            if (len(actives) == 0): return False
+            if (len(actives) == 0):
+                return False
             prev_point = current_point
             current_point = max(actives,key=lambda x:x[1])
             current_point = current_point[1]
-            if (current_point >= iend): return True
+            if (current_point >= iend):
+                return True
             if (prev_point == current_point): 
                 current_point = prev_point + 1
 
@@ -68,11 +71,13 @@ class Intervals(object):
             if len(actives) == 0:
                 break
             indices.append(map(lambda x: x[2],actives))
-            if (current_point >= iend): break
+            if (current_point >= iend):
+                break
             current_point = min(
                     filter(lambda x: x>current_point,self.points),
                                 )   
-            if (current_point >= iend): break
+            if (current_point >= iend):
+                break
         return indices
 
 
@@ -326,11 +331,13 @@ def singlefs_is_subset_of(singleFS, multiFS):
                                     getattr(multiFS[index],"%s_e"%field),index )
             if i.contain(field_s, field_e):
                 result = i.get_intersections(field_s, field_e)
-                for elem in result: new_intersections.append(elem)
+                for elem in result:
+                    new_intersections.append(elem)
             else:
                 return False
         potential_intersections = new_intersections
-        if len(potential_intersections)==0: return False
+        if len(potential_intersections)==0:
+            return False
     return True
             
 def multifs_is_subset_of(multifs1,multifs2):

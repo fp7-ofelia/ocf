@@ -99,7 +99,8 @@ def _add_geni_slice_info(sender, instance=None, created=None, **kwargs):
     
     Mainly so that all slices have a slice_urn associated.
     """
-    if created: GENISliceInfo.objects.create(slice=instance)
+    if created:
+        GENISliceInfo.objects.create(slice=instance)
     
 signals.post_save.connect(_add_geni_slice_info, Slice)
 
@@ -110,7 +111,8 @@ class GENIAggregate(Aggregate):
     """
     url = models.CharField(max_length=200)
     
-    class URLNotDefined(Exception): pass
+    class URLNotDefined(Exception):
+        pass
     
     def _get_client(self, cert_fname, key_fname):
         try:

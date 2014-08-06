@@ -4,13 +4,15 @@
 from django.db import models
 from expedient.common.extendable.models import Extendable
 
-class OtherModel(models.Model): pass
+class OtherModel(models.Model):
+    pass
 
 class OtherModelRel(models.Model):
     child = models.ForeignKey("TestChild")
     other = models.ForeignKey(OtherModel)
 
-class YetAnotherModel(models.Model): pass
+class YetAnotherModel(models.Model):
+    pass
 
 class YetAnotherModelRel(models.Model):
     child = models.ForeignKey("TestOtherChild")

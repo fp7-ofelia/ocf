@@ -44,7 +44,8 @@ def wait_for_servers(urls, timeout):
     for u in urls:
         parsed = urlparse.urlparse(u.lower(), "https")
         netloc = parsed.hostname
-        if parsed.port: netloc = "%s:%s" % (netloc, parsed.port)
+        if parsed.port:
+            netloc = "%s:%s" % (netloc, parsed.port)
         if parsed.scheme == "http":
             cnxn = httplib.HTTPConnection(netloc)
         elif parsed.scheme == "https":

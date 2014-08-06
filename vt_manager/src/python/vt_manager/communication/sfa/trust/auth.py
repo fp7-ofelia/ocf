@@ -302,6 +302,7 @@ class Auth:
                 tmp_cred = Credential(string=cred)
                 if tmp_cred.get_gid_caller().get_hrn() in [caller_hrn_list]:
                     creds.append(cred)
-            except: pass
+            except:
+                pass
         return creds
 

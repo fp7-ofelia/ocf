@@ -20,5 +20,6 @@ class RegexMatcher(object):
     def matches(self, path):
         for p in self.patterns:
             m = p.match(path)
-            if m: return m
-    
+            if m:
+                return m
+

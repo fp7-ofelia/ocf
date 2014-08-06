@@ -280,7 +280,8 @@ class Keypair:
         result=""
         result += "KEYPAIR: pubkey=%40s..."%self.get_pubkey_string()
         filename=self.get_filename()
-        if filename: result += "Filename %s\n"%filename
+        if filename:
+            result += "Filename %s\n"%filename
         return result
 
 ##
@@ -767,7 +768,8 @@ class Certificate:
         result += "CERTIFICATE for %s\n"%self.get_printable_subject()
         result += "Issued by %s\n"%self.get_issuer()
         filename=self.get_filename()
-        if filename: result += "Filename %s\n"%filename
+        if filename:
+            result += "Filename %s\n"%filename
         if show_extensions:
             all_datas=self.get_all_datas()
             result += " has %d extensions/data attached"%len(all_datas)

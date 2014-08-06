@@ -55,9 +55,11 @@ def generic_crud(request, obj_id, model, template, redirect,
         form = form_class(request.POST, instance=instance, **extra_form_params)
         if form.is_valid():
             instance = form.save(commit=False)
-            if pre_save: pre_save(instance, obj_id == None)
+            if pre_save:
+                pre_save(instance, obj_id == None)
             instance.save()
-            if post_save: post_save(instance, obj_id == None)
+            if post_save:
+                post_save(instance, obj_id == None)
             form.save_m2m()
             if success_msg:
                 DatedMessage.objects.post_message_to_user(
@@ -69,7 +71,8 @@ def generic_crud(request, obj_id, model, template, redirect,
 
     context = {"form": form}
     context.update(extra_context)
-    if obj_id != None: context[template_object_name] = instance
+    if obj_id != None:
+        context[template_object_name] = instance
 
     return simple.direct_to_template(
         request,

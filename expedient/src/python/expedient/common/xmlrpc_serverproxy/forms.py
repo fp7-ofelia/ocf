@@ -24,7 +24,8 @@ explicitly specify the port. e.g. https://hostname:portnum/xmlrpc/xmlrpc/")
             raise forms.ValidationError("Invalid port number 0.") 
         u = parsed.geturl()
         logger.debug("parsed url: %s" % u)
-        if not u.endswith("/"): u += "/"
+        if not u.endswith("/"):
+            u += "/"
         return u
 
     # Validation and so on
@@ -39,8 +40,10 @@ explicitly specify the port. e.g. https://hostname:portnum/xmlrpc/xmlrpc/")
             raise forms.ValidationError("Passwords don't match")
         # Remove fields that are not in the Model to avoid any mismatch when synchronizing
         d = dict(self.cleaned_data)
-        if "password2" in d: del d["password2"]
-        if "confirm_password" in d: del d["confirm_password"]
+        if "password2" in d:
+            del d["password2"]
+        if "confirm_password" in d:
+            del d["confirm_password"]
         p = self._meta.model(**d)
         avail, msg = p.is_available(get_info=True)
         if not avail:

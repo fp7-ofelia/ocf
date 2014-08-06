@@ -236,9 +236,11 @@ class TestObjectPermissions(test_mgr.SettingsTestCase):
             d["user_kw"] = self.u2
             self.assertRaises(PermissionDenied, obj.get_val_x2, obj)
             d["user_kw"] = self.o3
-            if obj != self.o3: self.assertRaises(PermissionDenied, obj.get_val_x3_other_val)
+            if obj != self.o3:
+                self.assertRaises(PermissionDenied, obj.get_val_x3_other_val)
             d["test_kw"] = self.objs[1]
-            if obj != self.objs[1]: self.assertRaises(PermissionDenied, obj.get_val_x4)
+            if obj != self.objs[1]:
+                self.assertRaises(PermissionDenied, obj.get_val_x4)
             d["user_kw"] = self.u2
             self.assertRaises(PermissionDenied, obj.get_val_x5_username, obj)
 

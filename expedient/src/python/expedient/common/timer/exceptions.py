@@ -5,7 +5,8 @@ Created on Feb 16, 2011
 '''
 from expedient.common.timer.utils import stringify_func
 
-class TimerException(Exception): pass
+class TimerException(Exception):
+    pass
 
 class JobAlreadyScheduled(TimerException):
     """Raised when a job is scheduled twice.
