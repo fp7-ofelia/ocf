@@ -74,7 +74,8 @@ class SSHServer(Resource):
     def __unicode__(self):
         return u"SSH server at IP %s" % self.ip_address
         
-class SSHServerSliver(Sliver): pass
+class SSHServerSliver(Sliver):
+    pass
 
 class SSHSliceInfo(models.Model):
     slice = models.OneToOneField(Slice)

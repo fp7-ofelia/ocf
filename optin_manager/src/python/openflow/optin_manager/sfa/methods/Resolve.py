@@ -1,11 +1,10 @@
+from openflow.optin_manager.sfa.trust.credential import Credential
+from openflow.optin_manager.sfa.util.method import Method
+from openflow.optin_manager.sfa.util.parameter import Parameter, Mixed
+from openflow.optin_manager.sfa.util.xrn import Xrn, urn_to_hrn
+
 import types
 
-from openflow.optin_manager.sfa.util.xrn import Xrn, urn_to_hrn
-from openflow.optin_manager.sfa.util.method import Method
-
-from openflow.optin_manager.sfa.trust.credential import Credential
-
-from openflow.optin_manager.sfa.util.parameter import Parameter, Mixed
 
 class Resolve(Method):
     """
@@ -33,8 +32,10 @@ class Resolve(Method):
     def call(self, xrns, creds, options={}):
         # use details=False by default, only when explicitly specified do we want 
         # to mess with the testbed details
-        if 'details' in options: details=options['details']
-        else:                    details=False
+        if 'details' in options:
+            details=options['details']
+        else:
+            details=False
         type = None
         if not isinstance(xrns, types.ListType):
             type = Xrn(xrns).get_type()

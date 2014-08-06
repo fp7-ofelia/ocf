@@ -24,7 +24,8 @@ class DummyAggregate(Aggregate):
             aggregate="%s" % self,
         )
 
-class DummyResource(Resource): pass
+class DummyResource(Resource):
+    pass
 
 class DummySliceEvent(models.Model):
     slice = models.TextField()

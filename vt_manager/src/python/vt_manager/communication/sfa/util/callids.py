@@ -70,7 +70,8 @@ class _call_ids_impl (dict):
             del self[k]
         if debug:
             logger.debug("AFTER PURGE")
-            for (k,v) in self.iteritems(): logger.debug("%s -> %s"%(k,time.strftime("%H:%M:%S",time.localtime(v))))
+            for (k,v) in self.iteritems():
+                logger.debug("%s -> %s"%(k,time.strftime("%H:%M:%S",time.localtime(v))))
         
 def Callids ():
     if not _call_ids_impl._instance:

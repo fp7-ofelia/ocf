@@ -33,7 +33,8 @@ def get_authority(hrn):
     return Xrn(hrn).get_authority_hrn()
 
 def urn_to_hrn(urn):
-    xrn=Xrn(urn); return (xrn.hrn, xrn.type)
+    xrn=Xrn(urn)
+    return (xrn.hrn, xrn.type)
 
 def hrn_to_urn(hrn,type):
     return Xrn(hrn, type=type).urn
@@ -167,10 +168,17 @@ class Xrn:
         result += ">"
         return result
 
-    def get_urn(self): return self.urn
-    def get_hrn(self): return self.hrn
-    def get_type(self): return self.type
-    def get_hrn_type(self): return (self.hrn, self.type)
+    def get_urn(self):
+        return self.urn
+
+    def get_hrn(self):
+        return self.hrn
+
+    def get_type(self):
+        return self.type
+
+    def get_hrn_type(self):
+        return (self.hrn, self.type)
 
     def _normalize(self):
         if self.hrn is None:

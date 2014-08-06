@@ -27,7 +27,8 @@ class ExtendableMeta(ModelBase):
         to save the content_object.'''
         
         # get the inner Extend class
-        class Extend: pass
+        class Extend:
+            pass
         extend = attrs.setdefault('Extend', Extend)
 
         # Only do this for subclasses of Extendable

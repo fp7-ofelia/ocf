@@ -26,11 +26,21 @@ import re
 from openflow.optin_manager.sfa.util.faults import SfaAPIError
 
 # for convenience and smoother translation - we should get rid of these functions eventually 
-def get_leaf(hrn): return Xrn(hrn).get_leaf()
-def get_authority(hrn): return Xrn(hrn).get_authority_hrn()
-def urn_to_hrn(urn): xrn=Xrn(urn); return (xrn.hrn, xrn.type)
-def hrn_to_urn(hrn,type): return Xrn(hrn, type=type).urn
-def hrn_authfor_hrn(parenthrn, hrn): return Xrn.hrn_is_auth_for_hrn(parenthrn, hrn)
+def get_leaf(hrn):
+    return Xrn(hrn).get_leaf()
+
+def get_authority(hrn):
+    return Xrn(hrn).get_authority_hrn()
+
+def urn_to_hrn(urn):
+    xrn=Xrn(urn)
+    return (xrn.hrn, xrn.type)
+
+def hrn_to_urn(hrn,type):
+    return Xrn(hrn, type=type).urn
+
+def hrn_authfor_hrn(parenthrn, hrn):
+    return Xrn.hrn_is_auth_for_hrn(parenthrn, hrn)
 
 class Xrn:
 
@@ -44,23 +54,28 @@ class Xrn:
 
     # e.g. hrn_leaf ('a\.b.c.d') -> 'd'
     @staticmethod
-    def hrn_leaf(hrn): return Xrn.hrn_split(hrn)[-1]
+    def hrn_leaf(hrn):
+        return Xrn.hrn_split(hrn)[-1]
 
     # e.g. hrn_auth_list ('a\.b.c.d') -> ['a\.b', 'c']
     @staticmethod
-    def hrn_auth_list(hrn): return Xrn.hrn_split(hrn)[0:-1]
+    def hrn_auth_list(hrn):
+        return Xrn.hrn_split(hrn)[0:-1]
     
     # e.g. hrn_auth ('a\.b.c.d') -> 'a\.b.c'
     @staticmethod
-    def hrn_auth(hrn): return '.'.join(Xrn.hrn_auth_list(hrn))
+    def hrn_auth(hrn):
+        return '.'.join(Xrn.hrn_auth_list(hrn))
     
     # e.g. escape ('a.b') -> 'a\.b'
     @staticmethod
-    def escape(token): return re.sub(r'([^\\])\.', r'\1\.', token)
+    def escape(token):
+        return re.sub(r'([^\\])\.', r'\1\.', token)
 
     # e.g. unescape ('a\.b') -> 'a.b'
     @staticmethod
-    def unescape(token): return token.replace('\\.','.')
+    def unescape(token):
+        return token.replace('\\.','.')
 
     # Return the HRN authority chain from top to bottom.
     # e.g. hrn_auth_chain('a\.b.c.d') -> ['a\.b', 'a\.b.c']
@@ -99,12 +114,18 @@ class Xrn:
 
     @staticmethod
     def urn_full (urn):
-        if Xrn.is_urn(urn): return urn
-        else: return Xrn.URN_PREFIX+urn
+        if Xrn.is_urn(urn):
+            return urn
+        else:
+            return Xrn.URN_PREFIX+urn
+
     @staticmethod
     def urn_meaningful (urn):
-        if Xrn.is_urn(urn): return urn[len(Xrn.URN_PREFIX):]
-        else: return urn
+        if Xrn.is_urn(urn):
+            return urn[len(Xrn.URN_PREFIX):]
+        else:
+            return urn
+
     @staticmethod
     def urn_split (urn):
         return Xrn.urn_meaningful(urn).split('+')
@@ -140,19 +161,29 @@ class Xrn:
 #            debug_logger.debug("type-less Xrn's are not safe")
 
     def __repr__ (self):
-        result="<XRN u=%s h=%s"%(self.urn,self.hrn)
-        if hasattr(self,'leaf'): result += " leaf=%s"%self.leaf
-        if hasattr(self,'authority'): result += " auth=%s"%self.authority
+        result = "<XRN u=%s h=%s" % (self.urn,self.hrn)
+        if hasattr(self,'leaf'):
+            result += " leaf=%s" % self.leaf
+        if hasattr(self,'authority'):
+            result += " auth=%s" % self.authority
         result += ">"
         return result
 
-    def get_urn(self): return self.urn
-    def get_hrn(self): return self.hrn
-    def get_type(self): return self.type
-    def get_hrn_type(self): return (self.hrn, self.type)
+    def get_urn(self):
+        return self.urn
+
+    def get_hrn(self):
+        return self.hrn
+
+    def get_type(self):
+        return self.type
+
+    def get_hrn_type(self):
+        return (self.hrn, self.type)
 
     def _normalize(self):
-        if self.hrn is None: raise SfaAPIError, "Xrn._normalize"
+        if self.hrn is None:
+            raise SfaAPIError, "Xrn._normalize"
         if not hasattr(self,'leaf'): 
             self.leaf=Xrn.hrn_split(self.hrn)[-1]
         # self.authority keeps a list

@@ -91,7 +91,8 @@ from sfa.trust.gid import GID
 #
 ####################
 
-class SfaClientException (Exception): pass
+class SfaClientException (Exception):
+    pass
 
 class SfaClientBootstrap:
 
@@ -100,7 +101,8 @@ class SfaClientBootstrap:
                   verbose=False, timeout=None, logger=None):
         self.hrn=user_hrn
         self.registry_url=registry_url
-        if dir is None: dir="."
+        if dir is None:
+            dir="."
         self.dir=dir
         self.verbose=verbose
         self.timeout=timeout
@@ -242,7 +244,8 @@ class SfaClientBootstrap:
         
     #################### private details
     # stupid stuff
-    def fullpath (self, file): return os.path.join (self.dir,file)
+    def fullpath (self, file):
+        return os.path.join (self.dir,file)
 
     # the expected filenames for the various pieces
     def private_key_filename (self): 
@@ -284,10 +287,17 @@ class SfaClientBootstrap:
             raise IOError,"Missing %s file %s"%(kind,filename)
         return True
         
-    def assert_private_key (self): return self.assert_filename (self.private_key_filename(),"private key")
-    def assert_self_signed_cert (self): return self.assert_filename (self.self_signed_cert_filename(),"self-signed certificate")
-    def assert_my_credential (self): return self.assert_filename (self.my_credential_filename(),"user's credential")
-    def assert_my_gid (self): return self.assert_filename (self.my_gid_filename(),"user's GID")
+    def assert_private_key (self):
+        return self.assert_filename (self.private_key_filename(),"private key")
+
+    def assert_self_signed_cert (self):
+        return self.assert_filename (self.self_signed_cert_filename(),"self-signed certificate")
+
+    def assert_my_credential (self):
+        return self.assert_filename (self.my_credential_filename(),"user's credential")
+
+    def assert_my_gid (self):
+        return self.assert_filename (self.my_gid_filename(),"user's GID")
 
 
     # decorator to make up the other methods
@@ -310,7 +320,7 @@ class SfaClientBootstrap:
                     return filename
                 except IOError:
                     raise 
-                except :
+                except:
                     error = sys.exc_info()[:2]
                     message="Could not produce/retrieve %s (%s -- %s)"%\
                         (filename,error[0],error[1])
@@ -320,34 +330,43 @@ class SfaClientBootstrap:
         return wrap
 
     @get_or_produce (self_signed_cert_filename, self_signed_cert_produce)
-    def self_signed_cert (self): pass
+    def self_signed_cert (self):
+        pass
 
     @get_or_produce (my_credential_filename, my_credential_produce, validate_credential)
-    def my_credential (self): pass
+    def my_credential (self):
+        pass
 
     @get_or_produce (my_gid_filename, my_gid_produce)
-    def my_gid (self): pass
+    def my_gid (self):
+        pass
 
     @get_or_produce (credential_filename, credential_produce, validate_credential)
-    def credential (self, hrn, type): pass
+    def credential (self, hrn, type):
+        pass
 
     @get_or_produce (slice_credential_filename, slice_credential_produce, validate_credential)
-    def slice_credential (self, hrn): pass
+    def slice_credential (self, hrn):
+        pass
 
     @get_or_produce (authority_credential_filename, authority_credential_produce, validate_credential)
-    def authority_credential (self, hrn): pass
+    def authority_credential (self, hrn):
+        pass
 
     @get_or_produce (gid_filename, gid_produce)
-    def gid (self, hrn, type ): pass
+    def gid (self, hrn, type ):
+        pass
 
 
     # get the credentials as strings, for inserting as API arguments
     def my_credential_string (self): 
         self.my_credential()
         return self.plain_read(self.my_credential_filename())
+
     def slice_credential_string (self, hrn): 
         self.slice_credential(hrn)
         return self.plain_read(self.slice_credential_filename(hrn))
+
     def authority_credential_string (self, hrn): 
         self.authority_credential(hrn)
         return self.plain_read(self.authority_credential_filename(hrn))

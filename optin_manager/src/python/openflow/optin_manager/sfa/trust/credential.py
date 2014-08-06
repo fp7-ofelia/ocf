@@ -215,7 +215,8 @@ def filter_creds_by_caller(creds, caller_hrn_list):
         Returns a list of creds who's gid caller matches the
         specified caller hrn
         """
-        if not isinstance(creds, list): creds = [creds]
+        if not isinstance(creds, list):
+            creds = [creds]
         if not isinstance(caller_hrn_list, list): 
             caller_hrn_list = [caller_hrn_list]
         caller_creds = []
@@ -224,7 +225,8 @@ def filter_creds_by_caller(creds, caller_hrn_list):
                 tmp_cred = Credential(string=cred)
                 if tmp_cred.get_gid_caller().get_hrn() in caller_hrn_list:
                     caller_creds.append(cred)
-            except: pass
+            except:
+                pass
         return caller_creds
 
 class Credential(object):
@@ -1045,7 +1047,8 @@ class Credential(object):
         result=""
         result += "CREDENTIAL %s\n" % self.get_subject()
         filename=self.get_filename()
-        if filename: result += "Filename %s\n"%filename
+        if filename:
+            result += "Filename %s\n"%filename
         result += "      privs: %s\n" % self.get_privileges().save_to_string()
         gidCaller = self.get_gid_caller()
         if gidCaller:

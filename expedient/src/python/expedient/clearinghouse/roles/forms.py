@@ -39,7 +39,8 @@ class PermissionModelMultipleChoiceField(forms.ModelMultipleChoiceField):
 class PermissionCheckboxTableSelectMultiple(CheckboxSelectMultiple):
     """A C{CheckboxSelectMultiple} widget that renders as a table instead of list"""
     def render(self, name, value, attrs=None, choices=()):
-        if value is None: value = []
+        if value is None:
+            value = []
         has_id = attrs and 'id' in attrs
         final_attrs = self.build_attrs(attrs, name=name)
         output = [u'<table class="permission_checkbox_table formtable_noborder">']

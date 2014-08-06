@@ -207,7 +207,8 @@ class GID(Certificate):
         if self.get_email() is not None:
             result += " "*indent + "email:" + str(self.get_email()) + "\n"
         filename=self.get_filename()
-        if filename: result += "Filename %s\n"%filename
+        if filename:
+            result += "Filename %s\n"%filename
 
         if self.parent and dump_parents:
             result += " "*indent + "parent:\n"

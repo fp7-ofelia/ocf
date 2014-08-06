@@ -21,7 +21,8 @@ for filename in os.listdir(model_dir):
     if not isinstance(item, (type, types.ClassType)):
       continue
     # Found a model, bring into the module namespace.
-    exec "%s = item" % name
+    #exec "%s = item" % name
+    locals()[name] = item
     model_names.append(name)
  
 # Hide everything other than the classes from other modules.
