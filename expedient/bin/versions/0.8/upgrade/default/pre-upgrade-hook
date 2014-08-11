@@ -30,6 +30,10 @@ geni_dir=$expedient_dir/src/python/geni
 if [ $(find $geni_dir -name "*.py" | wc -l) == 0 ]; then
   rm -r $geni_dir
 fi
+expedient_geni_dir=$expedient_dir/src/python/expedient_geni
+if [ $(find $expedient_geni_dir -name "*.py" | wc -l) == 0 ]; then
+  rm -r $expedient_geni_dir
+fi
 sfa_dir=$expedient_dir/src/python/sfa
 if [ $(find $sfa_dir -name "*.py" | wc -l) == 0 ]; then
   rm -r $sfa_dir
