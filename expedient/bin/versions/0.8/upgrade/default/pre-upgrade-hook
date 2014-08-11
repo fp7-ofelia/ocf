@@ -27,16 +27,22 @@ print "Removing old folders..."
 # Remove folders that are not tracker anymore (thus, no .py files)
 # > Before that, check that no ".py" file is indeed located there
 geni_dir=$expedient_dir/src/python/geni
-if [ $(find $geni_dir -name "*.py" | wc -l) == 0 ]; then
-  rm -r $geni_dir
+if [ -d $geni_dir ]; then
+  if [ $(find $geni_dir -name "*.py" | wc -l) == 0 ]; then
+    rm -r $geni_dir
+  fi
 fi
 expedient_geni_dir=$expedient_dir/src/python/expedient_geni
-if [ $(find $expedient_geni_dir -name "*.py" | wc -l) == 0 ]; then
-  rm -r $expedient_geni_dir
+if [ -d $expedient_geni_dir ]; then
+  if [ $(find $expedient_geni_dir -name "*.py" | wc -l) == 0 ]; then
+    rm -r $expedient_geni_dir
+  fi
 fi
 sfa_dir=$expedient_dir/src/python/sfa
-if [ $(find $sfa_dir -name "*.py" | wc -l) == 0 ]; then
-  rm -r $sfa_dir
+if [ -d $sfa_dir ]; then
+  if [ $(find $sfa_dir -name "*.py" | wc -l) == 0 ]; then
+    rm -r $sfa_dir
+  fi
 fi
 # ----------------------------------------
 
