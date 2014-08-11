@@ -1,0 +1,22 @@
+#!/bin/bash
+
+###
+#    @author: CarolinaFernandez
+#    @organization: i2CAT
+#    @description: pre-upgrade-hook module 
+###
+
+# Root for "expedient" folder
+expedient_dir=$EXECPATH/..
+
+# Remove folders that are not tracker anymore (thus, no .py files)
+# > Before that, check that no ".py" file is indeed located there
+geni_dir=$expedient_dir/src/python/geni
+if [ $(find $geni_dir -name "*.py" | wc -l) == 0 ]; then
+  rm -r $geni_dir
+fi
+sfa_dir=$expedient_dir/src/python/sfa
+if [ $(find $sfa_dir -name "*.py" | wc -l) == 0 ]; then
+  rm -r $sfa_dir
+fi
+
