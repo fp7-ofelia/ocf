@@ -39,6 +39,12 @@ ADMINS = [
 MANAGERS = ADMINS
 
 #
+# Control verbosity on Django messages.
+# If set to True, debug messages will be visible.
+#
+DEBUG = False
+
+#
 # Database parameters.
 # DATABASE_NAME: default is "ocf__expedient"
 # DATABASE_HOST: it is usually 'localhost' (or 127.0.0.1)
@@ -50,7 +56,7 @@ DATABASE_PASSWORD = "changeMe"
 DATABASE_HOST = "127.0.0.1"
 DATABASE_ENGINE = "mysql"
 #
-# WARNING: Do NOT modify the following block
+# WARNING: Do NOT modify the following block!
 #
 DATABASES = {
     'default': {
