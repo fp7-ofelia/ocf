@@ -1,12 +1,15 @@
 import uuid
 
+from django.conf import settings
+from django.contrib.sites.models import Site
+from django.db import transaction
+from expedient.common.utils.mail import send_mail
 from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
 from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
-from django.db import transaction
-from django.conf import settings
 from openflow.optin_manager.xmlrpc_server.ch_api import convert_star, om_ch_translate
 from openflow.optin_manager.flowspace.utils import parseFVexception
 from openflow.optin_manager.sfa.openflow_utils.ServiceThread import ServiceThread
+
 
 '''Same "create_slice" function from xmlrpc_server/ch_api.py without decorators'''
 
@@ -168,8 +171,8 @@ def CreateOFSliver(slice_urn,project_name,project_description,slice_name,slice_d
         except:
             vlan_range = "\n\n"
         send_mail(settings.EMAIL_SUBJECT_PREFIX+" Flowspace Request: OptinManager '"+str(project_name)+"'", "Hi, Island Manager\n\nA new flowspace was requested:\n\nProject: " + str(project_name) + "\nSlice: " + str(slice_name) + str(vlan_range) + "You may add a new Rule for this request at: %s" % site_domain_url, from_email=settings.DEFAULT_FROM_EMAIL, recipient_list=[settings.ROOT_EMAIL],)
-    except:
-        pass
+    except Exception, e:
+        print "SFA.CreateOCFSliver error: \n%s" % str(e)
 
     #transaction.commit()       
     return {'error_msg': "",'switches': []}

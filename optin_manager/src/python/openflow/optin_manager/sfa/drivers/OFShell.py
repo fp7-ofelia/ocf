@@ -123,9 +123,10 @@ class OFShell:
                     controller = rspec_attrs['controller'][0]['url']
                     email = rspec_attrs['email']
                     email_pass = ''
+                    slice_description = rspec_attrs['description']
                     if not self.check_req_switches(switch_slivers):
                         raise Exception("The Requested OF Switches on the RSpec do not match with the available OF switches of this island. Please check the datapath IDs of your Request RSpec.")
-                    CreateOFSliver(slice_id, authority, project_description ,slice_urn, 'slice_description',controller, email, email_pass, switch_slivers)
+                    CreateOFSliver(slice_id, authority, project_description, slice_urn, slice_description, controller, email, email_pass, switch_slivers)
                     if expiration:
                         #Since there is a synchronous connection, expiring_components table is easier to fill than VTAM
                         #ExpiringComponents.objects.create(slice=slice_urn, authority=authority, expires=expiration)
