@@ -187,8 +187,9 @@ INSTALLED_APPS = [
     'expedient.clearinghouse.permissionmgmt',
 #    'openflow.plugin',
     'expedient.clearinghouse.geni',
-    'expedient.clearinghouse.geni.planetlab',
-    'expedient.clearinghouse.geni.gopenflow',
+     # XXX: Probably not used, giving problems
+#    'expedient.clearinghouse.geni.planetlab',
+#    'expedient.clearinghouse.geni.gopenflow',
 #    'expedient.ui.html',
     'expedient.ui.rspec',
 #    'vt_plugin',

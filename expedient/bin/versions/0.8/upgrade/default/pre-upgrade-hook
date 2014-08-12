@@ -46,6 +46,36 @@ if [ -d $sfa_dir ]; then
 fi
 # ----------------------------------------
 
+# ----------------------------------------
+# Removing old (conflicting) Django apps
+# ----------------------------------------
+# Root for "manage.py" file
+expedient_manage_dir=$expedient_dir/src/python/expedient/clearinghouse
+current_dir=$PWD
+cd $expedient_manage_dir
+
+print "Removing old Django apps..."
+## Initial backup
+#manage_clear_app=$(python manage.py dumpdata gopenflow)
+## Retrieve data within braces
+#manage_clear_app=$(expr "$manage_clear_app" : '.*\[\(.*\)].*')
+#manage_clear_app="[$manage_clear_app]"
+#python manage.py loaddata $manage_clear_app
+
+# Completely clear those apps (no data on them)
+manage_clear_app=$(python manage.py sqlclear gopenflow)
+manage_clear_app=$(expr "$manage_clear_app" : '.*BEGIN;\([^;]*\);.*');
+manage_clear_app="BEGIN; $manage_clear_app; COMMIT;"
+echo $manage_clear_app | python manage.py dbshell
+
+manage_clear_app=$(python manage.py sqlclear planetlab)
+manage_clear_app=$(expr "$manage_clear_app" : '.*BEGIN;\([^;]*\);.*');
+manage_clear_app="BEGIN; $manage_clear_app; COMMIT;"
+echo $manage_clear_app | python manage.py dbshell
+
+cd $current_dir
+# ----------------------------------------
+
 #shutdown apache
 print "Shutting down apache2..."
 /usr/sbin/service apache2 stop
