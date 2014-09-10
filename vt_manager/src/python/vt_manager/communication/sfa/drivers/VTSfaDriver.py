@@ -82,11 +82,13 @@ class VTSfaDriver:
 		nodes = list()
 		for slivers in requested_attributes:
 			node = self.shell.GetNodes(uuid=slivers['component_id'])
+			#print "\n\n\n\n\n\nslivers: %s\n\n\n\n\n\n" % slivers['slivers']
 			for vm in slivers['slivers']:
 				#node = self.shell.GetNodes(uuid=vm['server-id'])
 				if not node in nodes:
 					nodes.append(node)
                                 try:
+                                       #print "\n\n\n\n\n\nusers: %s\n\n\n\n\n\n" % str(users)
                                        for user in users:
                                            xrn = Xrn(user['urn'], 'user')
                                            user_name = xrn.get_leaf()
@@ -106,47 +108,27 @@ class VTSfaDriver:
 			con = session.bind()
 			logging.info("create_slice > Connected to LDAP. Connection: %s" % str(con))
 			if con:
-				logging.warning("LDAP: trying to create the following users: %s" % str(users))
+				logging.info("LDAP: trying to create the following users: %s" % str(users))
 				for user in users:
-					logging.warning("Sending users to LDAP")
+					logging.info("Sending users to LDAP")
 					#logging.error("project: "+str(projectName)+" slicename"+str(sliceName))
 					ldapprj = "%s.%s" % (projectName, sliceName)
 					ldapprj = ldapprj.replace("\\" ,"")
-					logging.warning("LDAP project: " + ldapprj)
-					session.addModifyProjectUsers(con,user['urn'],ldapprj,user['keys'])
-					logging.warning("User added to project: " + str(ldapprj) + ", SSH key: " + str(user['keys']))
-				#status=session.addProject(con,projectName+"."+sliceName)
+					logging.info("LDAP project: " + ldapprj)
+					session.add_modify_project_users(con, user["urn"], ldapprj, user["keys"])
+					logging.info("User added to project: " + str(ldapprj) + ", SSH key: " + str(user['keys']))
+				#status=session.add_project(con,projectName+"."+sliceName)
 				#if status != 0:
 					#logging.error("users"+users)
 				#	for index,user in enumerate(users):
 						#logging.error(user)
-				#		status=session.addUser(con,"user"+str(index),user['urn'],projectName+"."+sliceName,user['keys'])
+				#		status=session.add_user(con,"user"+str(index),user['urn'],projectName+"."+sliceName,user['keys'])
 				#		if status ==0:
 				#			logging.error("can't add user to ldap of ssh gateway:"+ str(user))
 				#else:
 				#	logging.error("can't add project to ldap of ssh gateway: "+projectName+"."+sliceName)
 			else:
 				logging.error("Cannot contact LDAP of the SSH gateway")
-
-		#add ssh keys to ldap of ssh gateway
-#		if len(nodes)!=0:
-#			session=ldapManager()
- #       		con=session.bind()
-#			if con !=0:
-#				status=session.addProject(con,projectName+"."+sliceName)
-#				if status != 0:
-#					#logging.error("users"+users)
-#					for index,user in enumerate(users):
-#						#logging.error(user)
-#						status=session.addUser(con,"user"+str(index),user['urn'],projectName+"."+sliceName,user['keys'])
-#						if status ==0:
-#							logging.error("can't add user to ldap of ssh gateway:"+ str(user))
-#				else:
-#					logging.error("can't add project to ldap of ssh gateway: "+projectName+"."+sliceName)
-#			else:
-#				logging.error("can't contact ldap of ssh gateway")
-
-		
 		return self.aggregate.get_rspec(slice_leaf=slice_leaf,projectName=projectName,version=rspec.version,created_vms=created_vms,new_nodes=nodes)
 	
 	def sliver_status(self,slice_leaf,authority,options):
@@ -162,4 +144,4 @@ class VTSfaDriver:
 			credential = Credential(string=cred)
 			if credential.get_gid_caller().get_hrn() == slice_hrn:
 				return credential.get_expiration()
-		return None 
+		return None

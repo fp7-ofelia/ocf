@@ -50,7 +50,7 @@ class ldapManager:
             return 0
     
     # Add project to LDAP
-    def addProject(self, connection, cn):
+    def add_project(self, connection, cn):
         try:
             add_record = [("objectclass", ["inetorgperson"]),
                  ("cn", [cn] ),("sn", [cn])]
@@ -80,6 +80,87 @@ class ldapManager:
             return 1
         except:
             return 0
+    
+    # Check if project exists in LDAP
+    def check_project_exists(self, connection, cn):
+        try:
+            result_id = con.search(self.base_dn, ldap.SCOPE_SUBTREE,("cn="+cn),["cn"])
+            projects_list = []
+            while True:
+                result_type, result_data = connection.result(result_id, 0)
+                if not result_data:
+                    break
+                else:
+                    if result_type == ldap.RES_SEARCH_ENTRY:
+                        projects_list.append(result_data)
+            return len(projects_list)
+        except:
+            return 0
+    
+    # Check if a user exists in a given project
+    def check_user_exists(self, connection, sn, project_cn):
+        try:
+            result_id = con.search("cn=" + prj_cn + "," + self.base_dn, ldap.SCOPE_ONELEVEL, ("sn="+sn), ["cn","sn"])
+            users_list = []
+            while True:
+                result_type, result_data = connection.result(result_id, 0)
+                if not result_data:
+                    break
+                else:
+                    if result_type == ldap.RES_SEARCH_ENTRY:
+                        users_list.append(result_data)
+            if not users_list:
+                return 0
+            else:            
+                return users_list[0][0][1]
+        except:
+            return 0
+    
+    # Get the number of users for a given project
+    def get_number_users(self, connection, project_cn):
+        try:
+            result_id = connection.search_s("cn=" + prj_cn + "," + self.base_dn, ldap.SCOPE_ONELEVEL, ("cn=*"), None)
+            users_list = []
+            while True:
+                result_type, result_data = connection.result_s(result_id, 0)
+                if not result_data:
+                    break
+                else:
+                    if result_type == ldap.RES_SEARCH_ENTRY:
+                        users_list.append(result_data)
+            return len(users_list)
+        except:
+            return 0
+    
+    ##modify existing user,simpler to delete and re-add
+    def modify_user(self, connection, user_info, project_cn, keys):
+        try:
+            result = connection.delete_s("cn=" + str(user_info["cn"][0]) + "," + "cn=" + str(prj_cn) + "," + self.base_dn)
+            try:
+                self.add_user(connection, str(user_info["cn"][0]), str(user_info["sn"][0]), project_cn, keys)
+                return 1
+            except:
+                print "Error modifying user in LDAP"
+        except:
+            print "Error: %s" % str(sys.exc_info()[0])
+            return 0
+    
+    # Create or modify project and users
+    def add_modify_project_users(self, connection, sn, project_cn, keys):
+        # Check if project exists; otherwise create one
+        if self.check_project_exists(connection, project_cn) == 0:
+            self.add_project(connection, project_cn)
+        
+        # Check if user exists in project
+        result = self.check_user_exists(connection, sn, project_cn)
+        if result == 0:
+            # User does not exist => create
+            index = self.get_number_users(connection, project_cn)
+            return self.add_user(connection, "user" + str(index), sn, project_cn, keys)
+        else:
+            # User exists => modify
+            status = self.modify_user(connection, result, project_cn, keys)
+            return status
 
 if __name__ == "__main__":
     session = ldapManager()
