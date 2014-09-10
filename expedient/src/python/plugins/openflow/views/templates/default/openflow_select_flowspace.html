@@ -59,10 +59,13 @@ div.steps {
 	your controller. Each field is specified as a range. Empty cells mean any value.
 	The tables are OR'ed together to produce a rule.</p>
 
-	<p><em>For example, if you want to receive all incoming and
+	<p><em><!--For example, if you want to receive all incoming and
 	outgoing port 80 traffic, then you will need two tables. In the first, you
 	would set the "TCP/UDP Destination" field to 80. In the second,
-	you would set the "TCP/UDP Source" field to 80.</em></p>
+	you would set the "TCP/UDP Source" field to 80.-->
+	For example, if you want to receive packets tagged with VLANs
+	2012, then you will need to set this value in the columns corresponding to
+	the "VLAN ID" row. You may also choose a small range of values.</em></p>
 
 	<p>If you need to define more FlowSpaces, click "Define another FlowSpace"
 	and an additional empty table will be displayed.</p>

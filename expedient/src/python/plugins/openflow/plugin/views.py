@@ -424,10 +424,10 @@ def book_openflow(request, slice_id):
             except Exception as e:
                 fsmode = 'failed'
                 DatedMessage.objects.post_message_to_user(
-                         "Could not find free vlan to slice your experiment in all the affected AMs",
+                         "Could not find free VLAN(s) to slice your experiment in all the affected AMs",
                          request.user, msg_type=DatedMessage.TYPE_ERROR,
                      )
-                alertMessage = "Could not find free vlan to slice your experiment in all the affected AMs. It has been switched to advanced mode, choose your flowspace and wait for the admins decision."
+                alertMessage = "Could not find free VLAN(s) to slice your experiment in all the affected AMs. Please choose a suitable flowspace in the advanced mode, using a VLAN up to 4095, and wait for the admins' decision."
   
             return flowspace(request, slice_id, fsmode, free_vlan, alertMessage)
         else:
