@@ -48,7 +48,7 @@ def generic_crud(request, obj_id, model, template, redirect,
         instance = get_object_or_404(model, pk=obj_id)
     else:
         instance = None
-        
+    
     if request.method == "GET":
         form = form_class(instance=instance, **extra_form_params)
     elif request.method == "POST":
@@ -61,6 +61,9 @@ def generic_crud(request, obj_id, model, template, redirect,
             if post_save:
                 post_save(instance, obj_id == None)
             form.save_m2m()
+            # Send signal when generic object is ready
+            from expedient.common.utils.signals import post_object_ready
+            post_object_ready(instance)
             if success_msg:
                 DatedMessage.objects.post_message_to_user(
                     success_msg(instance), request.user,

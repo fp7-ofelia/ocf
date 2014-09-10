@@ -101,8 +101,12 @@ def _add_geni_slice_info(sender, instance=None, created=None, **kwargs):
     """
     if created:
         GENISliceInfo.objects.create(slice=instance)
-    
-signals.post_save.connect(_add_geni_slice_info, Slice)
+
+# Receive signal when object of type "Slice" is ready
+from django.dispatch import Signal
+post_object_ready = Signal()    
+post_object_ready.connect(_add_geni_slice_info, Slice)
+#signals.post_save.connect(_add_geni_slice_info, Slice)
 
 class GENIAggregate(Aggregate):
     """
