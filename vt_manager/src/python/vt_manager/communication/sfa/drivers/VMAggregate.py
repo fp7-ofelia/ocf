@@ -58,6 +58,17 @@ class VMAggregate:
         	    rspec.version.add_nodes(nodes)
         	return rspec.toxml()
 	
+    	def server_iface_to_vm_iface(self, server_iface):
+    	    # XXX Original code in Expedient shows hardcoded VM-to-server interfaces
+    	    # (note: server [eth2, eth3] connected to VM [eth1, eth2] respectively)
+    	    # Since this data is not persisted anywhere, let us use a similar approach
+    	    try:
+    	        if "." not in server_iface:
+    	            server_iface = server_iface.replace(server_iface[-1], str(int(server_iface[-1])-1))
+    	    except Exception as e:
+    	        print "sfa.drivers.VMAggregate > could not show adapter server's interface for user: %s" % str(e)
+    	    return server_iface
+
     	def get_nodes(self, options={},slice_leaf = None,projectName=None,created_vms=[],new_nodes=[]):
 		if 'slice' in options.keys():
 			nodes = self.shell.GetNodes(options['slice'],projectName)
@@ -105,7 +116,9 @@ class VMAggregate:
                                                                      'end_value': mac_range.endMac}))
 		    	if network_ifaces:
 			     for network_iface in network_ifaces:
-			    	rspec_node['services'].append(NetworkInterface({'from_server_interface_name':network_iface.name,
+			    	#rspec_node['services'].append(NetworkInterface({'from_server_interface_name':network_iface.name,
+			    	network_iface_name = self.server_iface_to_vm_iface(network_iface.name)
+			    	rspec_node['services'].append(NetworkInterface({'from_server_interface_name':network_iface_name,
 				    					        'to_network_interface_id': network_iface.switchID,
 										'to_network_interface_port':str(network_iface.port)}))
                     	if site['longitude'] and site['latitude']:
@@ -190,7 +203,9 @@ class VMAggregate:
                                                                      'end_value': mac_range.endMac}))
                         if network_ifaces:
                              for network_iface in network_ifaces:
-                                rspec_node['services'].append(NetworkInterface({'from_server_interface_name':network_iface.name,
+                                #rspec_node['services'].append(NetworkInterface({'from_server_interface_name':network_iface.name,
+                                network_iface_name = self.server_iface_to_vm_iface(network_iface.name)
+                                rspec_node['services'].append(NetworkInterface({'from_server_interface_name':network_iface_name,
                                                                                 'to_network_interface_id': network_iface.switchID,
                                                                                 'to_network_interface_port':str(network_iface.port)}))
                         if site['longitude'] and site['latitude']:
@@ -219,4 +234,3 @@ class VMAggregate:
                                 created_node = single_node.copy()
                                 rspec_nodes.append(created_node)
                 return rspec_nodes
-
