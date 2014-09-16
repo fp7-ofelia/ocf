@@ -135,10 +135,11 @@ $(":submit[id^=form_create], :submit[id^=form_request], :submit[id^=form_update]
     var id = "";
     var type = "";
     var results = Array();
-    $("form input, form select, form textarea").each(function(index) {
-        id = $(this).attr("id") || "";
-        //type = $(this).attr("type") || "";
-        type = $(this).type ? $(this).type : $(this).prop("tagName").toLowerCase();
+    $("form input, form select, form textarea").each(function(index, value) {
+        form_element = $(this);
+        id = form_element.attr("id") || "";
+        //type = $(this).type ? $(this).type : $(this).prop("tagName").toLowerCase();
+        type = form_element.prop("type") || form_element.type;
         // Correct by default (ignores fields non stated in the if/else block
         results[index] = true;
         if (contains("text",type)) {

@@ -17,7 +17,8 @@
 	<form class="form" action="" method="POST">{% csrf_token %}
 		{{ form.as_p }}
 		<div class="center">
-			<input type="submit" value="Save" />
+			<input type="submit" {% if slice %}id="form_update_slice"
+						{% else %}id="form_create_slice"{% endif %} value="Save" />
 			<input type="button" value="Cancel" onclick="document.location='{{ cancel_url }}'"/>
 		</div>
 	</form>

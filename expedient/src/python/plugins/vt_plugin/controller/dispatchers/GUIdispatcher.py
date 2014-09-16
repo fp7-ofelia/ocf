@@ -94,7 +94,8 @@ def virtualmachine_crud(request, slice_id, server_id):
         DatedMessage.objects.post_message_to_user(
             "VM might have been created, but some problem ocurred: %s" % str(e),
             request.user, msg_type=DatedMessage.TYPE_ERROR)
-        return HttpResponseRedirect(reverse("home"))
+        return HttpResponseRedirect(reverse("slice_detail",
+                                    args=[slice_id]))
 
     return simple.direct_to_template(
         request, template="vt_plugin_aggregate_add_virtualmachines.html",
