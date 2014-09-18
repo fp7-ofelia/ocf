@@ -32,10 +32,12 @@ SRC_DIR = location
 '''Base location of non-python source files.'''
 
 try:
-    from localsettings import CONF_DIR as location
+    from settings import CONF_DIR as location
 except ImportError:
     # TODO: Hack!
-    location = "/etc/expedient"
+    import os
+    #location = "/etc/expedient"
+    location = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 
 CONF_DIR = location
 '''Location of local Expedient configuration files.
@@ -187,9 +189,8 @@ INSTALLED_APPS = [
     'expedient.clearinghouse.permissionmgmt',
 #    'openflow.plugin',
     'expedient.clearinghouse.geni',
-     # XXX: Probably not used, giving problems
-#    'expedient.clearinghouse.geni.planetlab',
-#    'expedient.clearinghouse.geni.gopenflow',
+    'expedient.clearinghouse.geni.planetlab',
+    'expedient.clearinghouse.geni.gopenflow',
 #    'expedient.ui.html',
     'expedient.ui.rspec',
 #    'vt_plugin',

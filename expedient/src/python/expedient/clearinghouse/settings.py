@@ -6,6 +6,14 @@ Created on Aug 19, 2010
 '''
 import sys, traceback
 
+import os
+#CONF_DIR = os.path.join(os.getenv("OCF_PATH"), "expedient/src/python/expedient/clearinghouse")
+#CONF_DIR = "/opt/ofelia/expedient/src/python/expedient/clearinghouse"
+CONF_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+#SRC_DIR = os.path.join(os.getenv("OCF_PATH"), "expedient/src")
+#SRC_DIR = "/opt/ofelia/expedient/src
+SRC_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../..")
+
 from expedient.clearinghouse.defaultsettings.django import *
 from expedient.clearinghouse.defaultsettings.database import *
 from expedient.clearinghouse.defaultsettings.admins import *

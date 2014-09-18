@@ -14,7 +14,8 @@ import os
 import time
 
 # Temporal path to locate files for this process
-path = "/opt/ofelia"
+#path = "/opt/ofelia"
+path = os.getenv("OCF_PATH")
 FLOWVISOR_SLEEP_TIME = 10
 
 class Command(NoArgsCommand):

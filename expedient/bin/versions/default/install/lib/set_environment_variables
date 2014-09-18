@@ -1,0 +1,31 @@
+#!/bin/bash
+
+###
+#   @author: CarolinaFernandez
+#   @organization: i2CAT
+#   @description: setting environment variables for OCF
+###
+
+replacement=""
+# Determine OCF path
+#
+# Currently retrieves location of downloaded code
+# But any other could be asked for to the administrator...
+OCF_PATH=$(echo $PWD  | sed -e "s/expedient.*/${replacement}/g")
+
+# Set environment variables in Apache's envvars file
+APACHE_ENVVARS=/etc/apache2/envvars
+if [ -f $APACHE_ENVVARS ]; then
+  if [ -z $(grep -q $OCF_PATH $APACHE_ENVVARS) ]; then
+    echo -e """\n# OCF path\nexport OCF_PATH=$OCF_PATH" >> $APACHE_ENVVARS
+  fi
+fi
+
+# Set environment variables under OS's profile.d folder
+PROFILE_D=/etc/profile.d
+PROFILE_D_OCF=$PROFILE_D/ocf.sh
+if [ -d $PROFILE_D ]; then
+  if [ ! -f $PROFILE_D_OCF ]; then
+    echo -e """#!/bin/bash\n\nexport OCF_PATH=$OCF_PATH""" >> $PROFILE_D_OCF
+  fi
+fi

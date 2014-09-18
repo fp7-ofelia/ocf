@@ -17,7 +17,8 @@ import os
 import subprocess
 
 # Temporal path to locate files for this process
-path = "/opt/ofelia"
+#path = "/opt/ofelia"
+path = os.getenv("OCF_PATH")
 TIMEOUT = 600 # 10 minutes
 # Time (in seconds) to wait in order to release FlowVisor resources
 FLOWVISOR_SLEEP_TIME = 10

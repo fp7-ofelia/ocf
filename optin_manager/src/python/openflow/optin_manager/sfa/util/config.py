@@ -20,7 +20,10 @@ def str2bool(v):
 class Config:
   
 #    def __init__(self, config_file='/etc/sfa/sfa_config'):
-    def __init__(self, config_file='/opt/ofelia/vt_manager/src/python/openflow.optin_manager/sfa/configs/config'):
+#    def __init__(self, config_file='/opt/ofelia/vt_manager/src/python/openflow.optin_manager/sfa/configs/config'):
+    def __init__(self, config_file=None):
+        if not config_file:
+            config_file = os.path.join(os.path.dirname(__file__), "../sfa_config/config.py")
         self._files = []
         self.config_path = os.path.dirname(config_file)
         self.config = ConfigParser.ConfigParser()  
