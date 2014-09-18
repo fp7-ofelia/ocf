@@ -17,8 +17,8 @@ Created on Aug 18, 2010
 
 import ldap
 from django_auth_ldap.config import LDAPSearch, GroupOfUniqueNamesType
-from localsettings import CONF_DIR
-from localsettings import AUTH_LDAP_BIND_PASSWORD, AUTH_LDAP_BIND_DN
+from settings import CONF_DIR
+from settings import AUTH_LDAP_BIND_PASSWORD, AUTH_LDAP_BIND_DN
 
 ##
 ## LDAP CLient settings. Read access only; should point to the slave 

@@ -15,11 +15,11 @@ Created on Aug 18, 2010
 # Basic settings for the Expedient site configuration.
 #
 
-#
+# XXX: To be removed
 # Directories for the Expedient sources and the configuration file.
 #
-CONF_DIR = '/opt/ofelia/expedient/src/python/expedient/clearinghouse'
-SRC_DIR = '/opt/ofelia/expedient/src'
+#CONF_DIR = '/opt/ofelia/expedient/src/python/expedient/clearinghouse'
+#SRC_DIR = '/opt/ofelia/expedient/src'
 
 #
 # Super user credentials to access the admin GUI.
@@ -39,12 +39,6 @@ ADMINS = [
 MANAGERS = ADMINS
 
 #
-# Control verbosity on Django messages.
-# If set to True, debug messages will be visible.
-#
-DEBUG = False
-
-#
 # Database parameters.
 # DATABASE_NAME: default is "ocf__expedient"
 # DATABASE_HOST: it is usually 'localhost' (or 127.0.0.1)
@@ -56,7 +50,7 @@ DATABASE_PASSWORD = "changeMe"
 DATABASE_HOST = "127.0.0.1"
 DATABASE_ENGINE = "mysql"
 #
-# WARNING: Do NOT modify the following block!
+# WARNING: Do NOT modify the following block
 #
 DATABASES = {
     'default': {
@@ -72,6 +66,11 @@ DATABASES = {
 # Name for the island that is to be set on your host.
 #
 ISLAND_NAME   = "i2CAT"
+
+#
+# Debug in logs
+#
+DEBUG = False
 
 #
 # Address and IP you would like to use for e-mails sent to users and Island Manager.
@@ -131,7 +130,7 @@ THEME = "default"
 #
 # Address of the mailing host.
 #
-EMAIL_HOST = "changeMe"
+EMAIL_HOST = "127.0.0.1"
 
 #
 # Port used in that host. Default is '25'.

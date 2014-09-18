@@ -24,15 +24,21 @@ INSTALLING OCF
 1. Requirements
 ---------------
 
-* One (or more) GNU/Linux Debian-based distros (see Note #1)
-  * Developed and ensured to work under Debian 6.0 (Squeeze)
-* One (or more) GNU/Linux Debian-based distros to be virtualized by XEN
-(Virtualization Manager installations only)
+* Expedient, Opt-in and VT manager
+  * One (or more) GNU/Linux Debian-based distros (see Note #1)
+  * Developed and ensured to work under Debian 7.0 (Wheezy) using
+    the following packages:
+    * Python 2.7
+    * Django 1.4.5 (automatically installed)
+    * MySQL server (automatically installed)
+* OXAD (virtualization servers)
+  * One (or more) GNU/Linux Debian-based distros to be virtualized by XEN
+  * Developed and ensured to work under Debian 6.0 (Squeeze) using
+    the following packages:
+    * Python 2.6
+    * Django 1.2.3 (automatically installed)
+    * MySQL server (automatically installed)
 * FlowVisor (Opt-in Manager installations only) (automatically installed) 
-* The following packages:
-  * Python 2.6
-  * Django 1.2.3 (automatically installed)
-  * MySQL server (automatically installed)
 
 Note #1: the OCF upgrading system (OFVER) [http://code.google.com/p/ofver/] 
 supports Debian-based distros only. For other distros you shall install 
