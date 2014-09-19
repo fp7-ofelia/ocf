@@ -28,8 +28,10 @@ try:
     from localsettings import CONF_DIR as location
 except ImportError:
     # TODO: Hack!
-    location = "/etc/optin_manager"
-    location = "/opt/ofelia/optin_manager/src/python/openflow/optin_manager"
+    #location = "/etc/optin_manager"
+    #location = "/opt/ofelia/optin_manager/src/python/openflow/optin_manager"
+    import os
+    location = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
         
 CONF_DIR = location
 '''Location of local Expedient configuration files.

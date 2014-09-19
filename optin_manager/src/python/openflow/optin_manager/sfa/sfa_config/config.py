@@ -1,3 +1,4 @@
+import os
 from django.conf import settings
 #################
 #Federated Links - Static information about the connection from the switches to other authorities
@@ -11,11 +12,12 @@ FEDERATED_LINKS = [ {"src_id":"00:10:00:00:00:00:00:03", "src_port":"10", "dst_i
 #################
 #Credential stuff
 #################
-SFA_DATA_DIR = "/opt/ofelia/optin_manager/src/python/openflow/optin_manager/sfa/my_roots/"
-SFA_INTERFACE_HRN ="ocf_of"
-MY_ROOTS_DIR = "/opt/ofelia/optin_manager/src/python/openflow/optin_manager/sfa/my_roots/"
-TRUSTED_ROOTS_DIR = "/opt/ofelia/optin_manager/src/python/openflow/optin_manager/sfa/trusted_roots/"
-SFA_CREDENTIAL_SCHEMA = "/opt/ofelia/optin_manager/src/python/openflow/optin_manager/sfa/schemas/credential.xsd"
+OCF_PATH = os.getenv("OCF_PATH") # Usually OCF_PATH = "/opt/ofelia"
+SFA_DATA_DIR = os.path.join(OCF_PATH, "optin_manager/src/python/openflow/optin_manager/sfa/my_roots/")
+SFA_INTERFACE_HRN = "ocf_of"
+MY_ROOTS_DIR = os.path.join(OCF_PATH, "optin_manager/src/python/openflow/optin_manager/sfa/my_roots/")
+TRUSTED_ROOTS_DIR = os.path.join(OCF_PATH, "optin_manager/src/python/openflow/optin_manager/sfa/trusted_roots/")
+SFA_CREDENTIAL_SCHEMA = os.path.join(OCF_PATH, "optin_manager/src/python/openflow/optin_manager/sfa/schemas/credential.xsd")
 
 ###################
 #Get Version Params

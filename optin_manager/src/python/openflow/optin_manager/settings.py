@@ -3,7 +3,18 @@ Created on Sep 2, 2010
 
 @author: Peyman Kazemian
 '''
+
+import os
 import sys, traceback
+
+# *Load first* the path variables needed for the stack to run
+
+#CONF_DIR = "/opt/ofelia/optin_manager/src/python/openflow/optin_manager"
+#CONF_DIR = os.path.join(os.getenv("OCF_PATH"), "optin_manager/src/python/openflow/optin_manager")
+CONF_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+#SRC_DIR = "/opt/ofelia/optin_manager/src"
+#SRC_DIR = os.path.join(os.getenv("OCF_PATH"), "optin_manager/src")
+SRC_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../..")
 
 from openflow.optin_manager.defaultsettings.django import *
 from openflow.optin_manager.defaultsettings.database import *
@@ -67,6 +78,17 @@ except ImportError as e:
         )
     else:
         raise
+
+# Load database info
+DATABASES = {
+    'default': {
+        'ENGINE': "django.db.backends.%s" % DATABASE_ENGINE,
+        'NAME': DATABASE_NAME,
+        'USER': DATABASE_USER,
+        'PASSWORD': DATABASE_PASSWORD,
+        'HOST': DATABASE_HOST,
+    }
+}
 
 #
 # For testing. Not really needed, since the line is commented in

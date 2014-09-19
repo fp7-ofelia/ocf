@@ -14,12 +14,6 @@ Ofelia Opt-in AM user settings file
 #
 
 #
-# Directories for the Opt-in sources and the configuration file.
-#
-CONF_DIR = '/opt/ofelia/optin_manager/src/python/openflow/optin_manager'
-SRC_DIR = '/opt/ofelia/optin_manager/src'
-
-#
 # Super user credentials to access the admin GUI.
 # aka Island Manager credentials.
 #
@@ -53,18 +47,6 @@ DATABASE_USER = "changeMe"
 DATABASE_PASSWORD = "changeMe"
 DATABASE_HOST = "127.0.0.1"
 DATABASE_ENGINE = "mysql"
-#
-# WARNING: Do NOT modify the following block!
-#
-DATABASES = {
-    'default': {
-        'ENGINE': "django.db.backends.%s" % DATABASE_ENGINE,
-        'NAME': DATABASE_NAME,
-        'USER': DATABASE_USER,
-        'PASSWORD': DATABASE_PASSWORD,
-        'HOST': DATABASE_HOST,
-    }
-}
 
 #
 # Name for the island that is to be set on your host.

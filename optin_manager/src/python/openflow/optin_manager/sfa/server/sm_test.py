@@ -14,13 +14,13 @@ class SliceManager:
         self.cache=None
 
     def Resources(self):
-        aggregate = {'hrn':'topdomain.nitos','addr':'192.168.254.188', 'port':8080}
-        server = SfaServerProxy('192.168.254.188:8080') 
+        aggregate = {"hrn":"topdomain.nitos","addr":"192.168.254.188", "port":8080}
+        server = SfaServerProxy("192.168.254.188:8080") 
         server.ListResources(None,None)
 
 import xmlrpclib
 from httplib import HTTPS, HTTPSConnection
-need_HTTPSConnection=hasattr(xmlrpclib.Transport().make_connection('localhost'),'getresponse')
+need_HTTPSConnection=hasattr(xmlrpclib.Transport().make_connection("localhost"),"getresponse")
 class SfaServerProxy:
 
     def __init__ (self, url, keyfile=None, certfile=None, verbose=False, timeout=None):
@@ -70,11 +70,11 @@ class XMLRPCTransport(xmlrpclib.Transport):
             conn = HTTPS(host, None, key_file=self.key_file, cert_file=self.cert_file)
 
         # Some logic to deal with timeouts. It appears that some (or all) versions
-        # of python don't set the timeout after the socket is created. We'll do it
+        # of python don"t set the timeout after the socket is created. We"ll do it
         # ourselves by forcing the connection to connect, finding the socket, and
         # calling settimeout() on it. (tested with python 2.6)
         if self.timeout:
-            if hasattr(conn, 'set_timeout'):
+            if hasattr(conn, "set_timeout"):
                 conn.set_timeout(self.timeout)
 
             if hasattr(conn, "_conn"):
@@ -100,20 +100,22 @@ class ExceptionUnmarshaller(xmlrpclib.Unmarshaller):
             raise e.faultString
 
 
-#client_bootstrap = SfaClientBootstrap('ocf.i2cat.user',None ,dir='/opt/ofelia/expedient/src/python/sfa/sfi/')
-#cert = client_bootstrap.self_signed_cert_produce('/opt/ofelia/expedient/src/python/sfa/sfi/ocf.i2cat.user.sscert')
+#client_bootstrap = SfaClientBootstrap("ocf.i2cat.user",None ,dir="/opt/ofelia/expedient/src/python/sfa/sfi/")
+#cert = client_bootstrap.self_signed_cert_produce("/opt/ofelia/expedient/src/python/sfa/sfi/ocf.i2cat.user.sscert")
 #print cert
-#credential =  client_bootstrap.my_credential_produce ('/opt/ofelia/expedient/src/python/sfa/sfi/ocf.i2cat.user.cred')
+#credential =  client_bootstrap.my_credential_produce ("/opt/ofelia/expedient/src/python/sfa/sfi/ocf.i2cat.user.cred")
 #print credential
 #cred = client_bootstrap.my_credential_string()
 #print cred
-credential = open('/opt/ofelia/optin_manager/src/python/openflow/optin_manager/sfa/credentials/ocf.cred','r')
-#credential = open('/home/user/jfed_PEM/slicecred2.cred')
+import os
+OCF_PATH = os.getenv("OCF_PATH")
+credential = open(os.path.join(OCF_PATH,"optin_manager/src/python/openflow/optin_manager/sfa/credentials/ocf.cred"),"r")
+#credential = open("/home/user/jfed_PEM/slicecred2.cred")
 print credential
 
-s = SfaServerProxy('https://192.168.254.188:12346','/opt/ofelia/expedient/src/python/sfa/topdomain.pkey', '/opt/ofelia/expedient/src/python/sfa/topdomain.gid')
-s = SfaServerProxy('https://192.168.254.188:12346','/opt/ofelia/optin_manager/src/python/openflow/optin_manager/sfa/my_roots/authorities/ocf/ocf.pkey', '/opt/ofelia/optin_manager/src/python/openflow/optin_manager/sfa/my_roots/authorities/ocf/ocf.gid')
+s = SfaServerProxy("https://192.168.254.188:12346", os.path.join("OCF_PATH", "expedient/src/python/sfa/topdomain.pkey"), os.path.join(OCF_PATH, "expedient/src/python/sfa/topdomain.gid"))
+s = SfaServerProxy("https://192.168.254.188:12346", os.path.join("OCF_PATH", "optin_manager/src/python/openflow/optin_manager/sfa/my_roots/authorities/ocf/ocf.pkey"), os.path.join(OCF_PATH, "optin_manager/src/python/openflow/optin_manager/sfa/my_roots/authorities/ocf/ocf.gid"))
 
-#print s.get_trusted_certs([credential.read()],{'cached': True, 'list_leases': 'resources', 'geni_rspec_version': {'type': 'SFA', 'version': '1', 'namespace': None, 'extensions': [], 'schema': None}, 'rspec_version': {'namespace': None, 'version': '1', 'type': 'SFA', 'extensions': [], 'schema': None}, 'call_id': 'urn:uuid:57a5ce8d-a668-497c-8e91-ba5c4b42d415'})
+#print s.get_trusted_certs([credential.read()],{"cached": True, "list_leases": "resources", "geni_rspec_version": {"type": "SFA", "version": "1", "namespace": None, "extensions": [], "schema": None}, "rspec_version": {"namespace": None, "version": "1", "type": "SFA", "extensions": [], "schema": None}, "call_id": "urn:uuid:57a5ce8d-a668-497c-8e91-ba5c4b42d415"})
 
-print s.get_trusted_certs('aaa')#credential.read())
+print s.get_trusted_certs("aaa")#credential.read())
