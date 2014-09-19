@@ -5,10 +5,10 @@ import sys
 sys.stdout = sys.stderr
 
 # Add OCF's python files directory to system path, using a relative path from current file
-PYTHON_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../..")
 #PYTHON_DIR = os.path.join(os.path.dirname(__file__), '/opt/ofelia/expedient/src/python/')
-PLUGINS_DIR = os.path.join(PYTHON_DIR, "plugins")
+PYTHON_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../..")
 #PLUGINS_DIR = os.path.join(os.path.dirname(__file__), '/opt/ofelia/expedient/src/python/plugins')
+PLUGINS_DIR = os.path.join(PYTHON_DIR, "plugins")
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'expedient.clearinghouse.settings'
 sys.path.insert(0,PLUGINS_DIR)

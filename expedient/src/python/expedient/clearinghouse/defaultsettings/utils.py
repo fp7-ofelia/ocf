@@ -6,8 +6,8 @@ Created on Feb 14, 2011
 import os
 import sys
 # Retrieve current location and add parent's to system path (relative path > absolute path)
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 #sys.path.append("/opt/ofelia/expedient/src/python/expedient/clearinghouse/")
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
 def append_to_local_setting(setting_name, l, globals_dict, at_start=False):
     """Set or update a setting by adding items to it.
