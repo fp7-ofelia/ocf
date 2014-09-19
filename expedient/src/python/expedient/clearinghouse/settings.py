@@ -7,11 +7,14 @@ Created on Aug 19, 2010
 import sys, traceback
 
 import os
-#CONF_DIR = os.path.join(os.getenv("OCF_PATH"), "expedient/src/python/expedient/clearinghouse")
+
+# *Load first* the path variables needed for the stack to run
+
 #CONF_DIR = "/opt/ofelia/expedient/src/python/expedient/clearinghouse"
+#CONF_DIR = os.path.join(os.getenv("OCF_PATH"), "expedient/src/python/expedient/clearinghouse")
 CONF_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)))
-#SRC_DIR = os.path.join(os.getenv("OCF_PATH"), "expedient/src")
 #SRC_DIR = "/opt/ofelia/expedient/src
+#SRC_DIR = os.path.join(os.getenv("OCF_PATH"), "expedient/src")
 SRC_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../..")
 
 from expedient.clearinghouse.defaultsettings.django import *
@@ -28,6 +31,18 @@ from expedient.clearinghouse.defaultsettings.xmlrpc import *
 from expedient.clearinghouse.defaultsettings.openflowtests import *
 from expedient.clearinghouse.defaultsettings.tests import *
 from expedient.clearinghouse.defaultsettings.ldapSettings import *
+
+# *Before importing plug-in*, load database info
+DATABASES = {
+    'default': {
+        'ENGINE': "django.db.backends.%s" % DATABASE_ENGINE,
+        'NAME': DATABASE_NAME,
+        'USER': DATABASE_USER,
+        'PASSWORD': DATABASE_PASSWORD,
+        'HOST': DATABASE_HOST,
+    }
+}
+
 from expedient.clearinghouse.defaultsettings.plugin import *
 # Import the list of required variables
 from expedient.clearinghouse.defaultsettings.required import REQUIRED_SETTINGS
