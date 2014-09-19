@@ -35,8 +35,8 @@ try:
     from settings import CONF_DIR as location
 except ImportError:
     # TODO: Hack!
-    import os
     #location = "/etc/expedient"
+    import os
     location = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..")
 
 CONF_DIR = location
