@@ -28,24 +28,31 @@ confirm_deploy=0
 
 ## Parameters for whiptail screen
 whiptail_width=45
+
+ofver_actions=(install upgrade update remove)
 case $action_arg in
     install )
-        whiptail_checklist_title="OCF installation";
+        whiptail_action_title="OCF installation";
         whiptail_message_title="Installation stopped";
         whiptail_message_description="You have stopped or cancelled the installation";
         ;;
     upgrade|update )
-        whiptail_checklist_title="OCF upgrade";
+        whiptail_action_title="OCF upgrade";
         whiptail_message_title="Upgrade stopped";
         whiptail_message_description="You have stopped or cancelled the upgrade";
         ;;
     remove )
-        whiptail_checklist_title="OCF removal";
+        whiptail_action_title="OCF removal";
         whiptail_message_title="Removal stopped";
         whiptail_message_description="You have stopped or cancelled the removal";
         ;;
+    migrate )
+        whiptail_action_title="OCF migration";
+        whiptail_message_title="Migration stopped";
+        whiptail_message_description="You have stopped or cancelled the migration";
+        ;;
     *)
-        echo "Usage: ./splash {install | upgrade | update | remove} <modules>";
+        echo "Usage: ./splash {install | upgrade | update | remove | migrate} <modules>";
         exit 1;
         ;;
 esac
@@ -61,7 +68,16 @@ function exit_on_null_arg()
     fi
 }
 
-function main()
+function contains_element()
+{
+    local e
+    for e in "${@:2}"; do
+        [[ "$e" == "$1" ]] && echo 0 && return 0;
+    done
+    echo 1 && return 1
+}
+
+function do_ofver_action()
 {
     for i in "${whiptail_args[@]}"
     do
@@ -70,8 +86,8 @@ function main()
     
     ocf_modules_deploy=""
     while [ $confirm_deploy -eq 0 ]; do
-        #./${gui_path}/checklist.sh "$whiptail_checklist_title" "$whiptail_checklist_description" $(($((2+$num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options
-        ocf_modules_deploy=$(whiptail --checklist --noitem "$whiptail_checklist_description" $(($(($num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options --backtitle "OFELIA Control Framework" --title "$whiptail_checklist_title" 3>&1 1>&2 2>&3)
+        #./${gui_path}/checklist.sh "$whiptail_action_title" "$whiptail_checklist_description" $(($((2+$num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options
+        ocf_modules_deploy=$(whiptail --checklist --noitem "$whiptail_checklist_description" $(($(($num_whiptail_args))*3)) $whiptail_width $num_whiptail_args $whiptail_checklist_options --backtitle "OFELIA Control Framework" --title "$whiptail_action_title" 3>&1 1>&2 2>&3)
         #ocf_modules_deploy=$?
         # Saving the return code (0/1)
         exit_on_null_arg $ocf_modules_deploy
@@ -103,6 +119,34 @@ function main()
     done
     # Write file to be parsed later
     echo $ocf_modules_deploy > ocf_modules_deploy
+}
+
+function do_migration()
+{
+    chosen_folder=$(dirname $PWD)
+    while [ $confirm_deploy -eq 0 ]; do
+        ocf_modules_deploy=$(whiptail --inputbox "Please choose the destination path for your code" 8 78 $chosen_folder --title "$whiptail_action_title" --backtitle "OFELIA Control Framework" 3>&1 1>&2 2>&3)
+        # Update chosen folder to the last value set by the user
+        chosen_folder=$ocf_modules_deploy
+        # Saving the return code (0/1)
+        exit_on_null_arg $chosen_folder
+
+        .${gui_path}/yesno.sh "You are about to $action_arg the OCF modules to the following location:\n\n$ocf_modules_deploy" $(($((1+4))*2)) $whiptail_width
+        confirm_deploy=$?
+        # Negate exit code (whiptail --yesno => yes: 1, no: 0)
+        confirm_deploy=$((! $confirm_deploy ))
+    done
+    # Write file to be parsed later
+    echo $ocf_modules_deploy > ocf_modules_deploy
+}
+
+function main()
+{
+    if [[ $(contains_element "$action_arg" "${ofver_actions[@]}") == 0 ]]; then
+        do_ofver_action $@
+    elif [[ $action_arg == "migrate" ]]; then
+        do_migration $@
+    fi
 }
 
 main $@

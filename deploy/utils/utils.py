@@ -7,7 +7,7 @@ import subprocess
 Utils for the installation of OCF modules.
 """
 
-ocf_path = "/opt/ofelia"
+ocf_path = os.getenv("OCF_PATH") or "/opt/ofelia"
 deploy_path = os.path.join(ocf_path, "deploy")
 gui_path = os.path.join(deploy_path, "gui")
 common_path = os.path.join(deploy_path, "common")
@@ -54,7 +54,9 @@ def list_modules(modules):
 ## System execution
 
 def execute_command(arg_list):
+    print "arg list: ", arg_list
     return_code = subprocess.call(arg_list)
+    print "return code: ", return_code
     return return_code
 
 ## Screens
@@ -140,6 +142,23 @@ def remove_modules(ocf_modules):
     for ocf_module in ocf_modules:
         invoke_step_start_screen("remove", ocf_module)
         remove_module(ocf_path, ocf_module)
+
+## Operations over framework (migrate)
+
+def migrate_framework(new_location):
+    try:
+        import os
+        clear_screen()
+        current_dir = os.getcwd()
+        utils_dir = os.path.dirname(__file__)
+        print "utils_dir: ", utils_dir
+        os.chdir(utils_dir)
+        print "changed_dir to => ", os.getcwd()
+        return_code = execute_command(["./migrate.sh", new_location])
+        print "return code 1: ",return_code
+        os.chdir(current_dir)
+    except Exception as e:
+        print_error(e)
 
 ## External libraries and dependencies
 
