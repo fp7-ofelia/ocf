@@ -1,9 +1,9 @@
 import os
 import sys
 import uuid, random 
-from os.path import dirname, join
 
-PYTHON_DIR = join(dirname(__file__), '/opt/ofelia/vt_manager/src/python/')
+#PYTHON_DIR = join(dirname(__file__), '/opt/ofelia/vt_manager/src/python/')
+PYTHON_DIR = os.path.join(os.path.dirname(__file__), "../../..")
 
 # This is needed because wsgi disallows using stdout
 sys.stdout = sys.stderr

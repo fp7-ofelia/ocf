@@ -1,17 +1,26 @@
-'''
-	@author: msune
+"""
+@author: msune, CarolinaFernandez
+Ofelia VT manager settings loader 
+"""
 
-	Ofelia XEN Agent settings loader 
-'''
-
-#Import static settings
+# Import static settings
 from vt_manager.settings.staticSettings import *
 
-#Import user settings
+# Import user settings
 from vt_manager.mySettings import *
 
-#Must be here 
+# Load database info
+DATABASES = {
+    'default': {
+        'ENGINE': "django.db.backends.%s" % DATABASE_ENGINE,
+        'NAME': DATABASE_NAME,
+        'USER': DATABASE_USER,
+        'PASSWORD': DATABASE_PASSWORD,
+        'HOST': DATABASE_HOST,
+    }
+}
 
+#Must be here 
 ADMINS = [
     ("expedient", ROOT_EMAIL),
 ]

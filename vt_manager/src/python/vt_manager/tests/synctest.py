@@ -1,9 +1,10 @@
-rspec = open("/opt/ofelia/vt_manager/src/python/vt_manager/tests/provisioning/pruebaCreate.xml").read()
-url = "https://xml:rpc@llull.ctx.i2cat.net:38445/xmlrpc/plugin"
-from vt_manager.communication.northCommInterface import send_sync
 from uuid import uuid4
+from vt_manager.communication.northCommInterface import send_sync
 from vt_manager.communication.utils.XmlHelper import *
+import os
 
+rspec = open(os.path.join(os.path.dirname(__file__), "provisioning/pruebaCreate.xml")).read()
+url = "https://xml:rpc@llull.ctx.i2cat.net:38445/xmlrpc/plugin"
 
 rspec = XmlHelper.parseXmlString(rspec)
 rspec.query.provisioning.action[0].id = "fakeID:" + str(uuid4())

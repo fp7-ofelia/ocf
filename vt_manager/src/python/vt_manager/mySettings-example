@@ -38,18 +38,6 @@ DATABASE_USER = "changeMe"
 DATABASE_PASSWORD = "changeMe"
 DATABASE_HOST = "127.0.0.1"
 DATABASE_ENGINE = "mysql"
-#
-# WARNING: Do NOT modify the following block
-#
-DATABASES = {
-    'default': {
-        'ENGINE': "django.db.backends.%s" % DATABASE_ENGINE,
-        'NAME': DATABASE_NAME,
-        'USER': DATABASE_USER,
-        'PASSWORD': DATABASE_PASSWORD,
-        'HOST': DATABASE_HOST,
-    }
-}
 
 #
 # Name for the island that is to be set on your host.
