@@ -4,9 +4,9 @@ Created on Aug 19, 2010
 
 @author: jnaous
 '''
-import sys, traceback
 
 import os
+import sys, traceback
 
 # *Load first* the path variables needed for the stack to run
 
