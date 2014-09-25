@@ -42,9 +42,9 @@ DEBUG = True
 # Directory for the VT manager sources.
 #
 
-#SRC_DIR = "/opt/ofelia/vt_manager/src
+#SRC_DIR = "/opt/ofelia/vt_manager/src"
 #SRC_DIR = join(os.getenv("OCF_PATH"), "vt_manager/src")
-SRC_DIR = join(dirname(__file__), "../../..")
+SRC_DIR = join(dirname(__file__), "../../../")
 
 #
 # Database default parameters.
