@@ -29,3 +29,7 @@ while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFEL
             echo "Not valid option. Please say yes/no"
         fi
     done
+
+# Determine installation path
+print "Setting environment variables..."
+source $CURRENT_DIRECTORY/lib/set_environment_variables

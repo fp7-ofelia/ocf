@@ -11,7 +11,8 @@ replacement=""
 #
 # Currently retrieves location of downloaded code
 # But any other could be asked for to the administrator...
-OCF_PATH=$(echo $PWD  | sed -e "s/expedient.*/${replacement}/g")
+#OCF_PATH=$(echo $PWD | sed -e "s/expedient.*/${replacement}/g")
+OCF_PATH=$(dirname $(dirname $PWD))
 
 # Set environment variables in Apache's envvars file
 APACHE_ENVVARS=/etc/apache2/envvars
