@@ -147,15 +147,11 @@ def remove_modules(ocf_modules):
 
 def migrate_framework(new_location):
     try:
-        import os
         clear_screen()
         current_dir = os.getcwd()
         utils_dir = os.path.dirname(__file__)
-        print "utils_dir: ", utils_dir
         os.chdir(utils_dir)
-        print "changed_dir to => ", os.getcwd()
         return_code = execute_command(["./migrate.sh", new_location])
-        print "return code 1: ",return_code
         os.chdir(current_dir)
     except Exception as e:
         print_error(e)
