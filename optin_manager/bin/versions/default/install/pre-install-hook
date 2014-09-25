@@ -9,7 +9,7 @@
 
 
 # Deprecation warning
-printHeader "Information: this module has been DEPRECATED and may interfere with FlowVisor >= 0.8"
+#printHeader "Information: this module has been DEPRECATED and may interfere with FlowVisor >= 0.8"
 #accept_deprecation_warning=0
 #while [[ ! $accept_deprecation_warning =~ ^[y|Y|n|N]$ ]]
 #    do
