@@ -7,7 +7,7 @@ import subprocess
 Utils for the installation of OCF modules.
 """
 
-ocf_path = os.getenv("OCF_PATH") or "/opt/ofelia"
+ocf_path = os.path.join(os.path.dirname(__file__), "../../")
 deploy_path = os.path.join(ocf_path, "deploy")
 gui_path = os.path.join(deploy_path, "gui")
 common_path = os.path.join(deploy_path, "common")
