@@ -24,7 +24,7 @@ fi
 APACHE_ENVVARS=/etc/apache2/envvars
 if [ -f $APACHE_ENVVARS ]; then
   #if [ -z $(grep -q $OCF_PATH $APACHE_ENVVARS) ]; then
-  if [ -z $(grep $OCF_PATH $APACHE_ENVVARS) ]; then
+  if [[ -z $(grep $OCF_PATH $APACHE_ENVVARS) ]]; then
     echo -e """\n# OCF path\nexport OCF_PATH=$OCF_PATH" >> $APACHE_ENVVARS
   fi
 fi
