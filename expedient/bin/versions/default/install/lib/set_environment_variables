@@ -41,6 +41,6 @@ fi
 # NOTE: re-log in should me made anyway after any change for this env vars
 # to be globally available
 #if [ -z $OCF_PATH ]; then
-if [ "$OCF_PATH" == "$OCF_PATH_LOCAL" ]; then
+if [ "$OCF_PATH" != "$OCF_PATH_LOCAL" ]; then
   source $PROFILE_D_OCF
 fi
