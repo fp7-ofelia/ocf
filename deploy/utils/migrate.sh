@@ -86,7 +86,7 @@ function validate_new_ocf_path()
     new_ocf_path=$1
 
     # Ensure the new path ends with a "/"
-    last_char=${a#${a%?}}
+    last_char=${new_ocf_path#${new_ocf_path%?}}
     if [[ $last_char != "/" ]]; then
         new_ocf_path=$new_ocf_path/
     fi
