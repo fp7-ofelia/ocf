@@ -54,9 +54,7 @@ def list_modules(modules):
 ## System execution
 
 def execute_command(arg_list):
-    print "arg list: ", arg_list
     return_code = subprocess.call(arg_list)
-    print "return code: ", return_code
     return return_code
 
 ## Screens
