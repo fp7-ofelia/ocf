@@ -8,7 +8,8 @@
 ###
 
 #Constants
-SRC_DIR=/opt/ofelia/expedient/
+SRC_DIR=${OCF_PATH:-$(echo $(dirname $(dirname $PWD)))}
+SRC_DIR=$SRC_DIR/expedient/
 APACHE_USER="www-data"
 
 #Inform user

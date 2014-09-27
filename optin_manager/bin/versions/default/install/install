@@ -8,7 +8,8 @@
 ###
 
 #Constants
-SRC_DIR=/opt/ofelia/optin_manager/
+SRC_DIR=${OCF_PATH:-$(echo $(dirname $(dirname $PWD)))}
+SRC_DIR=$SRC_DIR/optin_manager/
 APACHE_USER="www-data"
 
 #Inform user
