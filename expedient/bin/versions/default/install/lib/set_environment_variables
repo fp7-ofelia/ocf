@@ -6,11 +6,11 @@
 #   @description: setting environment variables for OCF
 ###
 
-replacement=""
 # Determine OCF path
 #
 # Currently retrieves location of downloaded code
 # But any other could be asked for to the administrator...
+#replacement=""
 #OCF_PATH=$(echo $PWD | sed -e "s/expedient.*/${replacement}/g")
 OCF_PATH=$(dirname $(dirname $PWD))
 
