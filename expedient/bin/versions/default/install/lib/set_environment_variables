@@ -13,19 +13,19 @@
 
 #replacement=""
 #OCF_PATH=$(echo $PWD | sed -e "s/expedient.*/${replacement}/g")
-OCF_PATH=$(dirname $(dirname $PWD))
+OCF_PATH_LOCAL=$(dirname $(dirname $PWD))
 # Ensure the new path ends with a "/"
-last_char=${OCF_PATH#${OCF_PATH%?}}
+last_char=${OCF_PATH_LOCAL#${OCF_PATH_LOCAL%?}}
 if [[ $last_char != "/" ]]; then
-  OCF_PATH=$OCF_PATH/
+  OCF_PATH_LOCAL=$OCF_PATH_LOCAL/
 fi
 
 # Set environment variables in Apache's envvars file
 APACHE_ENVVARS=/etc/apache2/envvars
 if [ -f $APACHE_ENVVARS ]; then
   #if [ -z $(grep -q $OCF_PATH $APACHE_ENVVARS) ]; then
-  if [[ -z $(grep $OCF_PATH $APACHE_ENVVARS) ]]; then
-    echo -e """\n# OCF path\nexport OCF_PATH=$OCF_PATH" >> $APACHE_ENVVARS
+  if [[ -z $(grep $OCF_PATH_LOCAL $APACHE_ENVVARS) ]]; then
+    echo -e """\n# OCF path\nexport OCF_PATH=$OCF_PATH_LOCAL" >> $APACHE_ENVVARS
   fi
 fi
 
@@ -34,12 +34,13 @@ PROFILE_D=/etc/profile.d
 PROFILE_D_OCF=$PROFILE_D/ocf.sh
 if [ -d $PROFILE_D ]; then
   if [ ! -f $PROFILE_D_OCF ]; then
-    echo -e """#!/bin/bash\n\nexport OCF_PATH=$OCF_PATH""" >> $PROFILE_D_OCF
+    echo -e """#!/bin/bash\n\nexport OCF_PATH=$OCF_PATH_LOCAL""" >> $PROFILE_D_OCF
   fi
 fi
 # Read environment variable after any change (e.g. installation, migration)
 # NOTE: re-log in should me made anyway after any change for this env vars
 # to be globally available
-if [ -z $OCF_PATH ]; then
+#if [ -z $OCF_PATH ]; then
+if [ "$OCF_PATH" == "$OCF_PATH_LOCAL" ]; then
   source $PROFILE_D_OCF
 fi
