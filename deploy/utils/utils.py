@@ -24,7 +24,7 @@ def print_error(text):
 ## Paths and files
 
 def get_modules():
-    ocf_modules = os.walk(ocf_path).next()[1]
+    ocf_modules = sorted(os.walk(ocf_path).next()[1])
     ocf_modules.remove("deploy")
     ocf_modules.remove(".git")
     return ocf_modules
