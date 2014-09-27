@@ -17,7 +17,8 @@ OCF_PATH=$(dirname $(dirname $PWD))
 # Set environment variables in Apache's envvars file
 APACHE_ENVVARS=/etc/apache2/envvars
 if [ -f $APACHE_ENVVARS ]; then
-  if [ -z $(grep -q $OCF_PATH $APACHE_ENVVARS) ]; then
+  #if [ -z $(grep -q $OCF_PATH $APACHE_ENVVARS) ]; then
+  if [ -z $(grep $OCF_PATH $APACHE_ENVVARS) ]; then
     echo -e """\n# OCF path\nexport OCF_PATH=$OCF_PATH" >> $APACHE_ENVVARS
   fi
 fi
@@ -29,4 +30,10 @@ if [ -d $PROFILE_D ]; then
   if [ ! -f $PROFILE_D_OCF ]; then
     echo -e """#!/bin/bash\n\nexport OCF_PATH=$OCF_PATH""" >> $PROFILE_D_OCF
   fi
+fi
+# Read environment variable after any change (e.g. installation, migration)
+# NOTE: re-log in should me made anyway after any change for this env vars
+# to be globally available
+if [ -z $OCF_PATH ]; then
+  source $PROFILE_D_OCF
 fi
