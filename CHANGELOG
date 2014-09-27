@@ -31,6 +31,15 @@ Released: TBD
 
 Change log:
 
+[+] OFVER: Allow migration of the framework to another directory
+
+--------------------------------------------------
+v0.8.2
+--------------------------------------------------
+Released: TBD
+
+Change log:
+
 [*] EXP: Cannot monitor status of AMsoil-based aggregates enhancement Expedient. Issue 217
 [+] AGN: Locate server to store VM images and develop a template downloader for virtualisation agent. Issue 203
 
