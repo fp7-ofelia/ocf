@@ -1375,7 +1375,7 @@ div.expandable_admin {
 	padding-left: 10px !important;
 }
 div.expandable_admin {
-	margin-top: -5px;
+	margin-top: 5px;
 }
 .expandableCtl {
 	cursor: pointer;

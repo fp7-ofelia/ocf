@@ -38,6 +38,9 @@ def home(request):
 
 	# Iterate over each plugin to get its administration data
 	plugin_administration_methods = []
+	# Load plug-in settings, if needed
+	if not PluginLoader.plugin_settings:
+		PluginLoader.load_settings()
 	for plugin in PluginLoader.plugin_settings:
 		try:
 			plugin_administration_methods.append([str(plugin.capitalize()), reverse("%s_administration" % str(plugin))])
@@ -45,7 +48,6 @@ def home(request):
 			pass
 #		except Exception as e:
 #			print "[ERROR] Problem loading plugin administration methods inside administration module. Details: %s" % str(e)
-
 	return simple.direct_to_template(
 		request,
 		template=TEMPLATE_PATH+"/index.html",
