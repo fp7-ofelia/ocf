@@ -169,7 +169,7 @@ h1 {
 	color: #225599;	
 }
 h2, h3 {
-	margin: 15px 0 0px;
+	margin: 5px 0 5px; /*15px 0 0px;*/
 	border-width: 0px 0px 1px 0px;
 }
 
