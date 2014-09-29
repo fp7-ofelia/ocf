@@ -27,7 +27,7 @@ h2 {
     <tbody>
         <tr>
             <td>
-                <form method="post" action="{% url administration_home %}">{% csrf_token %}
+                <form method="post" action="">{% csrf_token %}
                     <table style="margin: 0 auto;">
                         <tbody>
                             <tr>
@@ -50,11 +50,11 @@ h2 {
                     </table>
                 </form>
             </td>
-            <!--<td>
-                <form method="post" action="{#{% url remove_all_vms %}#}">{% csrf_token %}
+            <td>
+                <form method="post" action="{% url remove_all_vms %}">{% csrf_token %}
                     <input type="submit" value="Delete all VMs" />
                 </form>
-            </td>-->
+            </td>
         </tr>
     </tbody>
 </table>

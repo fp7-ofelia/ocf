@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.views.generic import simple
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseRedirect, HttpResponseNotAllowed,\
@@ -27,6 +28,8 @@ from expedient.clearinghouse.project.models import Project
 from expedient.common.utils.plugins.plugincommunicator import PluginCommunicator
 from expedient.common.utils.plugins.resources.node import Node
 from expedient.common.utils.plugins.resources.link import Link
+
+import subprocess
 
 def goto_create_vm(request, slice_id, agg_id):
     """Show a page that allows user to add SSH s to the aggregate."""
@@ -356,7 +359,8 @@ def remove_vm(request, vm_id):
             DatedMessage.objects.post_message_to_user(
                 "Administration info for vt_plugin: VM with id %s removed successfully" % str(vm_id),
                 request.user, msg_type=DatedMessage.TYPE_SUCCESS)
-    except:
+    except Exception as e:
+        print "VT plug-in: could not delete VM %s: %s", (str(vm_id), str(e))
         DatedMessage.objects.post_message_to_user(
             "Administration error for vt_plugin: %s" % message_center_notification,
             request.user, msg_type=DatedMessage.TYPE_ERROR)
