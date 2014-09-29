@@ -48,11 +48,17 @@ the components manually.
 2. Installing
 -------------
 
-2.1 Clone the OCF repository under folder /opt:
+2.1 Clone the OCF repository:
 
+    2.1.1 For Expedient, Opt-in, VT manager: you may place it anywhere
+          (e.g. under /opt/ofelia)
+
+    2.1.2 For OXAD (XEN agent for virtualization purposes); you MUST
+          place it under /opt/ofelia
+    
     git clone https://github.com/fp7-ofelia/ocf.git /opt/ofelia
 
-    Alternatively you can download the tarball and uncompress it there
+    Alternatively you can download the tarball and uncompress in place
 
 2.2 For Expedient, Opt-in, VT manager: choose the components to install 
     as a root user. This will implicitly trigger OFVER:
@@ -115,7 +121,20 @@ the components manually.
     ./ofver upgrade
 
 
-4. Additional notes
+4. Migrating
+------------
+
+4.1 For Expedient, Opt-in, VT manager: choose the new path in your servers 
+    where you want the OCF stack code to be migrated:
+
+    cd /opt/ofelia/deploy
+    python migrate.py
+
+4.2 For OXAD (XEN agent for virtualization purposes); this features is not
+    supported
+
+
+5. Additional notes
 -------------------
 
 Please have a look to Manuals [https://github.com/fp7-ofelia/ocf/wiki/Manuals]
