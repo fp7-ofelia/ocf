@@ -11,3 +11,6 @@ ocf_modules_remove = utils.invoke_splash_screen("remove", utils.get_installed_mo
 
 if ocf_modules_remove:
     utils.remove_modules(ocf_modules_remove)
+
+# Show ending screen
+utils.invoke_ending_screen("Removal")

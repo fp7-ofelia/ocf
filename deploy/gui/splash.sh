@@ -33,22 +33,22 @@ ofver_actions=(install upgrade update remove)
 case $action_arg in
     install )
         whiptail_action_title="OCF installation";
-        whiptail_message_title="Installation stopped";
+        whiptail_message_title="Installation";
         whiptail_message_description="You have stopped or cancelled the installation";
         ;;
     upgrade|update )
         whiptail_action_title="OCF upgrade";
-        whiptail_message_title="Upgrade stopped";
+        whiptail_message_title="Upgrade";
         whiptail_message_description="You have stopped or cancelled the upgrade";
         ;;
     remove )
         whiptail_action_title="OCF removal";
-        whiptail_message_title="Removal stopped";
+        whiptail_message_title="Removal";
         whiptail_message_description="You have stopped or cancelled the removal";
         ;;
     migrate )
         whiptail_action_title="OCF migration";
-        whiptail_message_title="Migration stopped";
+        whiptail_message_title="Migration";
         whiptail_message_description="You have stopped or cancelled the migration";
         ;;
     *)
@@ -59,10 +59,11 @@ esac
 whiptail_checklist_description="Choose the modules by pressing SPACE key and then TAB to reach <Ok> or <Cancel>"
 whiptail_checklist_options=""
 
+
 function exit_on_null_arg()
 {
     if [[ $1 == "" ]]; then
-        .${gui_path}/info.sh "$whiptail_message_title" "$whiptail_message_description" "8" "$whiptail_width"
+        .${gui_path}/info.sh "$whiptail_message_title stopped" "$whiptail_message_description" "8" "$whiptail_width"
         confirm_deploy=1
         exit $confirm_deploy
     fi

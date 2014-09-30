@@ -13,3 +13,6 @@ new_location = utils.invoke_splash_screen("migrate", utils.get_modules())
 if new_location:
     # Perform migration to new location
     utils.migrate_framework(new_location[0])
+
+# Show ending screen
+utils.invoke_ending_screen("Migration")

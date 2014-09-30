@@ -89,6 +89,12 @@ def invoke_splash_screen(deploy_action, arg_list):
             print_error(e)
     return chosen_modules
 
+def invoke_ending_screen(deploy_action):
+    if not deploy_action:
+        return None
+    else:
+        return execute_command(["%s/end.sh" % gui_path] + [deploy_action])
+
 def clear_screen():
     execute_command(["clear"])
 

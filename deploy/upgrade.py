@@ -14,3 +14,6 @@ if ocf_modules_upgrade:
     utils.install_dependencies(utils.common_path, ocf_modules_upgrade)
     # Perform upgrade of already installed modules
     utils.upgrade_modules(ocf_modules_upgrade)
+
+# Show ending screen
+utils.invoke_ending_screen("Upgrade")

@@ -17,3 +17,6 @@ if ocf_modules_install:
     utils.install_dependencies(utils.dependencies_path, ocf_modules_install)
     # Perform installation of available modules
     utils.install_modules(ocf_modules_install)
+
+# Show ending screen
+utils.invoke_ending_screen("Installation")
