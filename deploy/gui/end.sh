@@ -20,4 +20,3 @@ whiptail_width=45
 gui_path="./deploy/gui"
 
 .${gui_path}/info.sh "$whiptail_message_title finished" "$whiptail_message_description" "8" "$whiptail_width"
-#exit 1

@@ -107,8 +107,14 @@ function migrate_framework()
         cp -Rp $current_ocf_path $new_ocf_path
         update_apache_symlinks $current_ocf_path $new_ocf_path
         update_framework_envvars $current_ocf_path $new_ocf_path
-        # XXX Uncomment after testing
-        #rm -r $current_ocf_path
+        if [ -d $new_ocf_path ]; then
+            if [ ! -z $(which rsync) ]; then
+                echo "Syncing files: $current_ocf_path => $new_ocf_path..."
+                # Double-check everything is in its place
+                rsync -a $current_ocf_path/ $new_ocf_path
+                rm -r $current_ocf_path
+            fi
+        fi
     fi
 }
 

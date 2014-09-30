@@ -14,5 +14,5 @@ if new_location:
     # Perform migration to new location
     utils.migrate_framework(new_location[0])
 
-# Show ending screen
-utils.invoke_ending_screen("Migration")
+# Show ending screen. Cannot run when files are migrated
+#utils.invoke_ending_screen("Migration")

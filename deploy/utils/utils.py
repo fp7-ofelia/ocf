@@ -156,7 +156,7 @@ def migrate_framework(new_location):
         utils_dir = os.path.dirname(__file__)
         os.chdir(utils_dir)
         return_code = execute_command(["./migrate.sh", new_location])
-        os.chdir(current_dir)
+        os.chdir(new_location)
     except Exception as e:
         print_error(e)
 
