@@ -51,7 +51,8 @@ function printHeader()
 	print ""
 	print ""
 #	print "${txtgreen}$1 ${txtrst} $2"
-	printBold "${txtgreen}$1 `printBold $2`"
+#	printBold "${txtgreen}$1 `printBold $2`"
+	printBold "${txtgreen}$1 $2"
 }
 
 #debug print
