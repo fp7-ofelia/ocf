@@ -11,7 +11,7 @@
 whiptail_action=$1
 whiptail_action=${whiptail_action,,}
 whiptail_message_title="OCF $whiptail_action"
-whiptail_message_description="The $whiptail_action process has finished successfully";
+whiptail_message_description="The $whiptail_action process has finished";
 
 ## Parameters for whiptail screen
 whiptail_width=45
