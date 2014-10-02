@@ -19,7 +19,7 @@ from vt_manager.utils.UrlUtils import UrlUtils
 #XXX:To implement SfaCommunicator for a better use of SFA CreateSliver and Start/Stop/Delete/Update slice
 #from vt_manager.common.middleware.thread_local import thread_locals, push
 #from multiprocessing import Pipe
-
+import random
 class VTShell:
 
         def __init__(self):
@@ -82,6 +82,7 @@ class VTShell:
 
 	def CreateSliver(self,vm_params,projectName,sliceName,expiration):
 		#processes = list()
+                self.modify_sliver_names(vm_params,projectName, sliceName)
 		provisioningRSpecs = VMSfaManager.getActionInstance(vm_params,projectName,sliceName)
 		for provisioningRSpec in provisioningRSpecs:
 		    #waiter,event = Pipe()
@@ -121,4 +122,14 @@ class VTShell:
                         if iface.isMgmt:
                             return iface.ip4s.all()[0].ip #IP
                 return "None" 
+
+        def modify_sliver_names(self, vm_params,authority, slice_name):
+                vms = VirtualMachine.objects.filter(sliceName=slice_name, projectName=authority)
+                names = list()
+                for vm in vms:
+                    names.append(vm.name)
+                for sliver in vm_params:
+                    for vm in sliver['slivers']:
+                         if vm['name'] in names:
+                             vm['name'] = vm['name'] + str(random.randint(0,999))
                            

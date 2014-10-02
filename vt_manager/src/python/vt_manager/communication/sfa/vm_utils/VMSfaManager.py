@@ -17,28 +17,58 @@ class VMSfaManager:
 
     '''Class to pass the VM parameters to an RSpec Instance for ProvisioningDisaptcher'''
 
+#    @staticmethod
+#    def getActionInstance(servers_slivers,projectName,sliceName):
+#	provisioningRSpecs = list()
+#	rspec = XmlHelper.getSimpleActionQuery()
+#	actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
+#        actionClassEmpty.type_ = "create"
+#        rspec.query.provisioning.action.pop()
+#        for vms in servers_slivers:
+#	    server_id = vms['component_id']
+#	    for vm in vms['slivers']:
+#                if not vm.get("interfaces"):
+#                    vm['interfaces'] = []
+#		server = VTServer.objects.get(uuid = server_id)
+#	        VMSfaManager.setDefaultVMParameters(vm,server,projectName,sliceName)
+#		actionClass = copy.deepcopy(actionClassEmpty)
+#                actionClass.id = uuid.uuid4()
+#                Translator.VMdictToClass(vm, actionClass.server.virtual_machines[0])
+#		Translator.VMdicIfacesToClass(vm.get('interfaces'),actionClass.server.virtual_machines[0].xen_configuration.interfaces)
+#                actionClass.server.uuid = server_id
+#                actionClass.server.virtualization_type = server.getVirtTech()
+#                rspec.query.provisioning.action.append(actionClass)
+#		provisioningRSpecs.append(rspec.query.provisioning)
+#
+#	return provisioningRSpecs
     @staticmethod
     def getActionInstance(servers_slivers,projectName,sliceName):
-	provisioningRSpecs = list()
-	rspec = XmlHelper.getSimpleActionQuery()
-	actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
+        provisioningRSpecs = list()
+        rspec = XmlHelper.getSimpleActionQuery()
+        actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
         actionClassEmpty.type_ = "create"
         rspec.query.provisioning.action.pop()
+        default_action = rspec.query.provisioning.action
         for vms in servers_slivers:
-	    server_id = vms['component_id']
-	    for vm in vms['slivers']:
-		server = VTServer.objects.get(uuid = server_id)
-	        VMSfaManager.setDefaultVMParameters(vm,server,projectName,sliceName)
-		actionClass = copy.deepcopy(actionClassEmpty)
+            server_id = vms['component_id']
+            for vm in vms['slivers']:
+                if "interfaces" not in vm.keys():
+                    vm['interfaces'] = None
+                server = VTServer.objects.get(uuid = server_id)
+                VMSfaManager.setDefaultVMParameters(vm,server,projectName,sliceName)
+                actionClass = copy.deepcopy(actionClassEmpty)
                 actionClass.id = uuid.uuid4()
                 Translator.VMdictToClass(vm, actionClass.server.virtual_machines[0])
-		Translator.VMdicIfacesToClass(vm['interfaces'],actionClass.server.virtual_machines[0].xen_configuration.interfaces)
+                Translator.VMdicIfacesToClass(vm['interfaces'],actionClass.server.virtual_machines[0].xen_configuration.interfaces)
                 actionClass.server.uuid = server_id
                 actionClass.server.virtualization_type = server.getVirtTech()
-                rspec.query.provisioning.action.append(actionClass)
-		provisioningRSpecs.append(rspec.query.provisioning)
+                rspec.query.provisioning.action = [actionClass]
+                provisioningRSpecs.append(copy.deepcopy(rspec.query.provisioning))
 
-	return provisioningRSpecs
+
+        return provisioningRSpecs
+
+
 	
     @staticmethod
     def setDefaultVMParameters(vm,server,projectName,sliceName):
