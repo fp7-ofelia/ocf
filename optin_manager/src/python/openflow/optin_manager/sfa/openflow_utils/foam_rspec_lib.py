@@ -33,9 +33,9 @@ def getAdvertisement (nodes):
   rspec.attrib["type"] = "advertisement"
 
 
-  devices = nodes['switches']#OFShell().get_switches(flow_visor)
-  links = nodes['links']#OFShell().get_links(flow_visor)
-  federated_links = nodes['federated_links']
+  devices = nodes.get('switches')#OFShell().get_switches(flow_visor)
+  links = nodes.get('links')#OFShell().get_links(flow_visor)
+  federated_links = nodes.get('federated_links')
  
   #links = FV.getLinkList()
   #devices =FV.getDeviceList()
@@ -51,15 +51,15 @@ def getAdvertisement (nodes):
 
 #getLinks START
   if links:    
-    for link in links:
-      addAdLink(rspec, link)
+    #for link in links:
+      #addAdLink(rspec, link)
     for link in links:
       addGeniLink(rspec,link)
 #getLinks END 
 
   if federated_links:
-    for link in federated_links:
-      addAdLink(rspec,link,True)
+    #for link in federated_links:
+      #addAdLink(rspec,link,True)
     for link in federated_links:
       addGeniLink(rspec,link,True)
 

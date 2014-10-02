@@ -77,7 +77,7 @@ class OFShell:
                             if not expfs.dpid in nodes:
                                 nodes.append(expfs.dpid)
                     switches = self.get_switches(nodes)
-                    return {'switches':switches, 'links':[]}
+                    return {'switches':switches, 'links':[], 'federated_links':[]}
 
 	#def GetSlice(self,slicename,authority):
         #

@@ -27,13 +27,16 @@ from localsettings import AUTH_LDAP_BIND_PASSWORD, AUTH_LDAP_BIND_DN
 #
 # URI for the LDAP server to check the clearances.
 #
-AUTH_LDAP_SERVER_URI = "ldap://ldap.ibbt.fp7-ofelia.eu:389"
+#AUTH_LDAP_SERVER_URI = "ldap://ldap.ibbt.fp7-ofelia.eu:389"
+AUTH_LDAP_SERVER_URI = "ldap://10.2.9.40:389"
+#AUTH_LDAP_SERVER_URI = "ldap://10.128.0.50:389"
 
 #
 # Object that locates a user with the given certificate information
 # (e.g. "ou=users,dc=userToSearchFor,dc=com")
 #
-AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=fp7-ofelia,dc=eu",ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+#AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=users,dc=fp7-ofelia,dc=eu",ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+AUTH_LDAP_USER_SEARCH = LDAPSearch("dc=eu,dc=fibre",ldap.SCOPE_SUBTREE, "(eppn=%(user)s)")
 
 #
 # Populates the Django user from the LDAP directory.
@@ -70,7 +73,9 @@ AUTH_LDAP_GROUP_CACHE_TIMEOUT = 3600
 # URI for the master LDAP server to check the clearances.
 # Do NEVER use a slave LDAP server here.
 #
-LDAP_MASTER_URI="ldap://ldap.ibbt.fp7-ofelia.eu"
+#LDAP_MASTER_URI="ldap://ldap.ibbt.fp7-ofelia.eu"
+LDAP_MASTER_URI="ldap://10.2.9.40:389"
+#LDAP_MASTER_URI="ldap://10.128.0.50:389"
 
 #
 # Use unversioned password
@@ -104,7 +109,8 @@ LDAP_MASTER_DISABLE=False
 # TODO: Explain the following
 ###############################################################################
 
-LDAP_MASTER_BASE="dc=fp7-ofelia,dc=eu"
+#LDAP_MASTER_BASE="o=noc,dc=br,dc=fibre"
+LDAP_MASTER_BASE="o=i2cat,dc=eu,dc=fibre"
 LDAP_MASTER_NETGROUPS="ou=netgroups,%s" % LDAP_MASTER_BASE
 LDAP_MASTER_USERNETGROUPS="ou=users,%s" % LDAP_MASTER_NETGROUPS
 LDAP_MASTER_HOSTNETGROUPS="ou=hosts,%s" % LDAP_MASTER_NETGROUPS
@@ -113,7 +119,7 @@ LDAP_MASTER_HOSTNETGROUPS="ou=hosts,%s" % LDAP_MASTER_NETGROUPS
 # If True, each connection to the LDAP server will call start_tls to
 # enable TLS encryption over the standard LDAP port.
 #
-AUTH_LDAP_START_TLS = True
+AUTH_LDAP_START_TLS = False
 
 LDAP_STORE_PROJECTS=True
 

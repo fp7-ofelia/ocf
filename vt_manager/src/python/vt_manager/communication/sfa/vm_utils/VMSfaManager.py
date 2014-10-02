@@ -69,7 +69,7 @@ class VMSfaManager:
         vm['operating-system-type'] = 'GNU/Linux'
         vm['operating-system-version'] = '6.0'
         vm['operating-system-distribution'] = 'Debian'
-        vm['hd-origin-path'] = "legacy/legacy.tar.gz"
+        vm['hd-origin-path'] = "default/default.tar.gz"#"legacy/legacy.tar.gz"
 
 	return vm
  
