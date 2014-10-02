@@ -17,16 +17,17 @@ SFA_CREDENTIAL_SCHEMA = "/opt/ofelia/optin_manager/src/python/openflow/optin_man
 #Get Version Params
 ###################
 #Main params
+HRN = 'openflow.i2cat.ofam' #Authority Name Here
+HRN_URN = HRN.replace("openflow.","").replace(".",":")
+URN = 'urn:publicid:IDN+%s+authority+cm' % HRN_URN
+EXPERIMENT_OFAM_IP = "10.1.0.7"
 
-HRN = 'i2cat.ofam'
-HRN_URN = HRN.replace(".",":")
-URN = 'urn:publicid:IDN+openflow:%s+cm' % HRN_URN
 HOSTNAME = settings.SITE_DOMAIN
 TESTBED = 'Ofelia Control Framework'
 #Geni API
 GENI_API_VERSION = 2
 #GENI_API_URL = 'https://%s:8443/xmlrpc/sfa/' % settings.SITE_IP_ADDR
-GENI_API_URL = 'https://10.216.12.5:8443/xmlrpc/sfa/' #% settings.SITE_IP_ADDR
+GENI_API_URL = 'https://%s:8443/xmlrpc/sfa/' % EXPERIMENT_OFAM_IP #% settings.SITE_IP_ADDR
 INTERFACE = 'aggregate'
 CODE_URL = 'git://git.onelab.eu/sfa.git@sfa-2.1-24'
 CODE_TAG = '2.1-24'
@@ -78,11 +79,3 @@ GENI_REQUEST_RSPEC_VERSIONS = [{ 'namespace':REQ_RS_NAMESPACE,
                                  'extensions':REQ_RS_VERSION_EXTENSIONS,
                                  'schema': REQ_RS_VERSION_SCHEMA,},
                                ] 
-
-
-
-
-
-
-
-

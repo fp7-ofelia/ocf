@@ -1,11 +1,4 @@
 from django.conf import settings
-################
-#Aggregate, Authority and Componet urns
-################
-OCF_ISLAND_AUTHORITY = "i2cat"
-OCF_AM_TYPE = "vtam"
-HRN = OCF_ISLAND_AUTHORITY + "." + OCF_AM_TYPE
-
 #################
 #Credential stuff
 #################
@@ -24,10 +17,14 @@ LATITUDE = 41.38732694954646
 #Get Version Params
 ###################
 #Main params
-URN = 'urn:publicid:IDN+' + OCF_ISLAND_AUTHORITY + '+' + OCF_AM_TYPE  + '+authority+sa' 
+HRN = 'virtualization.i2cat.vtam'
+HRN_URN = HRN.replace("virtualization.","").replace(".",":")
+URN = 'urn:publicid:IDN+virtualization:%s+authority+cm' % HRN_URN
+EXPERIMENT_VTAM_IP = "10.1.0.7" #Add public IP here
+
+
 HOSTNAME = settings.SITE_DOMAIN
 TESTBED = 'Ofelia Control Framework'
-EXPERIMENT_VTAM_IP = "10.216.12.5" #Add public one here
 
 #Geni API
 GENI_API_VERSION = 2
