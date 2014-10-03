@@ -35,6 +35,8 @@ class ProvisioningResponseDispatcher():
 
 			if actionModel.getStatus() is Action.QUEUED_STATUS or Action.ONGOING_STATUS:
 				logging.debug("The incoming response has id: %s and NEW status: %s",actionModel.uuid,actionModel.status)
+                                was_creating = False
+                                was_created = False
 				actionModel.status = action.status
 				actionModel.description = action.description
 				actionModel.save()
@@ -43,8 +45,13 @@ class ProvisioningResponseDispatcher():
 
 				#XXX:Implement this method or some other doing this job
 				vm = VTDriver.getVMbyUUID(actionModel.getObjectUUID())
-				controller=VTDriver.getDriver(vm.Server.get().getVirtTech())
-				failedOnCreate = 0
+                                if vm.state == "creating...":
+                                    was_creating = True
+                                elif vm.state == "starting...":
+                                    was_created = True
+                                controller=VTDriver.getDriver(vm.Server.get().getVirtTech())
+                                failedOnCreate = 0
+
 				if actionModel.getStatus() == Action.SUCCESS_STATUS:
 					ProvisioningResponseDispatcher.__updateVMafterSUCCESS(actionModel, vm)
 
@@ -59,8 +66,21 @@ class ProvisioningResponseDispatcher():
 
 
 				try:
+                                        created = False
+                                        vm_started = False
+                                        if vm.state == "created (stopped)":
+                                            created = True
+                                        elif vm.state == "running":
+                                            vm_started = True
 					logging.debug("Sending response to plug-in in sendAsync")
-					if str(actionModel.callBackUrl) == 'SFA.OCF.VTM':
+					if str(vm.getCallBackURL()) == 'SFA.OCF.VTM':
+                                            # Start VM jut after creating sliver/VM
+                                            if created and was_creating:
+                                                from vt_manager.communication.sfa.drivers.VTSfaDriver import VTSfaDriver
+                                                driver = VTSfaDriver(None)
+                                                driver.crud_slice(vm.sliceName,vm.projectName, "start_slice")
+                                                return
+
                                             if failedOnCreate:
                                                 expiring_slices = vm.objects.filter(sliceName=vm.sliceName,projectName=vm.projectName)
                                                 if len(expiring_slices) == 1:
@@ -132,7 +152,7 @@ class ProvisioningResponseDispatcher():
 
                                 try:
                                         logging.debug("Sending response to Plugin in sendAsync")
-                                        if str(actionModel.callBackUrl) == 'SFA.OCF.VTM':
+                                        if str(vm.getCallBackURL()) == 'SFA.OCF.VTM':
                                             if failedOnCreate:
                                                 expiring_slices = vm.objects.filter(sliceName=vm.sliceName,projectName=vm.projectName)
                                                 if len(expiring_slices)  == 1:
