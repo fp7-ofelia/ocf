@@ -1,4 +1,4 @@
-class CrafterRSpecManager:
+class CrafterManager:
     
     #TODO: Take into account extensions
     
@@ -6,6 +6,13 @@ class CrafterRSpecManager:
         self.resources = resources
         self.options = options
         self._urn_authority = "urn:publicID:MYAUTHORITY"
+        
+    def get_advertisement(self, resources):
+        output  = self.advert_header()
+        for resource in resources:
+            output += self.advert_resource(resource)
+        output += self.advert_footer()
+        return output    
     
     def advert_template(self):
         tmpl = '''<node component_manager_id="%s" component_name="%s" component_id="%s" exclusive="%s">
@@ -15,13 +22,14 @@ class CrafterRSpecManager:
         return tmpl
     
     def advert_resource(self, resource):
-        resource_id = str(resource.get_id())
+        resource_component_manager_id = str(resource.get_component_manager_id())
         resource_exclusive = str(resource.get_exclusive()).lower()
         resource_available = str(resource.get_available()).lower()
-        resource_urn = resource.get_urn()
-        return self.advert_template() % (self._urn_authority,
-                       resource_id,
-                       resource_urn,
+        resource_component_name = resource.get_component_name()
+        resource_component_id = resource.get_component_id()
+        return self.advert_template() % (resource_component_manager_id,
+                       resource_component_name,
+                       resource_component_id,
                        resource_exclusive,
                        resource_available)
     
@@ -39,14 +47,32 @@ class CrafterRSpecManager:
         return header
     
     def manifest_template(self):
-        template ='''  <node client_id="%s" component_id="%s" component_manager_id="%s" sliver_id="%s"/>\n'''
+        template ='''<node client_id="%s" component_id="%s" component_manager_id="%s" sliver_id="%s">\n'''
         return template    
     
-    def manifest_slice(self, slice):
+    def manfiest_node_close_tempalte(self):
+        template ='''</node>\n'''
+        return template
+    
+    def manifest_sliver_type_template(self):
+        template = '''<sliver_type name="%s"/>\n'''
+        return template
+    
+    def manifest_services_template(self):
+        template = '''<services>\n<login authentication="ssh-keys" hostname="%s" port="22" username="%s"/>\n</services>\n'''
+        return template
+        
+    def manifest_slivers(self, resources):
         result = ""
-        for sliver in slice.get_slivers(): 
-            for resource in sliver.get_resources():
-                result += self.manifest_template() % (slice.get_client_id(), slice.get_component_id(),slice.get_component_manager_id(), sliver.get_urn())
+        for resource in resources:
+            sliver = resource.get_sliver() 
+            result += self.manifest_template() % (sliver.get_client_id(), resource.get_component_id(), resource.get_component_manager_id(), sliver.get_urn())
+            if sliver.get_type():
+                result += self.manifest_sliver_type_template() %(resource.get_id)
+            if sliver.get_services():
+                services = sliver.get_services()
+                result += self.manifest_services_template() %(services["login"]["hostname"], services["login"]["username"])
+            result += self.manfiest_node_close_tempalte()
         return result
     
     def manifest_footer(self):

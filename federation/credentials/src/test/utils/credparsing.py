@@ -125,7 +125,7 @@ def get_cred_target_urn(logger, cred):
             logger = logging.getLogger("omni.credparsing")
             logger.setLevel(level)
         logger.error("Cannot parse target URN: Credential is not a string: %s", str(credString))
-        return credexp
+        return cred
 
     try:
         doc = md.parseString(credString)

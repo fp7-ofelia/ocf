@@ -1,7 +1,7 @@
-from federation.rspecs.src.geni.v3.parsermanager import ParserManager
-from federation.rspecs.test.geni.v3.examples import REQUEST_EXAMPLE
-from federation.rspecs.test.utils import testcase
-from federation.rspecs.test.geni.v3.expected_outputs import DEFAULT_AM_OUTPUT
+from rspecs.src.geni.v3.parsermanager import ParserManager
+from rspecs.test.geni.v3.examples import REQUEST_EXAMPLE
+from rspecs.test.utils import testcase
+from rspecs.test.geni.v3.expected_outputs import DEFAULT_AM_OUTPUT
 
 
 class TestRequest(testcase.TestCase):
@@ -11,10 +11,8 @@ class TestRequest(testcase.TestCase):
         self.request = REQUEST_EXAMPLE
         
     def test_should_parse_node(self):
-        am = self.manager.parse_request_rspec("MYURN", self.request)
-        print "-------",am
-        self.assertEquals(DEFAULT_AM_OUTPUT, am)
+        req = self.manager.parse_request_rspec(self.request)
+        self.assertEquals(DEFAULT_AM_OUTPUT, str(req))
     
 if __name__ == '__main__':
-    # Allows to run in stand-alone mode
     testcase.main()

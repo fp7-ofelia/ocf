@@ -1,7 +1,9 @@
-from federation.ambase.src.abstract.classes.delegatebase import DelegateBase
-from federation.ambase.src.ambase.exceptions import AllocationError, DeleteError,\
-    PerformOperationalStateError, ProvisionError
-from federation.ambase.src.ambase.exceptions import SliceAlreadyExists
+from ambase.src.abstract.classes.delegatebase import DelegateBase
+from ambase.src.ambase.exceptions import AllocationError
+from ambase.src.ambase.exceptions import DeleteError
+from ambase.src.ambase.exceptions import PerformOperationalStateError
+from ambase.src.ambase.exceptions import ProvisionError
+from ambase.src.ambase.exceptions import SliceAlreadyExists
 
 
 class MockDelegate(DelegateBase):

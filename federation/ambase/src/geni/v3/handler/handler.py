@@ -2,14 +2,14 @@ import base64
 import zlib
 import datetime
 
-from federation.ambase.src.abstract.classes.handlerbase import HandlerBase
-from federation.ambase.src.ambase.exceptions import SliceAlreadyExists
-from federation.ambase.src.ambase.exceptions import AllocationError
-from federation.ambase.src.ambase.exceptions import ProvisionError
-from federation.ambase.src.ambase.exceptions import DeleteError
-from federation.ambase.src.ambase.exceptions import ShutDown
+from ambase.src.abstract.classes.handlerbase import HandlerBase
+from ambase.src.ambase.exceptions import SliceAlreadyExists
+from ambase.src.ambase.exceptions import AllocationError
+from ambase.src.ambase.exceptions import ProvisionError
+from ambase.src.ambase.exceptions import DeleteError
+from ambase.src.ambase.exceptions import ShutDown
 #from federation.ambase.src.ambase.exceptions import UnsupportedState
-from federation.ambase.src.ambase.exceptions import PerformOperationalStateError
+from ambase.src.ambase.exceptions import PerformOperationalStateError
 
 class GeniV3Handler(HandlerBase):
        
@@ -51,7 +51,7 @@ class GeniV3Handler(HandlerBase):
         resources = self.__delegate.list_resources(geni_available)
         
         # Crafting resources into RSpec
-        output = self.__rspec_manager.advertise_resources(resources)
+        output = self.__rspec_manager.compose_advertisement(resources)
         
         
         # Preparing the output
@@ -78,7 +78,7 @@ class GeniV3Handler(HandlerBase):
         slivers = self.__delegate.describe(urns)
         
         # Crafting slivers to manifest RSpec
-        output = self.__rspec_manager.manifest_slivers(slivers)
+        output = self.__rspec_manager.compose_manifest(slivers)
         
         if 'geni_compressed' in options and options['geni_compressed']:
             output = base64.b64encode(zlib.compress(output))
@@ -92,16 +92,16 @@ class GeniV3Handler(HandlerBase):
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
-        am = self.__rspec_manager.parse_request(rspec)
+        reservation = self.__rspec_manager.parse_request(rspec)
         expiration = self.get_expiration()
         try:
-            allocated_slivers = self.__delegate.reserve(slice_urn, am, expiration)    
+            allocated_slivers = self.__delegate.reserve(slice_urn, reservation, expiration)    
         except SliceAlreadyExists as e:
             return self.error_result(self.__geni_exception_manager.ALREADYEXISTS, e)
         except AllocationError as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
 
-        manifest = self.__rspec_manager.manifest_slivers(allocated_slivers)
+        manifest = self.__rspec_manager.compose_manifest(allocated_slivers)
         
         return self.success_result(manifest)
         

@@ -23,8 +23,10 @@ class CredentialManager(CredentialManagerBase):
     
     def _get_geniv2_validation(self, method, credentials):
         method = self._translate_to_geniv2_method(method)
-        valid_creds = self.__auth.checkCredentials(credentials, method)
-        return 
+        try:
+            valid_cred = self.__auth.checkCredentials(credentials, method)
+        except Exception as e:
+            raise e
     
     def _translate_to_geniv2_method(self, method):
         if method == "Allocate" or method == "Provision":

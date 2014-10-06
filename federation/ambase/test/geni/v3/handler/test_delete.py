@@ -1,9 +1,9 @@
-from federation.ambase.src.geni.exceptions.manager import GENIExceptionManager
-from federation.ambase.src.geni.v3.handler.handler import GeniV3Handler
-from federation.ambase.test.utils import testcase
-from federation.ambase.test.utils.mockcredentialmanager import MockCredentialManager
-from federation.ambase.test.utils.mockdelegate import MockDelegate
-from federation.ambase.test.utils.mockrspecmanager import MockRSpecManager
+from ambase.src.geni.exceptions.manager import GENIExceptionManager
+from ambase.src.geni.v3.handler.handler import GeniV3Handler
+from ambase.test.utils import testcase
+from ambase.test.utils.mockcredentialmanager import MockCredentialManager
+from ambase.test.utils.mockdelegate import MockDelegate
+from ambase.test.utils.mockrspecmanager import MockRSpecManager
 
 
 class TestDelete(testcase.TestCase):

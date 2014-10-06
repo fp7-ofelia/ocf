@@ -1,6 +1,9 @@
 import sys
 #import unittest
-import unittest2 as unittest
+try:
+    import unittest2 as unittest
+except:
+    import unittest 
 
 class TestCase(unittest.TestCase):
     def runTest(self):

@@ -1,90 +1,10 @@
-RAW_NODES = '''<node component_manager_id="urn:publicID:MYAUTHORITY"
-                  component_name="0"
-                  component_id="urn:publicID:ThisisaURNof0"
-                  exclusive="true">
-                  <available now="none"/>
-                  </node>
-               <node component_manager_id="urn:publicID:MYAUTHORITY"
-                  component_name="1"
-                  component_id="urn:publicID:ThisisaURNof1"
-                  exclusive="true">
-                  <available now="none"/>
-                  </node>
-               <node component_manager_id="urn:publicID:MYAUTHORITY"
-                  component_name="2"
-                  component_id="urn:publicID:ThisisaURNof2"
-                  exclusive="true">
-                  <available now="none"/>
-                  </node>
-               <node component_manager_id="urn:publicID:MYAUTHORITY"
-                  component_name="3"
-                  component_id="urn:publicID:ThisisaURNof3"
-                  exclusive="true">
-                  <available now="none"/>
-                  </node>'''
+RAW_NODES = '''<nodecomponent_manager_id="urn:publicID:ThisisaURNof0"component_name="urn:publicID:ThisisaURNof0"component_id="urn:publicID:ThisisaURNof0"exclusive="true"><availablenow="none"/></node><nodecomponent_manager_id="urn:publicID:ThisisaURNof1"component_name="urn:publicID:ThisisaURNof1"component_id="urn:publicID:ThisisaURNof1"exclusive="true"><availablenow="none"/></node><nodecomponent_manager_id="urn:publicID:ThisisaURNof2"component_name="urn:publicID:ThisisaURNof2"component_id="urn:publicID:ThisisaURNof2"exclusive="true"><availablenow="none"/></node><nodecomponent_manager_id="urn:publicID:ThisisaURNof3"component_name="urn:publicID:ThisisaURNof3"component_id="urn:publicID:ThisisaURNof3"exclusive="true"><availablenow="none"/></node>'''
                   
-AD_RSPEC = '''<?xml version="1.0" encoding="UTF-8"?>
-                    <rspec xmlns="http://www.geni.net/resources/rspec/3"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/ad.xsd"
-                    type="advertisement">
-<node component_manager_id="urn:publicID:MYAUTHORITY"
-                  component_name="0"
-                  component_id="urn:publicID:ThisisaURNof0"
-                  exclusive="true">
-                  <available now="none"/>
-                  </node>
-               <node component_manager_id="urn:publicID:MYAUTHORITY"
-                  component_name="1"
-                  component_id="urn:publicID:ThisisaURNof1"
-                  exclusive="true">
-                  <available now="none"/>
-                  </node>
-               <node component_manager_id="urn:publicID:MYAUTHORITY"
-                  component_name="2"
-                  component_id="urn:publicID:ThisisaURNof2"
-                  exclusive="true">
-                  <available now="none"/>
-                  </node>
-               <node component_manager_id="urn:publicID:MYAUTHORITY"
-                  component_name="3"
-                  component_id="urn:publicID:ThisisaURNof3"
-                  exclusive="true">
-                  <available now="none"/>
-                  </node>
-               </rspec>'''
+AD_RSPEC = '''<?xmlversion="1.0"encoding="UTF-8"?><rspecxmlns="http://www.geni.net/resources/rspec/3"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://www.geni.net/resources/rspec/3http://www.geni.net/resources/rspec/3/ad.xsd"type="advertisement"><nodecomponent_manager_id="urn:publicID:ThisisaURNof0"component_name="urn:publicID:ThisisaURNof0"component_id="urn:publicID:ThisisaURNof0"exclusive="true"><availablenow="none"/></node><nodecomponent_manager_id="urn:publicID:ThisisaURNof1"component_name="urn:publicID:ThisisaURNof1"component_id="urn:publicID:ThisisaURNof1"exclusive="true"><availablenow="none"/></node><nodecomponent_manager_id="urn:publicID:ThisisaURNof2"component_name="urn:publicID:ThisisaURNof2"component_id="urn:publicID:ThisisaURNof2"exclusive="true"><availablenow="none"/></node><nodecomponent_manager_id="urn:publicID:ThisisaURNof3"component_name="urn:publicID:ThisisaURNof3"component_id="urn:publicID:ThisisaURNof3"exclusive="true"><availablenow="none"/></node></rspec>'''
                
-RAW_MANIFEST = '''   <node client_id="None"
-                        component_id="None"
-                        component_manager_id="urn:publicID:ComponentManagerID120"
-                        sliver_id="urn:publicID:Sliver0"/>
-                     <node client_id="None"
-                        component_id="None"
-                        component_manager_id="urn:publicID:ComponentManagerID120"
-                        sliver_id="urn:publicID:Sliver0"/>
-                    <node client_id="None"
-                        component_id="None"
-                        component_manager_id="urn:publicID:ComponentManagerID120"
-                        sliver_id="urn:publicID:Sliver0"/>'''
+RAW_MANIFEST = '''<nodeclient_id="None"component_id="urn:publicID:ResourceURN0"component_manager_id="urn:publicID:ResourceURN0"sliver_id="urn:publicID:Sliver0"></node><nodeclient_id="None"component_id="urn:publicID:ResourceURN1"component_manager_id="urn:publicID:ResourceURN1"sliver_id="urn:publicID:Sliver1"></node><nodeclient_id="None"component_id="urn:publicID:ResourceURN2"component_manager_id="urn:publicID:ResourceURN2"sliver_id="urn:publicID:Sliver2"></node>'''
                         
-FULL_MANIFEST = ''' <?xml version="1.0" encoding="UTF-8"?>
-                    <rspec xmlns="http://www.geni.net/resources/rspec/3"
-                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/manifest.xsd"
-                    type="manifest">
-  <node client_id="None"
-        component_id="None"
-        component_manager_id="urn:publicID:ComponentManagerID120"
-        sliver_id="urn:publicID:Sliver0"/>
-  <node client_id="None"
-        component_id="None"
-        component_manager_id="urn:publicID:ComponentManagerID120"
-        sliver_id="urn:publicID:Sliver0"/>
-  <node client_id="None"
-        component_id="None"
-        component_manager_id="urn:publicID:ComponentManagerID120"
-        sliver_id="urn:publicID:Sliver0"/>
-</rspec>'''
+FULL_MANIFEST = '''<?xmlversion="1.0"encoding="UTF-8"?><rspecxmlns="http://www.geni.net/resources/rspec/3"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://www.geni.net/resources/rspec/3http://www.geni.net/resources/rspec/3/manifest.xsd"type="manifest"><nodeclient_id="None"component_id="urn:publicID:ResourceURN0"component_manager_id="urn:publicID:ResourceURN0"sliver_id="urn:publicID:Sliver0"></node><nodeclient_id="None"component_id="urn:publicID:ResourceURN1"component_manager_id="urn:publicID:ResourceURN1"sliver_id="urn:publicID:Sliver1"></node><nodeclient_id="None"component_id="urn:publicID:ResourceURN2"component_manager_id="urn:publicID:ResourceURN2"sliver_id="urn:publicID:Sliver2"></node></rspec>'''
 
 REQUEST_EXAMPLE = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <rspec generated="2014-03-22T01:53:21.460+01:00" generated_by="Experimental jFed Rspec Editor" type="request" xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/request.xsd" xmlns="http://www.geni.net/resources/rspec/3" xmlns:jFed="http://jfed.iminds.be/rspec/ext/jfed/1" xmlns:jFedBonfire="http://jfed.iminds.be/rspec/ext/jfed-bonfire/1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

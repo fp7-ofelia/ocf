@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from abc import abstractmethod
 
-class RSpecManager:
+class RSpecManagerBase:
     """
     Abstract class, to be implemented in a new class.
     """

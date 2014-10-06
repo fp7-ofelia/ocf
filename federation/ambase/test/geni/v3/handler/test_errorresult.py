@@ -1,5 +1,5 @@
-from federation.ambase.src.geni.v3.handler.handler import GeniV3Handler
-from federation.ambase.test.utils import testcase
+from ambase.src.geni.v3.handler.handler import GeniV3Handler
+from ambase.test.utils import testcase
 
 
 class TestErrorResult(testcase.TestCase):

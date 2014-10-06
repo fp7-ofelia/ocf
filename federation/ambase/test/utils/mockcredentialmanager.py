@@ -1,6 +1,6 @@
-from federation.ambase.src.abstract.classes.credentialmanager import CredentialManager
+from ambase.src.abstract.classes.credentialmanagerbase import CredentialManagerBase
 
-class MockCredentialManager(CredentialManager):
+class MockCredentialManager(CredentialManagerBase):
     
     def __init__(self, success_mode = True):
         self.success_mode = success_mode

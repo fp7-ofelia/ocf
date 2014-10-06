@@ -1,11 +1,11 @@
-from federation.ambase.src.abstract.classes.rspecmanager import RSpecManager
+from ambase.src.abstract.classes.rspecmanagerbase import RSpecManagerBase
 
-class MockRSpecManager(RSpecManager):
+class MockRSpecManager(RSpecManagerBase):
     
-    def advertise_resources(self, resources):
+    def compose_advertisement(self, resources):
         return self.__get_add()
     
-    def manifest_slivers(self, slivers):
+    def compose_manifest(self, slivers):
         return self.__get_man()
     
     def parse_request(self, rspec):

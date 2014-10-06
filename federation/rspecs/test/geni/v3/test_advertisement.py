@@ -1,14 +1,14 @@
-from federation.rspecs.src.geni.v3.container.resource import Resource
-from federation.rspecs.src.geni.v3.craftermanager import CrafterRSpecManager
-from federation.rspecs.test.utils import testcase
-from federation.rspecs.test.geni.v3.examples import RAW_NODES
-from federation.rspecs.test.geni.v3.examples import AD_RSPEC
+from rspecs.src.geni.v3.container.resource import Resource
+from rspecs.src.geni.v3.craftermanager import CrafterManager
+from rspecs.test.utils import testcase
+from rspecs.test.geni.v3.examples import RAW_NODES
+from rspecs.test.geni.v3.examples import AD_RSPEC
 
 class TestAdvertisement(testcase.TestCase):
     
     def setUp(self):
         self.resources = self.get_default_resources()
-        self.manager = CrafterRSpecManager()
+        self.manager = CrafterManager()
         
     def tearDown(self):
         self.resources = []
@@ -19,7 +19,10 @@ class TestAdvertisement(testcase.TestCase):
             r = Resource()
             r.set_id(i)
             r.set_exclusive(True)
-            r.set_urn("urn:publicID:ThisisaURNof%d" %i)
+            r.set_component_id("urn:publicID:ThisisaURNof%d" %i)
+            r.set_component_manager_id("urn:publicID:ThisisaURNof%d" %i)
+            r.set_component_name("urn:publicID:ThisisaURNof%d" %i)
+            r.set_component_manager_name("urn:publicID:ThisisaURNof%d" %i)
             resources.append(r)
         return resources
     
@@ -30,7 +33,7 @@ class TestAdvertisement(testcase.TestCase):
         string = ""
         for r in self.resources:
             adv = self.manager.advert_resource(r)
-            string += adv
+            string += adv     
         self.assertEquals(self.format_rspec(RAW_NODES), self.format_rspec(string))
         
     def test_should_advertise_full_rspec(self):
@@ -38,6 +41,7 @@ class TestAdvertisement(testcase.TestCase):
         for r in self.resources:
             string += self.manager.advert_resource(r)
         string += self.manager.advert_footer()
+        print self.format_rspec(string)
         self.assertEquals(self.format_rspec(AD_RSPEC), self.format_rspec(string))
     
 if __name__ == '__main__':
