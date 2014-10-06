@@ -46,3 +46,7 @@ rm pypelib_latest_all.deb || warning "Could not remove pypelib_latest_all.deb"
 ## Keeping database consistent
 print "Checking and fixing database consistency..."
 python $SRC_DIR/src/python/vt_manager/manage.py clean_inconsistent_db_entries
+
+# Determine installation path
+print "Setting environment variables..."
+source $CURRENT_DIRECTORY/lib/set_environment_variables

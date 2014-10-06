@@ -37,6 +37,7 @@ if [ -d $PROFILE_D ]; then
     echo -e """#!/bin/bash\n\nexport OCF_PATH=$OCF_PATH_LOCAL""" >> $PROFILE_D_OCF
   fi
 fi
+
 # Read environment variable after any change (e.g. installation, migration)
 # NOTE: re-log in should me made anyway after any change for this env vars
 # to be globally available

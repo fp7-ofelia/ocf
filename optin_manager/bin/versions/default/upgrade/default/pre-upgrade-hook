@@ -36,3 +36,7 @@ while [ $OFELIA != "yes" ] && [ $OFELIA != "no" ] && [ $OFELIA != 1 ] && [ $OFEL
 ## Keeping database consistent
 print "Checking and fixing database consistency..."
 python $SRC_DIR/src/python/openflow/optin_manager/manage.py clean_inconsistent_db_entries
+
+# Determine installation path
+print "Setting environment variables..."
+source $CURRENT_DIRECTORY/lib/set_environment_variables
