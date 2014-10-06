@@ -105,7 +105,7 @@ for plugin in getattr(settings, "AGGREGATE_PLUGINS", []):
 
 def get_static_url(name, path=""):
     static_file_tuple = (
-        r'^%s%s/(?P<path>.*)$' % (settings.MEDIA_URL[1:], path),
+        r'^%s%s/(?P<path>.*)$' % (settings.MEDIA_URL[1:-1], path),
         'django.views.static.serve',
         {'document_root': "%s%s" % (settings.MEDIA_ROOT, path)})
     return url(*static_file_tuple, name=name)
@@ -120,7 +120,7 @@ urlpatterns += patterns('',
 
 try:
     # URLs for static content in plugins
-    urlpatterns += PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL)
+    urlpatterns += PLUGIN_LOADER.generate_static_content_urls(settings.MEDIA_URL[:-1])
 except Exception as e:
     print "[ERROR] Problem adding URLs for plugins inside expedient.clearinghouse.urls. Details: %s" % str(e)
 

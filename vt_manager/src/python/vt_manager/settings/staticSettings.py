@@ -121,7 +121,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
 # Path to the static content (images, css, js) folders.
 #
 MEDIA_ROOT = join(SRC_DIR+"python/vt_manager/views/static/", "media")
-MEDIA_URL = '/static/media'
+MEDIA_URL = '/static/media/'
 ADMIN_MEDIA_PREFIX = '/admin/media/'
 
 #
