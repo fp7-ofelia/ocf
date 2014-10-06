@@ -25,21 +25,14 @@ VERSIONS
 ========
 
 --------------------------------------------------
-v0.8.2
+v0.8.3
 --------------------------------------------------
-Released: TBD
+Released: XX/10/2014
 
 Change log:
 
-[+] OFVER: Allow migration of the framework to another directory
-
---------------------------------------------------
-v0.8.2
---------------------------------------------------
-Released: TBD
-
-Change log:
-
+[+] OFVER: Allow migration of the framework to another directory. Issue xyz
+[+] EXP, OPT, VTA: Adapt OCF to Debian7 and keep compatibility with Debian6. Issue 128
 [*] EXP: Cannot monitor status of AMsoil-based aggregates enhancement Expedient. Issue 217
 [+] AGN: Locate server to store VM images and develop a template downloader for virtualisation agent. Issue 203
 
