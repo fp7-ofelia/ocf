@@ -10,6 +10,12 @@
 #inform user
 printHeader "info#" "Using default upgrade module..."
 
+# SSL certificates: prepare ca_clients.crt for first use
+# (file is either empty or does not exist)
+if [[ -z $(cat /etc/apache2/ssl.crt/ca_clients.crt) ]]; then
+    cat /etc/apache2/ssl.crt/ca.crt >> /etc/apache2/ssl.crt/ca_clients.crt || warning "Could not add own CA to trusted clients (ca_clients.crt). Proceeding with upgrade..."
+fi
+
 local TMP_PATH=$PWD
 
 cd $EXECPATH/../src/python/vt_manager/ || error "Target directory does not exists anymore?"
