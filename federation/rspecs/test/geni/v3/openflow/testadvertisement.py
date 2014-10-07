@@ -1,5 +1,5 @@
 import unittest
-from rspecs.src.geni.v3.openflow.foamlib import FOAMLib
+from rspecs.src.geni.v3.openflow.foamlibcrafter import FOAMLibCrafter
 from rspecs.src.geni.v3.openflow.container.dpid import DPID
 from rspecs.src.geni.v3.openflow.container.port import Port
 from rspecs.src.geni.v3.openflow.container.link import Link
@@ -11,7 +11,7 @@ class TestAdvertisement(unittest.TestCase):
     
     def setUp(self):
         self.resources = self.get_test_resources()
-        self.rspec_crafter = FOAMLib()
+        self.rspec_crafter = FOAMLibCrafter()
         self.advertisement_rspec = self.rspec_crafter.get_advertisement(self.resources)
         
     def test_should_advertise_OF_resources(self):

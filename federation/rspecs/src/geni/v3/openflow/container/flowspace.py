@@ -7,6 +7,7 @@ class FlowSpace(Sliver):
         self.__description = None
         self.__controller = None
         self.__groups = list()
+        self.__state = None
 
     def get_email(self):
         return self.__email
@@ -22,6 +23,10 @@ class FlowSpace(Sliver):
 
     def get_groups(self):
         return self.__groups
+    
+
+    def get_state(self):
+        return self.__state
 
 
     def set_email(self, value):
@@ -40,5 +45,11 @@ class FlowSpace(Sliver):
         self.__groups = value
 
     
+    def set_state(self, value):
+        self.__state = value
+    
+    
     def add_group(self, value):
         self.__groups.append(value)
+        
+        

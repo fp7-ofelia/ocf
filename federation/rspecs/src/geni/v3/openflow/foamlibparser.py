@@ -28,16 +28,6 @@ class FOAMLibParser:
         groups = self.__parse_groups(groups)
         matches = self.__parse_matches(matches_dom)
         
-        print "----------------------"
-        print "FlowSpace:", flowspace
-        print "----------------------"
-        print "controller", controller
-        print "----------------------"
-        print "groups", groups
-        print "----------------------"
-        print "matches", matches
-        print "----------------------"
-        
         for group in groups:
             for match in matches:
                 if group.get_name() == match.get_group():
@@ -116,55 +106,54 @@ class FOAMLibParser:
         return matches
         
     def __parse_flowspec(self, match_dom):    
-        packet_dom = match_dom.find("{%s}packet" % (self.OFNSv3))
-        for flowspec in packet_dom:
-
-            match = Match()
+        packet_dom = match_dom.find("{%s}packet" % (self.OFNSv3))    
+        
+        match = Match()
             
-            nodes = flowspec.findall('{%s}dl_src' % (self.OFNSv3))
-            for dls in nodes:
-                macstr = dls.get("value").strip()
-                match.set_dl_src(macstr)
+        nodes = packet_dom.findall('{%s}dl_src' % (self.OFNSv3))
+        for dls in nodes:
+            macstr = dls.get("value").strip()             
+            match.add_dl_src(macstr)
 
-            nodes = flowspec.findall('{%s}dl_dst' % (self.OFNSv3))
-            for dld in nodes:
-                macstr = dld.get("value").strip()
-                match.set_dl_dst(macstr)
+        nodes = packet_dom.findall('{%s}dl_dst' % (self.OFNSv3))
+        for dld in nodes:
+            macstr = dld.get("value").strip()
+            match.add_dl_dst(macstr)
 
-            nodes = flowspec.findall('{%s}dl_type' % (self.OFNSv3))
-            for dlt in nodes:
-                dltstr = dlt.get("value").strip()
-                match.set_dl_type(dltstr)
+        nodes = packet_dom.findall('{%s}dl_type' % (self.OFNSv3))
+        for dlt in nodes:
+            dltstr = dlt.get("value").strip()
+            match.add_dl_type(dltstr)
 
-            nodes = flowspec.findall('{%s}dl_vlan' % (self.OFNSv3))
-            for elem in nodes:
-                vlidstr = elem.get("value").strip()
-                match.set_dl_vlan(vlidstr)
+        nodes = packet_dom.findall('{%s}dl_vlan' % (self.OFNSv3))
+        for elem in nodes:
+            vlidstr = elem.get("value").strip()
+            match.add_dl_vlan(vlidstr)
 
-            nodes = flowspec.findall('{%s}nw_src' % (self.OFNSv3))
-            for elem in nodes:
-                nwstr = elem.get("value").strip()
-                match.set_nw_src(nwstr)
+        nodes = packet_dom.findall('{%s}nw_src' % (self.OFNSv3))
+        for elem in nodes:
+            nwstr = elem.get("value").strip()
+            match.add_nw_src(nwstr)
 
-            nodes = flowspec.findall('{%s}nw_dst' % (self.OFNSv3))
-            for elem in nodes:
-                nwstr = elem.get("value").strip()
-                match.set_nw_dst(nwstr)
+        nodes = packet_dom.findall('{%s}nw_dst' % (self.OFNSv3))
+        for elem in nodes:
+            nwstr = elem.get("value").strip()
+            match.add_nw_dst(nwstr)
 
-            nodes = flowspec.findall('{%s}nw_proto' % (self.OFNSv3))
-            for elem in nodes:
-                nwproto = elem.get("value").strip()
-                match.set_nw_proto(nwproto)
+        nodes = packet_dom.findall('{%s}nw_proto' % (self.OFNSv3))
+        for elem in nodes:
+            nwproto = elem.get("value").strip()
+            match.add_nw_proto(nwproto)
 
-            nodes = flowspec.findall('{%s}tp_src' % (self.OFNSv3))
-            for elem in nodes:
-                tpsrc = elem.get("value").strip()
-                match.set_tp_src(tpsrc)
+        nodes = packet_dom.findall('{%s}tp_src' % (self.OFNSv3))
+        for elem in nodes:
+            tpsrc = elem.get("value").strip()
+            match.add_tp_src(tpsrc)
 
-            nodes = flowspec.findall('{%s}tp_dst' % (self.OFNSv3))
-            for elem in nodes:
-                tpdst = elem.get("value").strip()
-                match.set_tp_dst(tpdst)
+        nodes = packet_dom.findall('{%s}tp_dst' % (self.OFNSv3))
+        for elem in nodes:
+            tpdst = elem.get("value").strip()
+            match.add_tp_dst(tpdst)
             
-            return match
+        return match
             

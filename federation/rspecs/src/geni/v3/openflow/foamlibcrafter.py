@@ -4,7 +4,7 @@ from cStringIO import StringIO
 from lxml import etree as ET
 from settings.src import settings as config
 
-class FOAMLib:
+class FOAMLibCrafter:
     
     def __init__(self):
     
@@ -96,11 +96,34 @@ class FOAMLib:
         add(od,link.get_dst_dpid().get_datapath())
         add_port(od,link.get_dst_port().get_num()) 
         
+    def get_manifest(self, flowspace):
+        NSMAP = {None: "%s" % (self.PGNS),
+                       "xs" : "%s" % (self.XSNS),
+                       "openflow" : "%s" % (self.OFNSv3)}
+
+        rspec = ET.Element("rspec", nsmap=NSMAP)
+        rspec.attrib["{%s}schemaLocation" % (self.XSNS)] = self.PGNS + " " \
+                     "http://www.geni.net/resources/rspec/3/ad.xsd " + \
+                     self.OFNSv3 + " " \
+                     "http://www.geni.net/resources/rspec/ext/openflow/3/of-ad.xsd"
+        rspec.attrib["type"] = "manifest"
+        
+        od = ET.SubElement(rspec, "{%s}sliver" % (self.OFNSv3))
+        od.attrib["urn"] = flowspace.get_urn()
+        od.attrib["description"] = flowspace.get_urn()
+        od.attrib["email"] = flowspace.get_email()
+        od.attrib["status"] =  flowspace.get_state()
+        
+        xml = StringIO()
+        ET.ElementTree(rspec).write(xml)
+        return xml.getvalue() 
+        
     def filter_links(self, resources):
-            return self.__filter_by("Link", resources)
+        return self.__filter_by("Link", resources)
         
     def filter_devices(self, resources):
-            return self.__filter_by("Device", resources)
+        return self.__filter_by("Device", resources)
+       
         
     def __filter_by(self, filter_key, resources ):
             filtered_resources = list()        
