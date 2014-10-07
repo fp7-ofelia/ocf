@@ -12,6 +12,7 @@ class Resource:
         self.__component_manager_name = None
         self.__available = None
         self.__exclusive = None
+        self.__type = None
     
     def get_id(self):
         return self.__id
@@ -45,6 +46,9 @@ class Resource:
 
     def get_exclusive(self):
         return self.__exclusive
+    
+    def get_type(self):
+        return self.__type
 
     def set_id(self, value):
         self.__id = value
@@ -78,6 +82,9 @@ class Resource:
 
     def set_exclusive(self, value):
         self.__exclusive = value
+        
+    def set_type(self, value):
+        self.__type = value
         
 #    def add_sliver(self, value):
 #        if not type(self.__slivers) == list:
