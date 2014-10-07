@@ -3,7 +3,7 @@ from rspecs.src.geni.v3.container.resource import Resource
 class Group(Resource):
     
     def __init__(self):
-        self.__name
+        self.__name = None
         self.__dpids = list()
         self.__matches = list()
 
@@ -29,5 +29,15 @@ class Group(Resource):
 
     def set_matches(self, value):
         self.__matches = value
+        
+                
+    def add_dpid(self, value):
+        self.__dpids.append(value)
+
+
+    def add_match(self, value):
+        self.__matches.append(value)
+        
+        
         
         

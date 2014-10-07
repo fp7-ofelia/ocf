@@ -11,6 +11,7 @@ class FOAMLibParser:
     
     def __init__(self):
         self.OFNSv3 = "http://www.geni.net/resources/rspec/ext/openflow/3"
+
     
     def parse_request(self, rspec):
         
@@ -26,6 +27,24 @@ class FOAMLibParser:
         controller = self.__parse_controller(controller_elems)
         groups = self.__parse_groups(groups)
         matches = self.__parse_matches(matches_dom)
+        
+        print "----------------------"
+        print "FlowSpace:", flowspace
+        print "----------------------"
+        print "controller", controller
+        print "----------------------"
+        print "groups", groups
+        print "----------------------"
+        print "matches", matches
+        print "----------------------"
+        
+        for group in groups:
+            for match in matches:
+                if group.get_name() == match.get_group():
+                    group.add_match(match)
+        flowspace.set_controller(controller)
+        flowspace.set_groups(groups)
+        return flowspace
         
         
         #vlinks = sliver_dom.findall('{%s}vlink' % (self.OFNSv3))
@@ -51,9 +70,9 @@ class FOAMLibParser:
         controller.parse_url(controller_elems.get("url"))
         return controller
         
-    def __parse_groups(self, groups):
+    def __parse_groups(self, groups_dom):
         groups = list()
-        for grp in groups:
+        for grp in groups_dom:
             group = Group()
             dplist = []
             grpname = grp.get("name")
@@ -61,82 +80,91 @@ class FOAMLibParser:
                 raise Exception("No grup name for group")#NoGroupName()
             datapaths = grp.findall('{%s}datapath' % (self.OFNSv3))
             for dp in datapaths:
-                dplist.append(self.__parse_datapth(dp))
+                dplist.append(self.__parse_datapath(dp))
             group.set_name(grpname)
             group.set_dpids(dplist)    
             groups.append(group)
         return groups
     
     def __parse_datapath(self, dpid_dom):
-        cmid = dpid_dom.get("component_manager_id")
-        #if self.component_id.count(cmid[:-12]) != 1:
-        #   raise ComponentManagerIDMismatch(self.component_id, cmid)
-        #if cmid != getManagerID():
-        #   raise UnknownComponentManagerID(self.component_id)
+        component_manager_id = dpid_dom.get("component_manager_id")
+        component_id = dpid_dom.get("component_id")
+        datapath_id = dpid_dom.get("dpid")
+       
         dpid = DPID()
-        dpid.set_component_manager_id(cmid)
+        dpid.set_component_manager_id(component_manager_id)
+        dpid.set_component_id(component_id)
+        dpid.set_datapath(datapath_id)
+        
         ports = list()
         for port_dom in dpid_dom.findall('{%s}port' % (self.OFNSv3)):
             p = Port()
             p.set_num(int(port_dom.get("num")))
             p.set_name(str(port_dom.get("name")))
-            ports.add(p)
+            ports.append(p)
         dpid.set_ports(ports)
         return dpid    
         
-    def __parse_matches(self, matches_dom, ns):
+    def __parse_matches(self, matches_dom):
         matches = list()
-        group_dom = matches_dom.find("{%s}use-group" % (ns))
-        group_name = group_dom.get("name")
-        packet_dom = matches_dom.find("{%s}packet" % (ns))
-        for flowspec in packet_dom:
-            match = Match()
+        for match_dom in matches_dom:
+            group_dom = match_dom.find("{%s}use-group" % (self.OFNSv3))
+            group_name = group_dom.get("name")
+            match = self.__parse_flowspec(match_dom)
             match.set_group(group_name)
+            matches.append(match)
+        return matches
+        
+    def __parse_flowspec(self, match_dom):    
+        packet_dom = match_dom.find("{%s}packet" % (self.OFNSv3))
+        for flowspec in packet_dom:
+
+            match = Match()
             
-            nodes = flowspec.findall('{%s}dl_src' % (ns))
+            nodes = flowspec.findall('{%s}dl_src' % (self.OFNSv3))
             for dls in nodes:
                 macstr = dls.get("value").strip()
                 match.set_dl_src(macstr)
 
-            nodes = flowspec.findall('{%s}dl_dst' % (ns))
+            nodes = flowspec.findall('{%s}dl_dst' % (self.OFNSv3))
             for dld in nodes:
                 macstr = dld.get("value").strip()
                 match.set_dl_dst(macstr)
 
-            nodes = flowspec.findall('{%s}dl_type' % (ns))
+            nodes = flowspec.findall('{%s}dl_type' % (self.OFNSv3))
             for dlt in nodes:
                 dltstr = dlt.get("value").strip()
                 match.set_dl_type(dltstr)
 
-            nodes = flowspec.findall('{%s}dl_vlan' % (ns))
+            nodes = flowspec.findall('{%s}dl_vlan' % (self.OFNSv3))
             for elem in nodes:
                 vlidstr = elem.get("value").strip()
                 match.set_dl_vlan(vlidstr)
 
-            nodes = flowspec.findall('{%s}nw_src' % (ns))
+            nodes = flowspec.findall('{%s}nw_src' % (self.OFNSv3))
             for elem in nodes:
                 nwstr = elem.get("value").strip()
                 match.set_nw_src(nwstr)
 
-            nodes = flowspec.findall('{%s}nw_dst' % (ns))
+            nodes = flowspec.findall('{%s}nw_dst' % (self.OFNSv3))
             for elem in nodes:
                 nwstr = elem.get("value").strip()
                 match.set_nw_dst(nwstr)
 
-            nodes = flowspec.findall('{%s}nw_proto' % (ns))
+            nodes = flowspec.findall('{%s}nw_proto' % (self.OFNSv3))
             for elem in nodes:
                 nwproto = elem.get("value").strip()
                 match.set_nw_proto(nwproto)
 
-            nodes = flowspec.findall('{%s}tp_src' % (ns))
+            nodes = flowspec.findall('{%s}tp_src' % (self.OFNSv3))
             for elem in nodes:
                 tpsrc = elem.get("value").strip()
                 match.set_tp_src(tpsrc)
 
-            nodes = flowspec.findall('{%s}tp_dst' % (ns))
+            nodes = flowspec.findall('{%s}tp_dst' % (self.OFNSv3))
             for elem in nodes:
                 tpdst = elem.get("value").strip()
                 match.set_tp_dst(tpdst)
             
-            matches.append(match)
+            return match
             

@@ -53,7 +53,7 @@ class Match(Resource):
         return self.__tp_dst
     
     
-    def set_group_dst(self, value):
+    def set_group(self, value):
         self.__group = value
         
         
