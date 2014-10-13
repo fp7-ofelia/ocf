@@ -14,7 +14,7 @@ from expedient.common.permissions.shortcuts import give_permission_to
 from expedient.common.utils import create_or_update
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.clearinghouse.users.models import UserProfile
-from expedient_geni.models import GENISliceInfo
+from expedient.clearinghouse.geni.models import GENISliceInfo
 from expedient.clearinghouse.project.views import create_project_roles
 from expedient.common.middleware import threadlocals
 from django.db.utils import IntegrityError
@@ -24,7 +24,8 @@ import dateutil
 
 logger = logging.getLogger("openflow.plugin.gapi.gapi")
 
-class OpenFlowGAPIException(Exception): pass
+class OpenFlowGAPIException(Exception):
+    pass
 
 class DuplicateSliceNameException(OpenFlowGAPIException):
     def __init__(self, slice_name):

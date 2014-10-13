@@ -125,19 +125,6 @@ do_check_status()
     echo "$DESC $NAME is $STATUS."
 }
 
-#
-# Function that checks the status of the service
-#
-do_check_status()
-{
-	if [ "${PID}" != "" ]; then
-		STATUS="running (pid $PID)"
-	else
-		STATUS="NOT running"
-	fi
-	echo "$DESC $NAME is $STATUS."
-}
-
 case "$1" in
   start)
     log_daemon_msg "Starting $DESC" "$NAME"
