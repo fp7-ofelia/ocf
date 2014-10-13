@@ -201,8 +201,6 @@ class OcfVtNode:
             service_elem.add_instance("login", services[0], child_elements)
             #simple_elem.set_text(service[field])
 
-
-    
     @staticmethod
     def add_nodes_geni(xml, nodes):
 
@@ -281,7 +279,6 @@ class OcfVtNode:
             #PGv2SliverType.add_slivers(node_elem, slivers)
         return node_elems
 
-
 if __name__ == '__main__':
     from vt_manager.communication.sfa.rspecs.rspec import RSpec
     #import pdb
@@ -290,5 +287,3 @@ if __name__ == '__main__':
     nodes = OcfVtNode.get_nodes(r.xml)
     OcfVtNode.add_nodes(r2.xml.root, nodes)
     #pdb.set_trace()
-        
-                                    

@@ -299,7 +299,6 @@ class SfaClientBootstrap:
     def assert_my_gid (self):
         return self.assert_filename (self.my_gid_filename(),"user's GID")
 
-
     # decorator to make up the other methods
     def get_or_produce (filename_method, produce_method, validate_method=None):
         # default validator returns true
@@ -356,7 +355,6 @@ class SfaClientBootstrap:
     @get_or_produce (gid_filename, gid_produce)
     def gid (self, hrn, type ):
         pass
-
 
     # get the credentials as strings, for inserting as API arguments
     def my_credential_string (self): 

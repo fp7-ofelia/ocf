@@ -13,8 +13,7 @@ plogger.setLevel(logging.WARNING)
 
 logger = logging.getLogger("SSHClientPlus")
 
-class TimeoutException(Exception):
-    pass
+class TimeoutException(Exception): pass
 
 class SSHClientPlus(paramiko.SSHClient):
     @classmethod

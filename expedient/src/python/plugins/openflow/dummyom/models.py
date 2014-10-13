@@ -32,8 +32,7 @@ class DummyOM(models.Model):
         '''Create switches and random links'''
         import random
         
-        if not use_random:
-            random.seed(0)
+        if not use_random: random.seed(0)
         
         if num_switches >= 1000:
             raise Exception("Can only create less than 1000 dpids per DummyOM")
@@ -75,8 +74,7 @@ class DummyOM(models.Model):
         '''
         import random
 
-        if not use_random:
-            random.seed(0)
+        if not use_random: random.seed(0)
         
         switches = self.get_switches()
         if dpid == None:

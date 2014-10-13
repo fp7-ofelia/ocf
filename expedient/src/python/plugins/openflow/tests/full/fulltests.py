@@ -119,8 +119,7 @@ class FullIntegration(TestCase):
         for fs in flowspaces:
             id = id_re.search(fs).group("id")
             ops.append(dict(operation="REMOVE", id=id))
-        if ops:
-            s.api.changeFlowSpace(ops)
+        if ops: s.api.changeFlowSpace(ops)
         
         slices = s.api.listSlices()
         [s.api.deleteSlice(slice) for slice in slices if slice != "root"]

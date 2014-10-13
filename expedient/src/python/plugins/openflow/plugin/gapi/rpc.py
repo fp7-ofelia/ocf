@@ -6,7 +6,7 @@ Created on Oct 1, 2010
 from expedient.common.rpc4django import rpcmethod
 import xmlrpclib
 import logging
-from expedient.common.federation.geni import CredentialVerifier
+from geni import CredentialVerifier
 from django.conf import settings
 from decorator import decorator
 from openflow.plugin.gapi import gapi

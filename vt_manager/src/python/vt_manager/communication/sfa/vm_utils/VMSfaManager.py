@@ -58,7 +58,6 @@ class VMSfaManager:
 	if not vm['slice-id']:
 		vm['slice-id'] = str(uuid.uuid4())
 
-
         vm['slice-name']= sliceName
         vm['uuid'] = str(uuid.uuid4())
         vm['state'] = "on queue"
@@ -78,6 +77,5 @@ class VMSfaManager:
                 vm['operating-system-distribution'] = 'Debian'
                 #XXX: HACK!
                 vm['hd-origin-path'] = "legacy/legacy.tar.gz" #"default/test/lenny" 
-
 	return vm
  

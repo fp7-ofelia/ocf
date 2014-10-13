@@ -5,7 +5,6 @@ from openflow.optin_manager.sfa.util.xrn import Xrn, urn_to_hrn
 
 import types
 
-
 class Resolve(Method):
     """
     Resolve a record.

@@ -144,7 +144,6 @@ class VMAggregate:
                                                          'hostname':vm['vm-ip'],
                                                          'port': "22",
                                                          'username':'root',}))
-
                         rspec_node['services'] = services
 			rspec_node['slivers'] = slivers
 		        
@@ -154,7 +153,6 @@ class VMAggregate:
 	def get_testbed_info(self):
 		#TODO: get True Testbed Info from the AM
 		return {'longitude':config.LONGITUDE,'latitude':config.LATITUDE}
-
 
         def get_nodes_in_geni(self, options={},slice_leaf = None,projectName=None,created_vms=[],new_nodes=[]):
                 if 'slice' in options.keys():
@@ -166,7 +164,6 @@ class VMAggregate:
 
                 rspec_nodes = []
                 for node in nodes:
-
                     rspec_node = Node()
                     site=self.get_testbed_info()
                     rspec_node['component_id'] = hrn_to_urn(config.HRN+'.'+str(node.name),'node')

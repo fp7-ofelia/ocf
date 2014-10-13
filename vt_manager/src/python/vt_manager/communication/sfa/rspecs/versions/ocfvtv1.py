@@ -51,8 +51,6 @@ class OcfVt(RSpecVersion):
 	#XXX:I will get node[slivers] and the node ids to get all the information to create a vm.
 	attribs = dict()
 	attribs.update({'slivers':node['slivers'],'component_id':node['component_id'],'component_name':node['component_name']})
-
-
         return attribs
 
     def get_slice_attributes(self, network=None):

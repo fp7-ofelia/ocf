@@ -12,7 +12,7 @@ from django.db.models import Q
 import re
 from expedient.clearinghouse.users.models import UserProfile
 from openflow.plugin.models import OpenFlowSwitch, FlowSpaceRule
-from expedient.common.federation.geni.util.urn_util import publicid_to_urn
+from geni.util.urn_util import publicid_to_urn
 from expedient.clearinghouse.aggregate.models import Aggregate
 from expedient.common.tests.utils import drop_to_shell
 import time
@@ -115,7 +115,7 @@ def _get_root_node(slice_urn, available):
     '''Create the root node and add all aggregates'''
     # break circular dependecies by putting imports inside function
     from openflow.plugin.models import OpenFlowAggregate
-    from expedient.clearinghouse.geni.gopenflow.models import GCFOpenFlowAggregate
+    from expedient_geni.gopenflow.models import GCFOpenFlowAggregate
     
     root = et.Element(
         RSPEC_TAG, {

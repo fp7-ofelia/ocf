@@ -85,10 +85,3 @@ GENI_REQUEST_RSPEC_VERSIONS = [{ 'namespace':REQ_RS_NAMESPACE,
                                  'schema': REQ_RS_VERSION_SCHEMA,},
                                ] 
 
-
-
-
-
-
-
-

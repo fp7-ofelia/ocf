@@ -5,12 +5,9 @@ from vt_manager.controller.drivers.VTDriver import VTDriver
 import logging
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.controller.actions.ActionController import ActionController
-
 from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
 from vt_manager.common.middleware.thread_local import thread_locals, pull
-
 from vt_manager.models.VirtualMachineKeys import VirtualMachineKeys
-
 from vt_manager.utils.contextualization.vm_contextualize import VMContextualize
 
 class ProvisioningResponseDispatcher():

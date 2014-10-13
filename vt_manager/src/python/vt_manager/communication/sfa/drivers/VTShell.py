@@ -44,7 +44,6 @@ class VTShell:
                             vms = server.getChildObject().getVMs(sliceName=slice)
                         else:
                             vms = server.getChildObject().getVMs(sliceName=slice, projectName = authority)
-                        
                         if vms:
 			    slice_servers.append(server)
                     return slice_servers

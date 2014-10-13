@@ -131,11 +131,9 @@ def addGeniLink(rspec, link, federated=False):
   add_port(od, link['src']['port'])
   add(od,link['dst']['dpid'])
   add_port(od,link['dst']['port']) 
-  
 
 def generateSwitchComponentID (dpid, tag = None):
   return "urn:publicid:IDN+openflow:%s+datapath+%s" % (config.HRN_URN, dpid)
-
 
 def getManifest(slivers, slice_leaf):
   NSMAP = {None: "%s" % (PGNS),
@@ -158,6 +156,4 @@ def getManifest(slivers, slice_leaf):
       od.attrib["description"] = sliver['description']
       od.attrib["email"] = sliver['email']
       od.attrib["status"] = 'Pending to approval'
-
-   
   return rspec
