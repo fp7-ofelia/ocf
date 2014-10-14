@@ -1,7 +1,3 @@
-import base64
-import zlib
-import datetime
-
 from ambase.src.abstract.classes.handlerbase import HandlerBase
 from ambase.src.ambase.exceptions import SliceAlreadyExists
 from ambase.src.ambase.exceptions import AllocationError
@@ -11,6 +7,11 @@ from ambase.src.ambase.exceptions import ShutDown
 #from federation.ambase.src.ambase.exceptions import UnsupportedState
 from ambase.src.ambase.exceptions import PerformOperationalStateError
 
+import base64
+import datetime
+import dateutil.parser
+import zlib
+
 class GeniV3Handler(HandlerBase):
        
     def __init__(self):
@@ -18,7 +19,10 @@ class GeniV3Handler(HandlerBase):
         self.__credential_manager = None
         self.__rspec_manager = None
         self.__geni_exception_manager = None
-        self.__am_type = None
+        # See http://groups.geni.net/geni/attachment/wiki/GAPI_AM_API_V3/CommonConcepts/geni-am-types.xml
+        self.__am_type = "gcf" # Options: {"gcf", "orca", "foam", "protogeni", "sfa", "dcn"
+        # See http://groups.geni.net/geni/attachment/wiki/GAPI_AM_API_V3/CommonConcepts/geni-error-codes.xml
+        self.__am_code = 0
 
     def GetVersion(self, options=dict()):
         try:
@@ -93,17 +97,27 @@ class GeniV3Handler(HandlerBase):
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
         reservation = self.__rspec_manager.parse_request(rspec)
-        expiration = self.get_expiration()
+        expiration = self.__get_expiration()
+        # It is possible for the user to allocate a sliver with a sooner expiration time
+        if "geni_end_time" in options:
+            expiration = min(self.__get_expiration(), options["geni_end_time"])
+        
         try:
             allocated_slivers = self.__delegate.reserve(slice_urn, reservation, expiration)    
         except SliceAlreadyExists as e:
             return self.error_result(self.__geni_exception_manager.ALREADYEXISTS, e)
         except AllocationError as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
-
+        
         manifest = self.__rspec_manager.compose_manifest(allocated_slivers)
         
-        return self.success_result(manifest)
+        # Structure used in the parsing of the result
+        slivers = [{
+                    "geni_sliver_urn": slice_urn,
+                    "geni_expires": str(expiration),
+                    "geni_allocation_status": "geni_allocated"
+                }]
+        return self.success_result(manifest, slivers)
         
     def Provision(self, urns=list(), credentials=list(), options=dict()):
         try:
@@ -111,7 +125,7 @@ class GeniV3Handler(HandlerBase):
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
          
-        expiration = self.get_expiration()
+        expiration = self.__get_expiration()
         
         if not options.get('geni_rspec_version'):
             return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
@@ -196,7 +210,7 @@ class GeniV3Handler(HandlerBase):
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
-        expiration = self.get_expiration()
+        expiration = self.__get_expiration()
         now = datetime.datetime.utcnow()
         
         if 'geni_extend_alap' in options and options['geni_extend_alap']:
@@ -227,25 +241,53 @@ class GeniV3Handler(HandlerBase):
         six_months = datetime.timedelta(weeks = 6 * 4) #6 months
         return six_months
     
-    # Helper functions
-    def get_expiration(self):
-        ''' Max duration is a datetime.timedelta Object'''
+    # Helper methods
+    def __get_expiration(self):
         now = datetime.datetime.utcnow()
         expires = self.__credential_manager.get_expiration_list()
+        # max_duration is a datetime.timedelta object
         max_duration = self.__get_max_expiration()
         if max_duration:
             expires.append(now + max_duration)
-        return min(expires)
+        return self.__datetime_to_rfc3339(min(expires))
     
-    def success_result(self, value):
-        return self.build_property_list(0, value=value)
+    def __datetime_to_rfc3339(self, date):
+        """
+        Returns a datetime object that is formatted according to RFC3339.
+        """
+        try:
+            # Both approaches are valid
+            # Hint: use 'strict_rfc3339' package for validation: strict_rfc3339.validate_rfc3339(...)
+            formatted_date = date.replace(tzinfo=dateutil.tz.tzutc()).strftime("%Y-%m-%d %H:%M:%S").replace(" ", "T")+"Z"
+            #formatted_date = date.replace(tzinfo=dateutil.tz.tzutc()).isoformat("T")
+        except:
+            formatted_date = date
+        return formatted_date
+
+    def success_result(self, rspec, slivers=None):
+        """
+        Prepares "value" struct.
+        """
+        value = dict()
+        value = {
+                    "geni_rspec": rspec,
+                    "geni_slivers": [],
+                }
+        for sliver in slivers:
+            value["geni_slivers"].append(sliver)
+        return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def error_result(self, code, output):
         return self.build_property_list(code, output=output)
     
     def build_property_list(self, geni_code, value=None, output=None):
         result = {}
-        result["code"] = {'geni_code': geni_code}
+        result["code"] = {
+                            "geni_code": geni_code,
+                            # Optional return codes
+                            "am_type": self.__am_type,
+                            "am_code": -1, # XXX: Use this for specific, own error codes
+                        }
         # Non-zero geni_code implies error: output is required, value is optional
         if geni_code:
             result["output"] = output
