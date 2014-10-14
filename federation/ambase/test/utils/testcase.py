@@ -23,8 +23,11 @@ class TestCase(unittest.TestCase):
 def test_main():
     """
     Counts errors and successes from tests.
-    """ 
-    test = unittest.main(verbosity=2, exit=False)
+    """
+    try: 
+        test = unittest.main(verbosity=2, exit=False)
+    except:
+        test = unittest.main()
     # Retrieve errors
     #test_passed = test.result.wasSuccessful()
     #test_total = test.result.testsRun
