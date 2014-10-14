@@ -24,9 +24,12 @@ class VMSfaManager:
 	actionClassEmpty = copy.deepcopy(rspec.query.provisioning.action[0])
         actionClassEmpty.type_ = "create"
         rspec.query.provisioning.action.pop()
+        default_action = rspec.query.provisioning.action
         for vms in servers_slivers:
 	    server_id = vms['component_id']
 	    for vm in vms['slivers']:
+                if "interfaces" not in vm.keys():
+                    vm['interfaces'] = None
 		server = VTServer.objects.get(uuid = server_id)
 	        VMSfaManager.setDefaultVMParameters(vm,server,projectName,sliceName)
 		actionClass = copy.deepcopy(actionClassEmpty)
@@ -35,8 +38,9 @@ class VMSfaManager:
 		Translator.VMdicIfacesToClass(vm['interfaces'],actionClass.server.virtual_machines[0].xen_configuration.interfaces)
                 actionClass.server.uuid = server_id
                 actionClass.server.virtualization_type = server.getVirtTech()
-                rspec.query.provisioning.action.append(actionClass)
-		provisioningRSpecs.append(rspec.query.provisioning)
+                rspec.query.provisioning.action = [actionClass]
+		provisioningRSpecs.append(copy.deepcopy(rspec.query.provisioning))
+                
 
 	return provisioningRSpecs
 	

@@ -103,19 +103,24 @@ class XmlRpcServer():
                     return ""
 
                 def force_list_active_vms(self, password, vm_uuid):
+                    """
+                    Returns dictionary with VM's UUIDs and names.
+                    Parameters:
+                        vm_uuid: if passed, it will return data for that domain only.
+                                 Otherwise, the whole list of VMs will be returned
+                    """
                     from xen.XendManager import XendManager
                     if password != XMLRPC_SERVER_PASSWORD:
                         raise Exception("Password mismatch")
                     active_vms = dict()
-                    XendManager.retrieveActiveDomainsByUUID()
-                    for vm in XendManager.retrieveActiveDomainsByUUID():
+                    active_domains = XendManager.retrieveActiveDomainsByUUID()
+                    for vm in active_domains:
                         if (str(vm_uuid) != 'None'):
                             if vm[0] == vm_uuid:
                                 active_vms[vm[0]] = vm[1]
                                 break
-                            else:
-                                continue
-                        active_vms[vm[0]] = vm[1]
+                        else:
+                            active_vms[vm[0]] = vm[1]
                     return active_vms
 
                 # FIXME Internally works well, but cannot return "too much" data - server hangs

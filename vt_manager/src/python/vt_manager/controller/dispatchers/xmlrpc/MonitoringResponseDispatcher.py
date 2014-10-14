@@ -11,10 +11,7 @@ class MonitoringResponseDispatcher():
 	@staticmethod
 	def processResponse(rspec):
 	
-		print "-------------------> Monitoring!!!!!"
-	
-		for action in rspec.response.monitoring.action:
-			print action
+ 		for action in rspec.response.monitoring.action:
 			if not action.type_ == "listActiveVMs":
 				raise Exception("Cannot process Monitoring action:"+action.type_)
 			try:

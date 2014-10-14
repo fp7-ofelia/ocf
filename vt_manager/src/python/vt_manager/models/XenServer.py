@@ -1,13 +1,13 @@
 from django.db import models
 from django.contrib import auth
 from threading import Lock
-import inspect 
 from vt_manager.models.VTServer import VTServer
 from vt_manager.models.Action import Action
 from vt_manager.models.VirtualMachine import VirtualMachine
 from vt_manager.models.XenVM import XenVM
 from vt_manager.utils.MutexStore import MutexStore
 from vt_manager.models.utils.Choices import VirtTechClass
+import inspect 
 
 def validateAgentURLwrapper():
 	VTServer.validateAgentURL()
@@ -21,7 +21,7 @@ class XenServer(VTServer):
 
 	''' VMs array '''
 	vms = models.ManyToManyField(XenVM, blank = True, null = False, editable = False, related_name = "Server")
-	
+
 	#Stats of memory cpu and disk
 	#TODO: Add here ManyToMany relation to statistics objects
 

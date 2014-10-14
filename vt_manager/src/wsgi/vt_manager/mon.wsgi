@@ -12,6 +12,9 @@ os.environ['DJANGO_SETTINGS_MODULE'] = 'vt_manager.settings.settingsLoader'
 sys.path.insert(0,PYTHON_DIR)
 from vt_manager.controller.monitoring.BackgroundMonitor import BackgroundMonitor
 from vt_manager.controller.monitoring.background_expiration_monitoring import BackgroundExpirationMonitoring
+from vt_manager.controller.monitoring.backgroundreservation import BackgroundReservationMonitoring
+
 
 BackgroundMonitor.monitor()
 BackgroundExpirationMonitoring.monitor()
+BackgroundReservationMonitoring.monitor()

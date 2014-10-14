@@ -74,37 +74,33 @@ class InformationDispatcher():
 
         @staticmethod
         def forceListActiveVMs(serverID='None', vmID='None'):
-                print serverID
                 if serverID != 'None':
                     server = VTDriver.getServerById(serverID)
-                    vms = server.getVMs()
+                    vtam_vms = server.getVMs()
                 else: 
                     if vmID != 'None':
                         servers = VTDriver.getAllServers()
-                        vms = list()
+                        vtam_vms = list()
                         for server in servers:
-                            for vm in server.getVMs():
-                                print vm.name, vm.id, int(vmID), type(vm.id), vm.id==int(vmID)  
-                            vms = server.getVMs(id=int(vmID))
-                            if not vms:
-                                raise Exception("No VMs found in server")
-                            vmID = vms[0].getUUID()
-                            break
-                        if not vms:
+                            vtam_vms = server.getVMs(id=int(vmID))
+                            if vtam_vms:
+                                vmID = vtam_vms[0].getUUID()
+                                break
+                        if not vtam_vms:
                             raise Exception("VM not found")
                 xmlrpc_server = xmlrpclib.Server(server.getAgentURL())
                 # Handle safely the connection against the agent
                 try:
-                    vms_info = xmlrpc_server.force_list_active_vms(server.getAgentPassword(), vmID)
+                    server_active_vms = xmlrpc_server.force_list_active_vms(server.getAgentPassword(), vmID)
                     updated_vms = list()
-                    simple_actions = dict() 
-                    for vm in vms:
-                        if vm.getUUID() in vms_info.keys():
+                    for vm in vtam_vms:
+                        if vm.getUUID() in server_active_vms.keys():
                             vm.setState("running")
                             vm.save()
-                            simple_actions[vm.getUUID()] = "running"
                         else:
-                            if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown']:
+                            # XXX: avoiding "on queue" and "unknown" states to avoid bad management
+                            #if vm.getState() in ['deleting...', 'failed', 'on queue', 'unknown']:
+                            if vm.getState() in ["deleting...", "failed"]:
                                 child = vm.getChildObject()
                                 server = vm.Server.get()
                                 #Action.objects.all().filter(objectUUID = vm.uuid).delete()
@@ -112,16 +108,14 @@ class InformationDispatcher():
                                 # Keep actions table up-to-date after each deletion
                                 vm_uuids = [ vm.uuid for vm in VirtualMachine.objects.all() ]
                                 Action.objects.all().exclude(objectUUID__in = vm_uuids).delete()
-                                simple_actions[vm.getUUID()] = "deleted"
-                            elif vm.getState() in ['running', "starting...", "stopping..."] :
-                                vm.setState('stopped')
+                            elif vm.getState() in ["running", "starting...", "stopping..."] :
+                                vm.setState("stopped")
                                 vm.save()
-                                simple_actions[vm.getUUID()] = "stopped"
                             else:
                                 continue
                 except:
-                    vms_info = dict()
-                return vms_info
+                    server_active_vms = dict()
+                return server_active_vms
 
 	@staticmethod
 	def __ServerModelToClass(sModel, sClass ):

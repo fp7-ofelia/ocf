@@ -26,7 +26,8 @@ from vt_manager.controller.actions.ActionController import ActionController
 
 @rpcmethod(url_name="plugin")
 def send(callBackUrl, xml):
-	try:
+	try:    
+                print "Recieved RSpec", xml  
 		logging.debug("XML RECEIVED: \n%s" % xml)
 		rspec = XmlHelper.parseXmlString(xml)
 	except Exception as e:

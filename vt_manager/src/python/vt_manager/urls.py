@@ -9,6 +9,7 @@ from vt_manager.utils.ThemeManager import ThemeManager
 from vt_manager.communication.southCommInterface import *
 from vt_manager.communication.northCommInterface import *
 from vt_manager.communication.sfaCommunication import *
+from vt_manager.communication.gapi3communication import *
 
 '''
 Load Themes
@@ -78,6 +79,7 @@ urlpatterns = patterns('',
     rpc_url(r'^xmlrpc/agent/?$', name='agent'),
     rpc_url(r'^xmlrpc/plugin/?$', name='plugin'),
     rpc_url(r'^xmlrpc/sfa/?$', name='sfa'),
+    rpc_url(r'^xmlrpc/geni/3/?$', name='gapi'),
     #rpc_url(r'^xmlrpc/.*$', name='root'),
 )
 

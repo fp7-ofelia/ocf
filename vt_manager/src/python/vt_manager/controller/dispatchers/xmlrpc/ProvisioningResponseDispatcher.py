@@ -2,13 +2,14 @@ from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.Action import Action
 from vt_manager.models.VirtualMachine import VirtualMachine
 from vt_manager.controller.drivers.VTDriver import VTDriver
-import logging
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 from vt_manager.controller.actions.ActionController import ActionController
 from vt_manager.communication.sfa.vm_utils.SfaCommunicator import SfaCommunicator
 from vt_manager.common.middleware.thread_local import thread_locals, pull
+from vt_manager.models.reservation import Reservation
 from vt_manager.models.VirtualMachineKeys import VirtualMachineKeys
 from vt_manager.utils.contextualization.vm_contextualize import VMContextualize
+import logging
 
 class ProvisioningResponseDispatcher():
 
@@ -169,6 +170,10 @@ class ProvisioningResponseDispatcher():
                                                 expiring_slices = vm.objects.filter(sliceName=vm.sliceName,projectName=vm.projectName)
                                                 if len(expiring_slices)  == 1:
 						    expiring_slices[0].delete()
+                                        try:
+                                            Reservation.objects.get(name = vm.name).delete()
+                                        except:
+                                            print "Failed to delete reservation for VM with uuid"
                                             return
                                         XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendSync", XmlHelper.craftXmlClass(rspec))
                                         if failedOnCreate == 1:

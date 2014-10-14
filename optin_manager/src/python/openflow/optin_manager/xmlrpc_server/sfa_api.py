@@ -66,7 +66,7 @@ def GetVersion(api=None, options={}):
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
 def ListResources(creds, options, **kwargs):
-    pm.check_permissions('ListResources',locals()) 
+    #pm.check_permissions('ListResources',locals()) 
     #try: 
     rspec = aggregate.ListResources(options=options)
     #except Exception as e:
@@ -81,18 +81,18 @@ def ListSlices(creds, options):
 
 @rpcmethod(signature=[RSPEC_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name="optin_sfa")
 def CreateSliver(slice_xrn, creds, rspec, users, options):
-    pm.check_permissions('CreateSliver',locals())    
-    #try:
-    rspec = aggregate.CreateSliver(slice_xrn,rspec,users,creds,options)
-    #except Exception as e:
-    #    raise OCFSfaError(e,'CreateSliver')
+    #pm.check_permissions('CreateSliver',locals())    
+    try:
+        rspec = aggregate.CreateSliver(slice_xrn,rspec,users,creds,options)
+    except Exception as e:
+        raise OCFSfaError(e,'CreateSliver')
         
     to_return = {'output': '', 'geni_api': 2, 'code': {'am_type': 'sfa', 'geni_code': 0}, 'value': rspec}
     return to_return #driver.create_sliver(slice_urn,slice_leaf,authority,rspec,users,options)
 
 @rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
 def DeleteSliver(xrn, creds,options,**kwargs):
-    pm.check_permissions('DeleteSliver',locals())
+    #pm.check_permissions('DeleteSliver',locals())
     #DSCredVal(slice_urn,credentials,options)
     try:
         rspec = aggregate.DeleteSliver(xrn,options)
@@ -105,7 +105,7 @@ def DeleteSliver(xrn, creds,options,**kwargs):
 
 @rpcmethod(signature=[STATUS_TYPE, URN_TYPE, CREDENTIALS_TYPE], url_name="optin_sfa")
 def SliverStatus(slice_xrn, creds, options):
-    pm.check_permissions('SliverStatus',locals()) 
+    #pm.check_permissions('SliverStatus',locals()) 
     #SSCredVal(slice_urn,credentials,options)
     try:
         resources = aggregate.SliverStatus(slice_xrn,options)
