@@ -5,6 +5,7 @@ from ambase.src.ambase.exceptions import PerformOperationalStateError
 from ambase.src.ambase.exceptions import ProvisionError
 from ambase.src.ambase.exceptions import SliceAlreadyExists
 from ambase.test.utils import mocksettings as config
+from ambase.test.utils.mocksliver import MockSliver
 
 class MockDelegate(DelegateBase):
     
@@ -49,7 +50,9 @@ class MockDelegate(DelegateBase):
     
     def describe(self, urns=dict(),credentials=dict(),options=dict()):
         if self.success_mode:
-            return True
+            sliver = MockSliver()
+            sliver.set_slice_urn("Slice_urn")
+            return [sliver]
         else:
             raise Exception("Mock error")
     
@@ -57,19 +60,21 @@ class MockDelegate(DelegateBase):
         if self.raise_already_exists:
             raise SliceAlreadyExists("Mock error")
         if self.success_mode:
-            return True
+            sliver = MockSliver()
+            sliver.set_expiration(expiration)
+            return [sliver]
         else:
             raise AllocationError("Mock error")
     
     def create(self, urns=list(), expiration=None):
         if self.success_mode:
-            return True
+            return [MockSliver()]
         else:
             raise ProvisionError("Mock error")
     
     def delete(self, urns=list()):
         if self.success_mode:
-            return True
+            return [MockSliver()]
         else:
             raise DeleteError("Mock error") 
     

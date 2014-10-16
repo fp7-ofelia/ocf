@@ -10,7 +10,7 @@ from ambase.test.utils import testcase
 from ambase.test.utils.mockcredentialmanager import MockCredentialManager
 from ambase.test.utils.mockdelegate import MockDelegate
 from ambase.test.utils.mockrspecmanager import MockRSpecManager
-
+from lxml import etree
 
 class TestListResources(testcase.TestCase):
     """ Testing very basic behaviour to see 
@@ -47,7 +47,7 @@ class TestListResources(testcase.TestCase):
         self.ret_struct = self.handler.ListResources(None, self.options)
         # An XML can be decoded by base64.b64decode, thus we should try first with something particular
         try:
-            from lxml import etree
+            
             geni_rspec_uncompressed = etree.fromstring(self.ret_struct.get("value").get("geni_rspec"))
             geni_rspec_compressed = geni_rspec_uncompressed
         except:

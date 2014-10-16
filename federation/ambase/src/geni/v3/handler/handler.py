@@ -4,7 +4,6 @@ from ambase.src.ambase.exceptions import AllocationError
 from ambase.src.ambase.exceptions import ProvisionError
 from ambase.src.ambase.exceptions import DeleteError
 from ambase.src.ambase.exceptions import ShutDown
-#from federation.ambase.src.ambase.exceptions import UnsupportedState
 from ambase.src.ambase.exceptions import PerformOperationalStateError
 
 import base64
@@ -94,7 +93,7 @@ class GeniV3Handler(HandlerBase):
         if "geni_compressed" in options and options["geni_compressed"]:
             output = base64.b64encode(zlib.compress(output))
             
-        return self.success_result(output)
+        return self.success_result(output,slivers,slivers[0].get_slice_urn())
 
     def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict()):
         # Credential validation
@@ -118,13 +117,8 @@ class GeniV3Handler(HandlerBase):
         
         manifest = self.__rspec_manager.compose_manifest(allocated_slivers)
         
-        # Structure used in the parsing of the result
-        slivers = [{
-                    "geni_sliver_urn": slice_urn,
-                    "geni_expires": str(expiration),
-                    "geni_allocation_status": "geni_allocated",
-                }]
-        return self.success_result(manifest, slivers)
+ 
+        return self.success_result(manifest, allocated_slivers)
         
     def Provision(self, urns=list(), credentials=list(), options=dict()):
         try:
@@ -146,11 +140,12 @@ class GeniV3Handler(HandlerBase):
 
         try:
             slivers = self.__delegate.create(urns, expiration)
+            
         except ProvisionError as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
         
-        manifest = self.__rspec_manager.manifest_slivers(slivers)
-        return self.success_result(manifest)
+        manifest = self.__rspec_manager.compose_manifest(slivers)
+        return self.success_result(manifest, slivers)
     
     def Delete(self, urns=list(), credentials=list(), options=dict()):
         # Credential validation
@@ -175,7 +170,7 @@ class GeniV3Handler(HandlerBase):
         except ShutDown as e:
             return self.error_result(self.__geni_exception_manager.UNAVAILABLE, e)
         
-        return self.success_result(result)
+        return self.success_result(slivers = result)
     
     def PerformOperationalAction(self, urns=list(), credentials=list(), action=None, options=dict()):
         try:
@@ -273,17 +268,20 @@ class GeniV3Handler(HandlerBase):
             formatted_date = date
         return formatted_date
 
-    def success_result(self, rspec, slivers=[]):
+    def success_result(self, rspec=None, slivers=[], slice_urn=None):
         """
         Prepares "value" struct.
         """
         value = dict()
-        value = {
-                    "geni_rspec": rspec,
-                    "geni_slivers": [],
-                }
-        for sliver in slivers:
-            value["geni_slivers"].append(sliver)
+        if rspec:
+            value["geni_rspec"] = rspec
+        if slice_urn:
+            value["geni_urn"] = slice_urn
+        if slivers:
+            value["geni_slivers"] = list()
+            for sliver in slivers:
+                geni_sliver_struct = self.__get_geni_sliver_structure(sliver)
+                value["geni_slivers"].append(geni_sliver_struct)
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def error_result(self, code, output):
@@ -306,6 +304,14 @@ class GeniV3Handler(HandlerBase):
         else:
             result["value"] = value
         return result
+    
+    def __get_geni_sliver_structure(self, sliver):
+        sliver_struct = dict()
+        sliver_struct["geni_sliver_urn"] = sliver.get_urn()
+        sliver_struct["geni_allocation_status"] =  sliver.get_allocation_status()
+        sliver_struct["geni_operational_status"] = sliver.get_operational_status()
+        sliver_struct["geni_expires"] = sliver.get_expiration()
+        return sliver_struct
     
     def get_delegate(self):
         return self.__delegate
