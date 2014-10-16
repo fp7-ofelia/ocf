@@ -17,8 +17,6 @@ import sys, traceback, logging
 from django.conf import settings
 from os.path import dirname, join
 
-
-
 #
 # Email configuration.
 #
@@ -47,7 +45,8 @@ DEBUG = True
 #SRC_DIR = "/opt/ofelia/vt_manager/src"
 #SRC_DIR = join(os.getenv("OCF_PATH"), "vt_manager/src")
 SRC_DIR = join(dirname(__file__), "../../../")
-sys.path.append(SRC_DIR + "../../core/lib/am/")
+AM_LIB_LOCATION = SRC_DIR + "../../core/lib/am/"
+sys.path.append(AM_LIB_LOCATION)
 sys.path.append(SRC_DIR + "../../core/lib/")
 
 #
