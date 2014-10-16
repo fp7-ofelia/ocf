@@ -20,7 +20,11 @@ class CredentialManager(CredentialManagerBase):
 
     def get_expiration_list(self):
         return ""
-    
+
+    def get_slice_expiration(self, credentials):
+        # TODO: Retrieve slice expiration from slice credentials
+        return str(credentials)
+
     def _get_geniv2_validation(self, method, credentials):
         method = self._translate_to_geniv2_method(method)
         try:
@@ -42,4 +46,4 @@ class CredentialManager(CredentialManagerBase):
         elif method == "Renew":
             return "renewsliver"
         raise Exception("Unknown method")
-    
+

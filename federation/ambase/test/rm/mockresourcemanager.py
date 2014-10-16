@@ -24,8 +24,7 @@ class MockResourceManager(ResourceManagerBase):
         self.resources = resources
         self.resources.extend(default_resources)
         print self.resources
-        
-              
+    
     def get_resources(self, urns = None):
         if urns:
             result = list()
@@ -40,16 +39,15 @@ class MockResourceManager(ResourceManagerBase):
             return result            
         else:                
             return self.resources
-        
-    def create_resources(self, urns):
+    
+    def create_resources(self, urns, expiration):
         result = list()
         for urn in urns:
             for r in self.resources:
-                if r.get_sliver().get_urn() == urn :
-                    if r.get_allocation_state() ==  "RESERVED":
+                if r.get_sliver().get_urn() == urn:
+                    if r.get_allocation_state() == "RESERVED":
                         r.set_allocation_state("provisioned")
                         result.append(r)
-                        
         return result
     
     def reserve_resources(self, slice_urn, reservation, expiration):

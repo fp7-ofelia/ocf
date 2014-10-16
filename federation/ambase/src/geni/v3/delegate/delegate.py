@@ -39,11 +39,9 @@ class GeniV3Delegate(DelegateBase):
                         geni_request_rspec_versions=reqver,
                         geni_ad_rspec_versions=adver,
                         geni_credential_types=credential_types)
-
         return versions
     
     def list_resources(self, geni_available=False):
-        
         return self.__resource_manager.get_resources()
     
     def describe(self, urns=dict()):
@@ -53,10 +51,9 @@ class GeniV3Delegate(DelegateBase):
         """
         Allocate slivers
         """
-
         return self.__resource_manager.reserve_resources(slice_urn, reservation, expiration)
     
-    def create(self, urns=list()):
+    def create(self, urns=list(), expiration=None):
         """
         Provision slivers
         """
@@ -69,7 +66,6 @@ class GeniV3Delegate(DelegateBase):
         return self.__resource_manager.delete_resources(urns)
     
     def perform_operational_action(self, urns=list(), action=None, geni_besteffort=True):
-        
         if action == 'geni_start':
             return self.__resource_manager.start_resources(urns, geni_besteffort)
         elif action == 'geni_stop':
@@ -92,5 +88,4 @@ class GeniV3Delegate(DelegateBase):
 
     def set_resource_manager(self, value):
         self.__resource_manager = value
-
 

@@ -4,7 +4,7 @@ from ambase.src.ambase.exceptions import DeleteError
 from ambase.src.ambase.exceptions import PerformOperationalStateError
 from ambase.src.ambase.exceptions import ProvisionError
 from ambase.src.ambase.exceptions import SliceAlreadyExists
-
+from ambase.test.utils import mocksettings as config
 
 class MockDelegate(DelegateBase):
     
@@ -16,7 +16,28 @@ class MockDelegate(DelegateBase):
     
     def get_version(self):
         if self.success_mode:
-            return True
+            reqver = [dict(type=config.REQ_RSPEC_TYPE,
+                       version=config.REQ_RSPEC_VERSION,
+                       schema=config.REQ_RSPEC_SCHEMA,
+                       namespace=config.REQ_RSPEC_NAMESPACE,
+                       extensions=config.REQ_RSPEC_EXTENSIONS)]
+            adver = [dict(type=config.AD_RSPEC_TYPE,
+                       version=config.AD_RSPEC_VERSION,
+                       schema=config.AD_RSPEC_SCHEMA,
+                       namespace=config.AD_RSPEC_NAMESPACE,
+                       extensions=config.AD_RSPEC_EXTENSIONS)]
+            api_versions = dict()
+            api_versions[str(config.GENI_API_VERSION)] = config.AM_URL
+            credential_types = [dict(geni_type = config.CREDENTIAL_TYPE,
+                                 geni_version = config.GENI_API_VERSION)]
+            versions = dict(geni_api= config.GENI_API_VERSION,
+                        geni_api_versions=api_versions,
+                        geni_am_type=config.AM_TYPE,
+                        geni_am_code=config.AM_CODE_VERSION,
+                        geni_request_rspec_versions=reqver,
+                        geni_ad_rspec_versions=adver,
+                        geni_credential_types=credential_types)
+            return versions
         else:
             raise Exception("Mock error")
     
@@ -40,7 +61,7 @@ class MockDelegate(DelegateBase):
         else:
             raise AllocationError("Mock error")
     
-    def create(self, urns=list()):
+    def create(self, urns=list(), expiration=None):
         if self.success_mode:
             return True
         else:

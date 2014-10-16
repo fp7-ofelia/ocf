@@ -34,14 +34,25 @@ class TestAllocate(testcase.TestCase):
     def test_should_allocate_with_sooner_user_expiration(self):
         import datetime
         import dateutil.parser
-        current_time = datetime.datetime.now()
+        current_time = datetime.datetime.utcnow()
         # User expiration time: 10 minutes from now (far less than the default 60 minutes)
-        user_expiration_time = current_time + datetime.timedelta(0,0,0,0,10)
+        user_expiration_time = current_time + datetime.timedelta(minutes = 10)
         user_expiration_time = user_expiration_time.replace(tzinfo=dateutil.tz.tzutc()).strftime("%Y-%m-%d %H:%M:%S")
         user_expiration_time = user_expiration_time.replace(" ", "T")+"Z"
         self.ret_struct = self.handler.Allocate(None, None, None, {"geni_end_time": user_expiration_time})
         self.assertEquals(user_expiration_time, self.ret_struct.get("value").get("geni_slivers")[0].get("geni_expires"))
     
+    def test_should_fail_with_later_user_expiration(self):
+        import datetime
+        import dateutil.parser
+        current_time = datetime.datetime.utcnow()
+        # User expiration time: 1 day from now (far more than the default 60 minutes)
+        user_expiration_time = current_time + datetime.timedelta(days = 1)
+        user_expiration_time = user_expiration_time.replace(tzinfo=dateutil.tz.tzutc()).strftime("%Y-%m-%d %H:%M:%S")
+        user_expiration_time = user_expiration_time.replace(" ", "T")+"Z"
+        self.ret_struct = self.handler.Allocate(None, None, None, {"geni_end_time": user_expiration_time})
+        self.assertNotEquals(user_expiration_time, self.ret_struct.get("value").get("geni_slivers")[0].get("geni_expires"))
+        
     def test_should_return_rspec(self):
         self.assertNotEquals("", self.ret_struct.get("value").get("geni_rspec"))
     

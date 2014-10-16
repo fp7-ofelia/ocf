@@ -15,7 +15,7 @@ import zlib
 class GeniV3Handler(HandlerBase):
        
     def __init__(self):
-        self.__delegate= None
+        self.__delegate = None
         self.__credential_manager = None
         self.__rspec_manager = None
         self.__geni_exception_manager = None
@@ -23,7 +23,7 @@ class GeniV3Handler(HandlerBase):
         self.__am_type = "gcf" # Options: {"gcf", "orca", "foam", "protogeni", "sfa", "dcn"
         # See http://groups.geni.net/geni/attachment/wiki/GAPI_AM_API_V3/CommonConcepts/geni-error-codes.xml
         self.__am_code = 0
-
+    
     def GetVersion(self, options=dict()):
         try:
             value = self.__delegate.get_version()
@@ -38,18 +38,26 @@ class GeniV3Handler(HandlerBase):
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
-        # Options validation
+        # Required options validation
         if not options.has_key("geni_rspec_version"):
-            return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version required in options')
-
-        required_options = set(['type', 'version'])
-        option_list = set(options['geni_rspec_version'].keys())
+            return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version required in options")
+        required_options = set(["type", "version"])
+        option_list = set(options["geni_rspec_version"].keys())
         if not required_options.issubset(option_list):
-            return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
+            return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
+        
+        # Allow only the rspec versions advertised in GetVersion
+        user_geni_rspec_version = str(options.get("geni_rspec_version").get("version")).lower()
+        # TODO: Retrieve 'am_geni_rspec_version' and 'am_geni_rspec_type' as a list of values; not just the first one!
+        am_geni_rspec_version = str(self.__delegate.get_version().get("geni_ad_rspec_versions")[0].get("version")).lower()
+        user_geni_rspec_type = str(options.get("geni_rspec_version").get("type")).lower()
+        am_geni_rspec_type = str(self.__delegate.get_version().get("geni_ad_rspec_versions")[0].get("type")).lower()
+        if user_geni_rspec_version != am_geni_rspec_version or user_geni_rspec_type != am_geni_rspec_type:
+            return self.error_result(self.__geni_exception_manager.BADVERSION, "Bad Version: option geni_rspec_version defines an invalid version, type or geni_rspec_version value.")
         
         # Retrieving raw resources
         geni_available = False
-        if options.get('geni_available'):
+        if options.get("geni_available"):
             if geni_available:
                 geni_available = True
         resources = self.__delegate.list_resources(geni_available)
@@ -57,9 +65,8 @@ class GeniV3Handler(HandlerBase):
         # Crafting resources into RSpec
         output = self.__rspec_manager.compose_advertisement(resources)
         
-        
         # Preparing the output
-        if 'geni_compressed' in options and options['geni_compressed']:
+        if options.get("geni_compressed", False):
             output = base64.b64encode(zlib.compress(output))
             
         return self.success_result(output)
@@ -70,13 +77,13 @@ class GeniV3Handler(HandlerBase):
             self.__credential_manager.validate_for("describe", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        if not options.get('geni_rspec_version'):
-            return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
+        if not options.get("geni_rspec_version"):
+            return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
         # Options validation
-        required_options = set(['type', 'version'])
-        option_list = set(options['geni_rspec_version'].keys())
+        required_options = set(["type", "version"])
+        option_list = set(options["geni_rspec_version"].keys())
         if not required_options.issubset(option_list):
-            return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
+            return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
 
         # Retrieving slivers to manifest
         slivers = self.__delegate.describe(urns)
@@ -84,7 +91,7 @@ class GeniV3Handler(HandlerBase):
         # Crafting slivers to manifest RSpec
         output = self.__rspec_manager.compose_manifest(slivers)
         
-        if 'geni_compressed' in options and options['geni_compressed']:
+        if "geni_compressed" in options and options["geni_compressed"]:
             output = base64.b64encode(zlib.compress(output))
             
         return self.success_result(output)
@@ -115,7 +122,7 @@ class GeniV3Handler(HandlerBase):
         slivers = [{
                     "geni_sliver_urn": slice_urn,
                     "geni_expires": str(expiration),
-                    "geni_allocation_status": "geni_allocated"
+                    "geni_allocation_status": "geni_allocated",
                 }]
         return self.success_result(manifest, slivers)
         
@@ -125,23 +132,24 @@ class GeniV3Handler(HandlerBase):
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
          
-        expiration = self.__get_expiration()
+        # TODO: Implement this method
+        expiration = self.__credential_manager.get_slice_expiration(credentials)
+        #expiration = self.__get_expiration()
         
-        if not options.get('geni_rspec_version'):
-            return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
+        if not options.get("geni_rspec_version"):
+            return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
         # Options validation
-        required_options = set(['type', 'version'])
-        option_list = set(options['geni_rspec_version'].keys())
+        required_options = set(["type", "version"])
+        option_list = set(options["geni_rspec_version"].keys())
         if not required_options.issubset(option_list):
-            return self.error_result(self.__geni_exception_manager.BADARGS, 'Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.')
+            return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
 
         try:
-            slivers = self.__delegate.create(urns)
+            slivers = self.__delegate.create(urns, expiration)
         except ProvisionError as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
         
         manifest = self.__rspec_manager.manifest_slivers(slivers)
-        
         return self.success_result(manifest)
     
     def Delete(self, urns=list(), credentials=list(), options=dict()):
@@ -175,11 +183,11 @@ class GeniV3Handler(HandlerBase):
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
-        actions = ['geni_start', 'geni_restart', 'geni_stop']
+        actions = ["geni_start", "geni_restart", "geni_stop"]
         if action not in actions:
             return self.error_result(self.__geni_exception_manager.UNSUPPORTED, "Unsupported Action")
         
-        if options.get('geni_best_effort'):
+        if options.get("geni_best_effort"):
             best_effort = True
         else:
             best_effort = False
@@ -213,7 +221,7 @@ class GeniV3Handler(HandlerBase):
         expiration = self.__get_expiration()
         now = datetime.datetime.utcnow()
         
-        if 'geni_extend_alap' in options and options['geni_extend_alap']:
+        if "geni_extend_alap" in options and options["geni_extend_alap"]:
             if expiration < expiration_time:
                 expiration= expiration_time
         
@@ -238,8 +246,9 @@ class GeniV3Handler(HandlerBase):
         return self.error_result(self.__geni_exception_manager.FORBIDDEN, "ShutDown Method is only available for the AM administrators")
     
     def __get_max_expiration(self):
-        six_months = datetime.timedelta(weeks = 6 * 4) #6 months
-        return six_months
+        #six_months = datetime.timedelta(weeks = 6 * 4) #6 months
+        one_hour = datetime.timedelta(hours = 1)
+        return one_hour
     
     # Helper methods
     def __get_expiration(self):
@@ -257,14 +266,14 @@ class GeniV3Handler(HandlerBase):
         """
         try:
             # Both approaches are valid
-            # Hint: use 'strict_rfc3339' package for validation: strict_rfc3339.validate_rfc3339(...)
+            # Hint: use "strict_rfc3339" package for validation: strict_rfc3339.validate_rfc3339(...)
             formatted_date = date.replace(tzinfo=dateutil.tz.tzutc()).strftime("%Y-%m-%d %H:%M:%S").replace(" ", "T")+"Z"
             #formatted_date = date.replace(tzinfo=dateutil.tz.tzutc()).isoformat("T")
         except:
             formatted_date = date
         return formatted_date
 
-    def success_result(self, rspec, slivers=None):
+    def success_result(self, rspec, slivers=[]):
         """
         Prepares "value" struct.
         """
