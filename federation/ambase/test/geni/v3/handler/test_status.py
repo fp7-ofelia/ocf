@@ -1,10 +1,9 @@
-from federation.ambase.src.geni.exceptions.manager import GENIExceptionManager
-from federation.ambase.src.geni.v3.handler.handler import GeniV3Handler
-from federation.ambase.test.utils import testcase
-from federation.ambase.test.utils.mockcredentialmanager import MockCredentialManager
-from federation.ambase.test.utils.mockdelegate import MockDelegate
-from federation.ambase.test.utils.mockrspecmanager import MockRSpecManager
-
+from ambase.src.geni.exceptions.manager import GENIExceptionManager
+from ambase.src.geni.v3.handler.handler import GeniV3Handler
+from ambase.test.utils import testcase
+from ambase.test.utils.mockcredentialmanager import MockCredentialManager
+from ambase.test.utils.mockdelegate import MockDelegate
+from ambase.test.utils.mockrspecmanager import MockRSpecManager
 
 class TestStatus(testcase.TestCase):
     """ Testing very basic behaviour to see 
@@ -18,6 +17,7 @@ class TestStatus(testcase.TestCase):
         self.handler.set_rspec_manager(MockRSpecManager())
         self.handler.set_delegate(MockDelegate())
         self.handler.set_geni_exception_manager(GENIExceptionManager()) #is too simple to mock it
+        self.ret_struct = self.handler.Status([], [], {})
         
     def tearDown(self):
         self.handler = None
@@ -33,8 +33,32 @@ class TestStatus(testcase.TestCase):
         self.assertEquals(GENIExceptionManager.ERROR, value.get('code').get('geni_code'))
         
     def test_should_status(self):
-        value = self.handler.Status([], [], {})
-        self.assertEquals(GENIExceptionManager.SUCCESS, value.get('code').get('geni_code'))
+        self.assertEquals(GENIExceptionManager.SUCCESS, self.ret_struct.get('code').get('geni_code'))
+
+    def test_should_return_correct_value_structure(self):
+        struct = self.get_expected_return_structure().keys()
+        struct.sort()
+        obtained = self.ret_struct.get("value").keys()
+        obtained.sort()
+        self.assertEquals(struct, obtained)
+        
+    def test_should_return_correct_sliver_value_structure(self):
+        struct = self.get_geni_slivers_content().keys()
+        struct.sort()
+        obtained = self.ret_struct.get("value").get("geni_slivers")[0].keys()
+        obtained.sort()
+        self.assertEquals(struct, obtained)
+        
+    def get_expected_return_structure(self):
+        struct = {"geni_urn" : "None",
+                  "geni_slivers" : [],}
+        return struct
+    
+    def get_geni_slivers_content(self):
+        return { "geni_sliver_urn": "urn",
+                 "geni_allocation_status": "string",
+                 "geni_operational_status": "string",
+                 "geni_expires":"String"}
     
 if __name__ == "__main__":
     # Allows to run in stand-alone mode

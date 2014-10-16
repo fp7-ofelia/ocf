@@ -170,7 +170,8 @@ class GeniV3Handler(HandlerBase):
         except ShutDown as e:
             return self.error_result(self.__geni_exception_manager.UNAVAILABLE, e)
         
-        return self.success_result(slivers = result)
+        
+        return self.delete_success_result(result)
     
     def PerformOperationalAction(self, urns=list(), credentials=list(), action=None, options=dict()):
         try:
@@ -192,7 +193,7 @@ class GeniV3Handler(HandlerBase):
         except PerformOperationalStateError as e:
             return self.error_result(self.__geni_exception_manager.BADARGS, e)
         
-        return self.success_result(action)
+        return self.success_result(slivers_direct=result)
      
     def Status(self, urns=list(), credentials=list(), options=dict()):
         try:
@@ -203,9 +204,8 @@ class GeniV3Handler(HandlerBase):
             result = self.__delegate.status(urns)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
-            
-        
-        return self.success_result(result)
+                    
+        return self.success_result(slivers=result, slice_urn=result[0].get_slice_urn())
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
         try:
@@ -267,21 +267,37 @@ class GeniV3Handler(HandlerBase):
         except:
             formatted_date = date
         return formatted_date
+    
+    def delete_success_result(self, slivers):
+        value = list()
+        for sliver in slivers:
+            sliver_struct = dict()
+            sliver_struct["geni_sliver_urn"] = sliver.get_urn()
+            sliver_struct["geni_allocation_status"] =  sliver.get_allocation_status()
+            sliver_struct["geni_expires"] = sliver.get_expiration()
+            value.append(sliver_struct)
+        return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
 
-    def success_result(self, rspec=None, slivers=[], slice_urn=None):
+    def success_result(self, rspec=None, slivers=[], slice_urn=None, slivers_direct=list()):
         """
         Prepares "value" struct.
         """
-        value = dict()
-        if rspec:
-            value["geni_rspec"] = rspec
-        if slice_urn:
-            value["geni_urn"] = slice_urn
-        if slivers:
-            value["geni_slivers"] = list()
-            for sliver in slivers:
-                geni_sliver_struct = self.__get_geni_sliver_structure(sliver)
-                value["geni_slivers"].append(geni_sliver_struct)
+        if slivers_direct:
+            value = list()
+            for sliver in slivers_direct:
+                geni_sliver_special_struct = self.__get_geni_sliver_structure(sliver)
+                value.append(geni_sliver_special_struct)   
+        else:    
+            value = dict()
+            if rspec:
+                value["geni_rspec"] = rspec
+            if slice_urn:
+                value["geni_urn"] = slice_urn
+            if slivers:
+                value["geni_slivers"] = list()
+                for sliver in slivers:
+                    geni_sliver_struct = self.__get_geni_sliver_structure(sliver)
+                    value["geni_slivers"].append(geni_sliver_struct)
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def error_result(self, code, output):
@@ -309,10 +325,10 @@ class GeniV3Handler(HandlerBase):
         sliver_struct = dict()
         sliver_struct["geni_sliver_urn"] = sliver.get_urn()
         sliver_struct["geni_allocation_status"] =  sliver.get_allocation_status()
-        sliver_struct["geni_operational_status"] = sliver.get_operational_status()
         sliver_struct["geni_expires"] = sliver.get_expiration()
+        sliver_struct["geni_operational_status"] = sliver.get_operational_status()
         return sliver_struct
-    
+        
     def get_delegate(self):
         return self.__delegate
     

@@ -80,13 +80,15 @@ class MockDelegate(DelegateBase):
     
     def perform_operational_action(self, urns=list(), action=None, geni_besteffort=True):
         if self.success_mode:
-            return True
+            return [MockSliver()]
         else:
             raise PerformOperationalStateError("Mock error")
     
     def status(self, urns=list()):
         if self.success_mode:
-            return True
+            sliver = MockSliver()
+            sliver.set_slice_urn("slice_urn")
+            return [sliver]
         else:
             raise Exception("Mock error")
     

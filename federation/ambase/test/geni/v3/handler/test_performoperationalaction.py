@@ -19,6 +19,7 @@ class TestPerformOperationalAction(unittest.TestCase):
         self.handler.set_delegate(MockDelegate())
         self.handler.set_geni_exception_manager(GENIExceptionManager()) #is too simple to mock it
         
+        
     def tearDown(self):
         self.handler = None
         
@@ -48,6 +49,31 @@ class TestPerformOperationalAction(unittest.TestCase):
         # XXX Add incorrect credentials for the second parameter
         value = self.handler.PerformOperationalAction([], None, "geni_start", {})
         self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get('code').get('geni_code'))
+    
+    def test_should_return_correct_value_structure(self):
+        value = self.handler.PerformOperationalAction([], [], "geni_start", {}) 
+        obtained = value.get("value")
+        obtained.sort()
+        self.assertTrue(type(obtained) == list)
+        
+    def test_should_return_correct_sliver_value_structure(self):
+        value = self.handler.PerformOperationalAction([], [], "geni_start", {})
+        struct = self.get_geni_slivers_content()[0].keys()
+        struct.sort()
+        obtained = value.get("value")[0].keys()
+        obtained.sort()
+        self.assertEquals(struct, obtained)    
+        
+    def get_expected_return_structure(self):
+        struct = {"geni_rspec" : "None",
+                  "geni_slivers" : [],}
+        return struct
+    
+    def get_geni_slivers_content(self):
+        return [{ "geni_sliver_urn": "urn",
+                  "geni_allocation_status": "string",
+                  "geni_operational_status":"String",
+                  "geni_expires":"String"}]
     
 if __name__ == "__main__":
     # Allows to run in stand-alone mode
