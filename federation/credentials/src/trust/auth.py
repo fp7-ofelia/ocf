@@ -15,14 +15,13 @@ from geniutils.src.xrn.xrn import get_authority
 
 from credentials.src.trust.gid import GID
 from credentials.src.trust.rights import Rights
-from credentials.src.trust.certificate import Keypair
 from credentials.src.trust.certificate import Certificate
 from credentials.src.trust.credential import Credential
 from credentials.src.trust.trustedroots import TrustedRoots
 from credentials.src.trust.hierarchy import Hierarchy
 from credentials.src.trust.sfaticket import SfaTicket
 
-from settings.src import settings as CONFIG 
+from settings.src.settings import Settings as CONFIG 
 
 
 class Auth:
@@ -33,8 +32,10 @@ class Auth:
     def __init__(self, peer_cert = None, config = None ):
         self.peer_cert = peer_cert
         self.hierarchy = Hierarchy()
-        #if not config:
-        self.config = CONFIG#Config()
+        if not config:
+            self.config = CONFIG#Config()
+        else:
+            self.config = config
         self.load_trusted_certs()
 
     def load_trusted_certs(self):

@@ -27,7 +27,11 @@ class ResourceManagerBase:
     
     @abstractmethod
     def reboot_resources(self, urns, geni_best_effort):
-        return 
+        return
+    
+    @abstractmethod
+    def delete_resources(self, urns, geni_best_effort): 
+        return
     
     @abstractmethod
     def renew_resources(self, urns, geni_best_effort):

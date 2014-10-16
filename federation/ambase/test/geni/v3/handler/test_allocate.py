@@ -10,6 +10,8 @@ from ambase.test.utils.mockcredentialmanager import MockCredentialManager
 from ambase.test.utils.mockdelegate import MockDelegate
 from ambase.test.utils.mockrspecmanager import MockRSpecManager
 
+import datetime
+import dateutil.parser
 
 class TestAllocate(testcase.TestCase):
     """ Testing very basic behaviour to see 
@@ -32,8 +34,6 @@ class TestAllocate(testcase.TestCase):
         self.assertEquals(GENIExceptionManager.SUCCESS, self.ret_struct.get("code").get("geni_code"))
     
     def test_should_allocate_with_sooner_user_expiration(self):
-        import datetime
-        import dateutil.parser
         current_time = datetime.datetime.utcnow()
         # User expiration time: 10 minutes from now (far less than the default 60 minutes)
         user_expiration_time = current_time + datetime.timedelta(minutes = 10)
@@ -43,8 +43,7 @@ class TestAllocate(testcase.TestCase):
         self.assertEquals(user_expiration_time, self.ret_struct.get("value").get("geni_slivers")[0].get("geni_expires"))
     
     def test_should_fail_with_later_user_expiration(self):
-        import datetime
-        import dateutil.parser
+
         current_time = datetime.datetime.utcnow()
         # User expiration time: 1 day from now (far more than the default 60 minutes)
         user_expiration_time = current_time + datetime.timedelta(days = 1)

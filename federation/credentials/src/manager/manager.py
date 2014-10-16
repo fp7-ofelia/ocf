@@ -4,8 +4,9 @@ from credentials.src.trust.auth import Auth
 class CredentialManager(CredentialManagerBase):
     
     def __init__(self):
+        self.__config = None
         self.__auth = Auth()
-
+        
     def get_auth(self):
         return self.__auth
 
@@ -46,4 +47,9 @@ class CredentialManager(CredentialManagerBase):
         elif method == "Renew":
             return "renewsliver"
         raise Exception("Unknown method")
-
+    
+    def get_config(self):
+        return self.__config
+    
+    def set_config(self, value):
+        self.__config = value 
