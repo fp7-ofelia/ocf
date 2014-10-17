@@ -70,7 +70,7 @@ class GeniV3Delegate(DelegateBase):
             return self.__resource_manager.stop_resources(urns, geni_besteffort)
         elif action == 'geni_restart':
             return  self.__resource_manager.reboot_resources(urns, geni_besteffort)
-        raise Exception("Unknown Operational Action")
+        raise Exception("Unknown Operational Action %s" %str(action))
     
     def status(self, urns=list()):
         return self.__resource_manager.get_resources(urns)

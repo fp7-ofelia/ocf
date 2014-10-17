@@ -18,10 +18,7 @@ class GeniV3Handler(HandlerBase):
         self.__credential_manager = None
         self.__rspec_manager = None
         self.__geni_exception_manager = None
-        # See http://groups.geni.net/geni/attachment/wiki/GAPI_AM_API_V3/CommonConcepts/geni-am-types.xml
-        self.__am_type = "gcf" # Options: {"gcf", "orca", "foam", "protogeni", "sfa", "dcn"
-        # See http://groups.geni.net/geni/attachment/wiki/GAPI_AM_API_V3/CommonConcepts/geni-error-codes.xml
-        self.__am_code = 0
+        self.__config = None
     
     def GetVersion(self, options=dict()):
         try:
@@ -278,7 +275,7 @@ class GeniV3Handler(HandlerBase):
             value.append(sliver_struct)
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
 
-    def success_result(self, rspec=None, slivers=[], slice_urn=None, slivers_direct=list()):
+    def success_result(self, rspec=None, slivers=[], slice_urn=None, slivers_direct=list(), result=None):
         """
         Prepares "value" struct.
         """
@@ -286,7 +283,9 @@ class GeniV3Handler(HandlerBase):
             value = list()
             for sliver in slivers_direct:
                 geni_sliver_special_struct = self.__get_geni_sliver_structure(sliver)
-                value.append(geni_sliver_special_struct)   
+                value.append(geni_sliver_special_struct)
+        elif result != None:
+            value = result   
         else:    
             value = dict()
             if rspec:
@@ -298,6 +297,7 @@ class GeniV3Handler(HandlerBase):
                 for sliver in slivers:
                     geni_sliver_struct = self.__get_geni_sliver_structure(sliver)
                     value["geni_slivers"].append(geni_sliver_struct)
+            
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def error_result(self, code, output):
@@ -305,12 +305,13 @@ class GeniV3Handler(HandlerBase):
     
     def build_property_list(self, geni_code, value=None, output=None):
         result = {}
-        result["code"] = {
-                            "geni_code": geni_code,
-                            # Optional return codes
-                            "am_type": self.__am_type,
-                            "am_code": -1, # XXX: Use this for specific, own error codes
-                        }
+        result["code"] = {"geni_code": geni_code}
+        if self.__config:
+            if self.__config.AM_TYPE:
+                result["code"] = self.__config.AM_TYPE
+            if self.__config.AM_CODE:
+                result["code"] = self.__config.AM_CODE
+                             
         # Non-zero geni_code implies error: output is required, value is optional
         if geni_code:
             result["output"] = output

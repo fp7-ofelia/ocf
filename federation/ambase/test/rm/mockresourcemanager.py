@@ -61,16 +61,17 @@ class MockResourceManager(ResourceManagerBase):
         for urn in urns:
             for r in self.resources:
                 if r.get_sliver().get_urn() == urn :
-                    r.set_operational_state = "STARTED"
+                    r.set_operational_state("geni_ready")
                     result.append(r)
-        return  result
+        return result
+
     
     def stop_resources(self, urns, geni_best_effort):
         result = list()
         for urn in urns:
             for r in self.resources:
                 if r.get_sliver().get_urn() == urn :
-                    r.set_operational_state = "STOPPED"
+                    r.set_operational_state("geni_notready")
                     result.append(r)
         return  result 
     
@@ -79,11 +80,21 @@ class MockResourceManager(ResourceManagerBase):
         for urn in urns:
             for r in self.resources:
                 if r.get_sliver().get_urn() == urn :
-                    r.set_operational_state = "STARTED"
+                    r.set_operational_state("geni_ready")
                     result.append(r)
         return  result
 
     
     def renew_resources(self, urns, geni_best_effort):
-        return True
+        result = list()
+        for urn in urns:
+            for r in self.resources:
+                if r.get_sliver().get_urn() == urn :
+                    r.set_operational_state = "STARTED"
+                    result.append(r)
+        return result
+    
+    def delete_resources(self, urns, geni_best_effort): 
+        return 
+    
         
