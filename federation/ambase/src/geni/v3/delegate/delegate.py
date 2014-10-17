@@ -55,7 +55,7 @@ class GeniV3Delegate(DelegateBase):
         """
         Provision slivers
         """
-        return self.__resource_manager.create_resources(urns)
+        return self.__resource_manager.create_resources(urns, expiration)
     
     def delete(self, urns=list()):
         """

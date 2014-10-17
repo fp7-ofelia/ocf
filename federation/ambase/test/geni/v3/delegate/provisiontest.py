@@ -10,7 +10,7 @@ class ProvisionTest(unittest.TestCase):
         self.urns = list()
         self.delegate = GeniV3Delegate()
         self.delegate.set_resource_manager(MockResourceManager(self.add_reservations()))
-        self.manifest = self.delegate.create(self.urns)
+        self.manifest = self.delegate.create(self.urns, None)
         
     def test_should_return_success_result(self):
         self.assertEquals(list, type(self.manifest))

@@ -85,13 +85,14 @@ class MockResourceManager(ResourceManagerBase):
         return  result
 
     
-    def renew_resources(self, urns, geni_best_effort):
+    def renew_resources(self, urns, expiration,geni_best_effort):
         result = list()
         for urn in urns:
             for r in self.resources:
                 if r.get_sliver().get_urn() == urn :
                     r.set_operational_state = "STARTED"
-                    result.append(r)
+                    r.get_sliver().set_expiration(expiration)
+                    result.append(r)           
         return result
     
     def delete_resources(self, urns, geni_best_effort): 
