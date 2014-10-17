@@ -5,9 +5,9 @@ from ambase.test.utils.mockcredentialmanager import MockCredentialManager
 from ambase.test.utils.mockdelegate import MockDelegate
 from ambase.test.utils.mockrspecmanager import MockRSpecManager
 
-
 class TestDelete(testcase.TestCase):
-    """ Testing very basic behaviour to see 
+    """
+        Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
     """
@@ -24,17 +24,17 @@ class TestDelete(testcase.TestCase):
         self.handler = None
     
     def test_should_delete(self):
-        self.assertEquals(GENIExceptionManager.SUCCESS, self.ret_struct.get('code').get('geni_code'))
+        self.assertEquals(GENIExceptionManager.SUCCESS, self.ret_struct.get("code").get("geni_code"))
     
     def test_should_fail_when_invalid_credentials(self):
         self.handler.set_credential_manager(MockCredentialManager(False))
         value = self.handler.Delete(None, None, {})
-        self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get('code').get('geni_code'))
+        self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get("code").get("geni_code"))
     
     def test_should_fail_when_deleting_wrong_sliver(self):
         self.handler.set_delegate(MockDelegate(False))
         value = self.handler.Delete(None, None, {})
-        self.assertEquals(GENIExceptionManager.ERROR, value.get('code').get('geni_code'))
+        self.assertEquals(GENIExceptionManager.ERROR, value.get("code").get("geni_code"))
     
     def test_should_return_correct_value_structure(self):
         obtained = self.ret_struct.get("value")
@@ -56,8 +56,8 @@ class TestDelete(testcase.TestCase):
     def get_geni_slivers_content(self):
         return [{ "geni_sliver_urn": "urn",
                   "geni_allocation_status": "string",
-                  "geni_expires":"String"}]
+                  "geni_expires": "string"}]
     
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Allows to run in stand-alone mode
     testcase.main()

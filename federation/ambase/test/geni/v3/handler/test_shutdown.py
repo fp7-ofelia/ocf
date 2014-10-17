@@ -1,13 +1,13 @@
-from federation.ambase.src.geni.exceptions.manager import GENIExceptionManager
-from federation.ambase.src.geni.v3.handler.handler import GeniV3Handler
-from federation.ambase.test.utils import testcase
-from federation.ambase.test.utils.mockcredentialmanager import MockCredentialManager
-from federation.ambase.test.utils.mockdelegate import MockDelegate
-from federation.ambase.test.utils.mockrspecmanager import MockRSpecManager
-
+from ambase.src.geni.exceptions.manager import GENIExceptionManager
+from ambase.src.geni.v3.handler.handler import GeniV3Handler
+from ambase.test.utils import testcase
+from ambase.test.utils.mockcredentialmanager import MockCredentialManager
+from ambase.test.utils.mockdelegate import MockDelegate
+from ambase.test.utils.mockrspecmanager import MockRSpecManager
 
 class TestShutDown(testcase.TestCase):
-    """ Testing very basic behaviour to see 
+    """
+        Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
     """
@@ -23,8 +23,8 @@ class TestShutDown(testcase.TestCase):
         self.handler = None
         
     def test_should_fail_always(self):
-        value = self.handler.ShutDown()
-        self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get('code').get('geni_code'))
+        self.ret_struct = self.handler.ShutDown()
+        self.assertEquals(GENIExceptionManager.FORBIDDEN, self.ret_struct.get("code").get("geni_code"))
     
 if __name__ == "__main__":
     # Allows to run in stand-alone mode

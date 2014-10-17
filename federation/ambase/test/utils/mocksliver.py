@@ -1,12 +1,12 @@
 class MockSliver:
     
     def __init__(self):
-        self.__urn = None
-        self.__name = None
-        self.__slice_urn = None
-        self.__allocation_status = None
-        self.__operational_status = None
-        self.__expiration = None
+        self.__urn = "" # str
+        self.__name = "" # str
+        self.__slice_urn = "" # str
+        self.__allocation_status = "" # str
+        self.__operational_status = "" # str
+        self.__expiration = "" # dateTime.rfc3339 (str)
         self.__resource = None
         self.__type = None
         self.__services = dict()

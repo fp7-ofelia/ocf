@@ -1,8 +1,3 @@
-import sys
-sys.path.append("/home/ocf/federation/")
-#
-# REMOVE PREVIOUS
-#
 from ambase.src.geni.exceptions.manager import GENIExceptionManager
 from ambase.src.geni.v3.handler.handler import GeniV3Handler
 from ambase.test.utils import testcase
@@ -14,7 +9,8 @@ import datetime
 import dateutil.parser
 
 class TestAllocate(testcase.TestCase):
-    """ Testing very basic behaviour to see 
+    """
+        Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
     """
@@ -43,7 +39,6 @@ class TestAllocate(testcase.TestCase):
         self.assertEquals(user_expiration_time, self.ret_struct.get("value").get("geni_slivers")[0].get("geni_expires"))
     
     def test_should_fail_with_later_user_expiration(self):
-
         current_time = datetime.datetime.utcnow()
         # User expiration time: 1 day from now (far more than the default 60 minutes)
         user_expiration_time = current_time + datetime.timedelta(days = 1)

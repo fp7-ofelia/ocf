@@ -1,18 +1,14 @@
-import sys
-sys.path.append("/home/ocf/federation/")
-#
-# REMOVE PREVIOUS
-#
 from ambase.src.geni.exceptions.manager import GENIExceptionManager
 from ambase.src.geni.v3.handler.handler import GeniV3Handler
 from ambase.test.utils import testcase
 from ambase.test.utils.mockcredentialmanager import MockCredentialManager
+#from credentials.src.manager.manager import CredentialManager
 from ambase.test.utils.mockdelegate import MockDelegate
 from ambase.test.utils.mockrspecmanager import MockRSpecManager
-#from credentials.src.manager.manager import CredentialManager
 
 class TestProvision(testcase.TestCase):
-    """ Testing very basic behaviour to see 
+    """
+        Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
     """

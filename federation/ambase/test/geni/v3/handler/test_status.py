@@ -6,7 +6,8 @@ from ambase.test.utils.mockdelegate import MockDelegate
 from ambase.test.utils.mockrspecmanager import MockRSpecManager
 
 class TestStatus(testcase.TestCase):
-    """ Testing very basic behaviour to see 
+    """
+        Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
     """
@@ -24,18 +25,18 @@ class TestStatus(testcase.TestCase):
         
     def test_should_fail_when_invalid_credentials(self):
         self.handler.set_credential_manager(MockCredentialManager(False))
-        value = self.handler.Status([], [], {})
-        self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get('code').get('geni_code'))
+        self.ret_struct = self.handler.Status([], [], {})
+        self.assertEquals(GENIExceptionManager.FORBIDDEN, self.ret_struct.get("code").get("geni_code"))
     
     def test_should_fail_when_worng_status(self):
         self.handler.set_delegate(MockDelegate(False))
-        value = self.handler.Status([], [], {})
-        self.assertEquals(GENIExceptionManager.ERROR, value.get('code').get('geni_code'))
+        self.ret_struct = self.handler.Status([], [], {})
+        self.assertEquals(GENIExceptionManager.ERROR, self.ret_struct.get("code").get("geni_code"))
         
     def test_should_status(self):
-        self.assertEquals(GENIExceptionManager.SUCCESS, self.ret_struct.get('code').get('geni_code'))
+        self.assertEquals(GENIExceptionManager.SUCCESS, self.ret_struct.get("code").get("geni_code"))
 
-    def test_should_return_correct_value_structure(self):
+    def test_should_return_correct_value(self):
         struct = self.get_expected_return_structure().keys()
         struct.sort()
         obtained = self.ret_struct.get("value").keys()
@@ -58,7 +59,7 @@ class TestStatus(testcase.TestCase):
         return { "geni_sliver_urn": "urn",
                  "geni_allocation_status": "string",
                  "geni_operational_status": "string",
-                 "geni_expires":"String"}
+                 "geni_expires": "string"}
     
 if __name__ == "__main__":
     # Allows to run in stand-alone mode
