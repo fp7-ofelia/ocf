@@ -1,5 +1,6 @@
 import unittest
 from ambase.src.geni.v3.delegate.delegate import GeniV3Delegate
+import ambase.test.utils.mocksettings as config
 
 class TestGetVersion(unittest.TestCase):
     """ Testing very basic behaviour to see 
@@ -8,6 +9,7 @@ class TestGetVersion(unittest.TestCase):
     """
     def setUp(self):
         self.delegate = GeniV3Delegate()
+        self.delegate.set_config(config)
         self.version = self.delegate.get_version()
 
     def test_should_return_success_result(self):

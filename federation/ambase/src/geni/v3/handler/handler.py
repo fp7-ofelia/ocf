@@ -25,7 +25,7 @@ class GeniV3Handler(HandlerBase):
             value = self.__delegate.get_version()
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e) 
-        return self.success_result(value)
+        return self.success_result(result=value)
 
     def ListResources(self, credentials=list(), options=dict()):
         # Credential validation
