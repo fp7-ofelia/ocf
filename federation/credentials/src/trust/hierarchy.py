@@ -22,7 +22,7 @@ from geniutils.src.xrn.xrn import urn_to_hrn
 from credentials.src.trust.certificate import Keypair
 from credentials.src.trust.credential import Credential
 from credentials.src.trust.gid import GID, create_uuid
-from settings.src import settings as config 
+from settings.src.settings import Settings as config 
 from credentials.src.trust.sfaticket import SfaTicket
 #XXX:Use the ClearingHouse
 #from openflow.optin_manager.sfa.setUp import setup_config as auth_config
@@ -102,8 +102,9 @@ class Hierarchy:
     #
     # @param basedir the base directory to store the hierarchy in
 
-    def __init__(self, basedir = None):
-        self.config = config
+    def __init__(self, basedir = None, config=None):
+        if config:
+            self.config = config
         if not basedir:
             basedir = os.path.join(self.config.SFA_DATA_DIR, "authorities")
         self.basedir = basedir

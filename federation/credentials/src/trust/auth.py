@@ -31,18 +31,17 @@ class Auth:
 
     def __init__(self, peer_cert = None, config = None ):
         self.peer_cert = peer_cert
-        self.hierarchy = Hierarchy()
         if not config:
             self.config = CONFIG#Config()
         else:
             self.config = config
+        self.hierarchy = Hierarchy(self.config)
         self.load_trusted_certs()
 
     def load_trusted_certs(self):
         self.trusted_cert_list = TrustedRoots(self.config.TRUSTED_ROOTS_DIR).get_list()
         self.trusted_cert_file_list = TrustedRoots(self.config.TRUSTED_ROOTS_DIR).get_file_list()
          
-        
     def checkCredentials(self, creds, operation, hrn = None):
         valid = []
         error = None

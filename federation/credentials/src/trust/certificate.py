@@ -381,7 +381,7 @@ class Certificate:
         else:
             parts = string.split(Certificate.separator, 1)
             
-        print "Parts----", parts
+        #print "Parts----", parts
         self.cert = crypto.load_certificate(crypto.FILETYPE_PEM, parts[0])
 
         # if there are more certs, then create a parent and let the parent load
