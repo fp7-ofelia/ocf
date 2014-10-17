@@ -75,8 +75,8 @@ class GeniV3Delegate(DelegateBase):
     def status(self, urns=list()):
         return self.__resource_manager.get_resources(urns)
         
-    def renew(self, urns=list(), expiration_time=None):
-        return self.__resource_manager.renew_resources(urns, expiration_time)
+    def renew(self, urns=list(), expiration_time=None, geni_best_effort=False):
+        return self.__resource_manager.renew_resources(urns, expiration_time, geni_best_effort)
         
     def shut_down(self, urns=list()):
         return None

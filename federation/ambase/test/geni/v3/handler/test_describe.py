@@ -4,12 +4,12 @@ from ambase.test.utils import testcase
 from ambase.test.utils.mockcredentialmanager import MockCredentialManager
 from ambase.test.utils.mockdelegate import MockDelegate
 from ambase.test.utils.mockrspecmanager import MockRSpecManager
-import base64
 from lxml import etree
-
+import base64
 
 class TestDescribe(testcase.TestCase):
-    """ Testing very basic behaviour to see 
+    """
+        Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
     """
@@ -23,24 +23,23 @@ class TestDescribe(testcase.TestCase):
         self.options = {"geni_rspec_version": {"type": "geni", "version": "3"}}
         self.ret_struct = self.handler.Describe(None,None, options=self.options)
 
-        
     def tearDown(self):
         self.handler = None
         
     def test_should_describe(self):
-        self.assertEquals(GENIExceptionManager.SUCCESS, self.ret_struct.get('code').get('geni_code'))
+        self.assertEquals(GENIExceptionManager.SUCCESS, self.ret_struct.get("code").get("geni_code"))
     
     def test_fail_when_invalid_options(self):
         value = self.handler.Describe(None,None, options={})
-        self.assertEquals(GENIExceptionManager.BADARGS, value.get('code').get('geni_code'))
+        self.assertEquals(GENIExceptionManager.BADARGS, value.get("code").get("geni_code"))
     
     def test_should_fail_when_invalid_credentials(self):
         self.handler.set_credential_manager(MockCredentialManager(False))
         value = self.handler.Describe(None,None, options=self.options)
-        self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get('code').get('geni_code'))
+        self.assertEquals(GENIExceptionManager.FORBIDDEN, value.get("code").get("geni_code"))
     
     def test_should_send_compressed_output_when_geni_compressed(self):
-        options = {"geni_rspec_version": {"type": "geni", "version": "3"}, 'geni_compressed':True}
+        options = {"geni_rspec_version": {"type": "geni", "version": "3"}, "geni_compressed":True}
         value = self.handler.Describe(None,None, options=options)
         #If it can decode, it raise an Exception
         try:
@@ -75,8 +74,8 @@ class TestDescribe(testcase.TestCase):
         return { "geni_sliver_urn": "urn",
                  "geni_allocation_status": "string",
                  "geni_operational_status": "string",
-                 "geni_expires":"String"}
+                 "geni_expires": "string"}
     
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Allows to run in stand-alone mode
     testcase.main()

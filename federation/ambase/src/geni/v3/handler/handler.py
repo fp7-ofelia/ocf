@@ -64,8 +64,7 @@ class GeniV3Handler(HandlerBase):
         # Preparing the output
         if options.get("geni_compressed", False):
             output = base64.b64encode(zlib.compress(output))
-            
-        return self.success_result(output)
+        return self.listresources_success_result(output)
         
     def Describe(self, urns=dict(),credentials=dict(),options=dict()):
         # Credential validation
@@ -114,7 +113,6 @@ class GeniV3Handler(HandlerBase):
         
         manifest = self.__rspec_manager.compose_manifest(allocated_slivers)
         
- 
         return self.success_result(manifest, allocated_slivers)
         
     def Provision(self, urns=list(), credentials=list(), options=dict()):
@@ -167,7 +165,6 @@ class GeniV3Handler(HandlerBase):
         except ShutDown as e:
             return self.error_result(self.__geni_exception_manager.UNAVAILABLE, e)
         
-        
         return self.delete_success_result(result)
     
     def PerformOperationalAction(self, urns=list(), credentials=list(), action=None, options=dict()):
@@ -189,7 +186,6 @@ class GeniV3Handler(HandlerBase):
             result = self.__delegate.perform_operational_action(urns, action, best_effort)
         except PerformOperationalStateError as e:
             return self.error_result(self.__geni_exception_manager.BADARGS, e)
-        
         return self.success_result(slivers_direct=result)
      
     def Status(self, urns=list(), credentials=list(), options=dict()):
@@ -206,33 +202,45 @@ class GeniV3Handler(HandlerBase):
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
         try:
-            self.__credential_manager.validate_for("Status", credentials)
+            self.__credential_manager.validate_for("Renew", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        
-        expiration = self.__get_expiration()
+        # TODO: Retrieve slice expiration correctly
+        try:
+            # TODO: Implement this method
+            expiration = self.__rfc3339_to_datetime(self.__credential_manager.get_slice_expiration(credentials))
+        except Exception as e:
+            return self.error_result(self.__geni_exception_manager.SEARCHFAILED, e)
+        # Format dates to expected output
+        try:
+            expiration_time = self.__rfc3339_to_datetime(expiration_time)
+        except:
+            pass
         now = datetime.datetime.utcnow()
-        
+        # NOTE: Possibly existing on GCF, but not on GENIv3 API. Using it here, though
         if "geni_extend_alap" in options and options["geni_extend_alap"]:
             if expiration < expiration_time:
-                expiration= expiration_time
-        
+                expiration = expiration_time
+        # If slice already expired & user tries to extend...
         if expiration < expiration_time:
             # Fail the call, the requested expiration exceeds the slice expir.
-            msg = (("Out of range: Expiration %s is out of range"
-                   + " (past last credential expiration of %s).")
-                   % (expiration_time, expiration))
-            return self.error_result(self.__geni_exception_manager.OUTOFRANGE, msg)
+            msg = "Expired slice or slivers: Requested expiration %s exceeds sliver expiration %s" \
+                   % (expiration_time, expiration)
+            return self.error_result(self.__geni_exception_manager.EXPIRED, msg)
+        # If user tries to extend to a past date...
         elif expiration_time < now:
-            msg = (("Out of range: Expiration %s is out of range"
-                   + " (prior to now %s).")
-                   % (expiration_time, now.isoformat()))
-            print "What I am doing?"
-            return self.error_result(self.__geni_exception_manager.OUTOFRANGE, msg)
+            msg = "Expired slice or slivers: Requested expiration %s is in the past (current time: %s)" \
+                   % (expiration_time, now.strftime("%Y-%m-%d %H:%M:%S"))
+            return self.error_result(self.__geni_exception_manager.ERROR, msg)
+        # When requested expiration time is less than the slice expiration and a valid expiration date, serve
         else:
-            result = self.__delegate.renew(urns, expiration)
-        
-        return self.success_result(result)
+            # Check options and perform call to delegate
+            if "geni_best_effort" in options:
+                geni_best_effort = options.get("geni_best_effort")
+            else:
+                geni_best_effort = False # Default is false
+            result = self.__delegate.renew(urns, expiration, geni_best_effort)
+        return self.success_result(slivers_direct=result)
     
     def ShutDown(self, urns=list(), credentials=list(), options=list()):
         return self.error_result(self.__geni_exception_manager.FORBIDDEN, "ShutDown Method is only available for the AM administrators")
@@ -257,10 +265,19 @@ class GeniV3Handler(HandlerBase):
         Returns a datetime object that is formatted according to RFC3339.
         """
         try:
-            # Both approaches are valid
             # Hint: use "strict_rfc3339" package for validation: strict_rfc3339.validate_rfc3339(...)
+            # May also be computed as date.replace(...).isoformat("T")
             formatted_date = date.replace(tzinfo=dateutil.tz.tzutc()).strftime("%Y-%m-%d %H:%M:%S").replace(" ", "T")+"Z"
-            #formatted_date = date.replace(tzinfo=dateutil.tz.tzutc()).isoformat("T")
+        except:
+            formatted_date = date
+        return formatted_date
+    
+    def __rfc3339_to_datetime(self, date):
+        """
+        Returns a datetime object from an input string formatted according to RFC3339.
+        """
+        try:
+            formatted_date = datetime.datetime.strptime(date[:-1].replace("T"," "), "%Y-%m-%d %H:%M:%S")
         except:
             formatted_date = date
         return formatted_date
@@ -274,6 +291,9 @@ class GeniV3Handler(HandlerBase):
             sliver_struct["geni_expires"] = sliver.get_expiration()
             value.append(sliver_struct)
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
+    
+    def listresources_success_result(self, rspec):
+        return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=rspec)
 
     def success_result(self, rspec=None, slivers=[], slice_urn=None, slivers_direct=list(), result=None):
         """

@@ -7,7 +7,8 @@ import unittest
 
 
 class TestPerformOperationalAction(unittest.TestCase):
-    """ Testing very basic behaviour to see 
+    """
+        Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
     """
@@ -18,7 +19,6 @@ class TestPerformOperationalAction(unittest.TestCase):
         self.handler.set_rspec_manager(MockRSpecManager())
         self.handler.set_delegate(MockDelegate())
         self.handler.set_geni_exception_manager(GENIExceptionManager()) #is too simple to mock it
-        
         
     def tearDown(self):
         self.handler = None

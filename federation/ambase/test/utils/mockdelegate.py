@@ -92,9 +92,9 @@ class MockDelegate(DelegateBase):
         else:
             raise Exception("Mock error")
     
-    def renew(self, urns=list(), expiration_time=None):
+    def renew(self, urns=list(), expiration_time=None, geni_best_effort=False):
         if self.success_mode:
-            return True
+            return [MockSliver()]
         else:
             raise Exception("Mock error")
     

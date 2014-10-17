@@ -1,8 +1,3 @@
-import sys
-sys.path.append("/home/ocf/federation/")
-#
-# REMOVE PREVIOUS
-#
 from ambase.src.geni.exceptions.manager import GENIExceptionManager
 from ambase.src.geni.v3.handler.handler import GeniV3Handler
 from ambase.src.geni.v3.delegate.delegate import GeniV3Delegate
@@ -13,7 +8,8 @@ from ambase.test.utils.mockrspecmanager import MockRSpecManager
 from lxml import etree
 
 class TestListResources(testcase.TestCase):
-    """ Testing very basic behaviour to see 
+    """
+        Testing very basic behaviour to see 
         whether the Handler is able to respond
         with error_results or success_results  
     """
@@ -47,19 +43,18 @@ class TestListResources(testcase.TestCase):
         self.ret_struct = self.handler.ListResources(None, self.options)
         # An XML can be decoded by base64.b64decode, thus we should try first with something particular
         try:
-            
-            geni_rspec_uncompressed = etree.fromstring(self.ret_struct.get("value").get("geni_rspec"))
+            geni_rspec_uncompressed = etree.fromstring(self.ret_struct.get("value"))
             geni_rspec_compressed = geni_rspec_uncompressed
         except:
             import base64
-            geni_rspec_compressed = base64.b64decode(self.ret_struct.get("value").get("geni_rspec"))
-            #geni_rspec_compressed = base64.decodestring(self.ret_struct.get("value").get("geni_rspec"))
+            geni_rspec_compressed = base64.b64decode(self.ret_struct.get("value"))
+            #geni_rspec_compressed = base64.decodestring(self.ret_struct.get("value"))
         self.assertEquals(str, type(geni_rspec_compressed))
     
     def test_should_return_uncompressed_output_when_not_geni_compressed(self):
         from lxml import etree
         try:
-            geni_rspec_uncompressed = etree.fromstring(self.ret_struct.get("value").get("geni_rspec"))
+            geni_rspec_uncompressed = etree.fromstring(self.ret_struct.get("value"))
         except:
             geni_rspec_uncompressed = None
         self.assertEquals(etree._Element, type(geni_rspec_uncompressed))
@@ -69,6 +64,9 @@ class TestListResources(testcase.TestCase):
         # ListResources must be invoked here because credential manager is different as in setUp
         self.ret_struct = self.handler.ListResources(None, self.options)
         self.assertEquals(GENIExceptionManager.FORBIDDEN, self.ret_struct.get("code").get("geni_code"))
+    
+    def test_should_return_correct_sliver_value_structure(self):
+        self.assertEquals(str, type(self.ret_struct.get("value")))
     
 if __name__ == "__main__":
     # Allows to run in stand-alone mode
