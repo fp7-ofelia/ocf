@@ -42,7 +42,6 @@ class Reservation(VirtualMachine):
     def get_valid_until(self):
         return self.valid_until
  
-
     def set_name(self, value):
         self.name = value
 
