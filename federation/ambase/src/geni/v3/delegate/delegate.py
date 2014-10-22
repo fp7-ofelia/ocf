@@ -12,7 +12,6 @@ class GeniV3Delegate(DelegateBase):
         self.__config = None
     
     def get_version(self):
-        
         '''Specify version information about this AM. That could
         include API version information, RSpec format and version
         information, etc. Return a dict.'''
@@ -27,22 +26,16 @@ class GeniV3Delegate(DelegateBase):
                        namespace=self.__config.AD_RSPEC_NAMESPACE,
                        extensions=self.__config.AD_RSPEC_EXTENSIONS)]
         
-        code_dict = dict(geni_code = self.__config.AM_CODE_VERSION,
-                         am_type=self.__config.AM_TYPE,
-                         am_code=self.__config.AM_CODE_VERSION)
-        
         api_versions = dict()
         api_versions[str(self.__config.GENI_API_VERSION)] = self.__config.AM_URL
         credential_types = [dict(geni_type = self.__config.CREDENTIAL_TYPE,
                                  geni_version = self.__config.GENI_API_VERSION)]
         versions = dict(geni_api= self.__config.GENI_API_VERSION,
                         geni_api_versions=api_versions,
-                        #geni_am_type=self.__config.AM_TYPE,
-                        #geni_am_code=self.__config.AM_CODE_VERSION,
-                        code=code_dict,
                         geni_request_rspec_versions=reqver,
                         geni_ad_rspec_versions=adver,
                         geni_credential_types=credential_types)
+        versions.keys().sort()
         return versions
     
     def list_resources(self, geni_available=False):
