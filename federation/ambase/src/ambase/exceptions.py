@@ -18,3 +18,11 @@ class UnsupportedState(Exception):
 
 class PerformOperationalStateError(Exception):
     pass
+
+class ApiErrorException(Exception):
+    def __init__(self, code, output):
+        self.code = code
+        self.output = output
+
+    def __str__(self):
+        return "ApiError(%r, %r)" % (self.code, self.output)

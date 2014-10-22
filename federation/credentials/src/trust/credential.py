@@ -160,7 +160,6 @@ class Signature(object):
             self.xml = string
             self.decode()
 
-
     def get_refid(self):
         if not self.refid:
             self.decode()
@@ -230,6 +229,8 @@ def filter_creds_by_caller(creds, caller_hrn_list):
 
 class Credential(object):
 
+    SFA_CREDENTIAL_TYPE = "geni_sfa"
+    
     ##
     # Create a Credential object
     #
@@ -251,21 +252,20 @@ class Credential(object):
         self.xml = None
         self.refid = None
         self.legacy = None
-
+        
         # Check if this is a legacy credential, translate it if so
         if string or filename:
-            if string:                
+            if string:
                 str = string
             elif filename:
                 str = file(filename).read()
-            print "----STR:",str    
             if str.strip().startswith("-----"):
                 self.legacy = CredentialLegacy(False,string=str)
                 self.translate_legacy(str)
             else:
                 self.xml = str
                 self.decode()
-
+        
         # Find an xmlsec1 path
         self.xmlsec_path = ''
         paths = ['/usr/bin','/usr/local/bin','/bin','/opt/bin','/opt/local/bin']
@@ -273,6 +273,7 @@ class Credential(object):
             if os.path.isfile(path + '/' + 'xmlsec1'):
                 self.xmlsec_path = path + '/' + 'xmlsec1'
                 break
+
         if not self.xmlsec_path:
             print "Could not locate binary for xmlsec1 - SFA will be unable to sign stuff !!"
 
@@ -298,7 +299,6 @@ class Credential(object):
 
     def set_signature(self, sig):
         self.signature = sig
-
         
     ##
     # Translate a legacy credential into a new one
@@ -326,7 +326,6 @@ class Credential(object):
     def set_issuer_keys(self, privkey, gid):
         self.issuer_privkey = privkey
         self.issuer_gid = gid
-
 
     ##
     # Set this credential's parent
@@ -784,7 +783,6 @@ class Credential(object):
     def verify(self, trusted_certs=None, schema=None, trusted_certs_required=True):
         if not self.xml:
             self.decode()
-
         # validate against RelaxNG schema
         if HAVELXML and not self.legacy:
             if schema and os.path.exists(schema):
@@ -817,6 +815,7 @@ class Credential(object):
                 except Exception, exc:
                     print "Failed to load trusted cert from %s: %r" %(f, exc) 
             trusted_certs = ok_trusted_certs
+
         # Use legacy verification if this is a legacy credential
         if self.legacy:
             self.legacy.verify_chain(trusted_cert_objects)
@@ -832,7 +831,6 @@ class Credential(object):
         filename = self.save_to_random_tmp_file()
         if trusted_certs is not None:
             cert_args = " ".join(['--trusted-pem %s' % x for x in trusted_certs])
-        
         # If caller explicitly passed in None that means skip cert chain validation.
         # - Strange and not typical
         if trusted_certs is not None:
@@ -840,12 +838,13 @@ class Credential(object):
             for cur_cred in self.get_credential_list():
                 cur_cred.get_gid_object().verify_chain(trusted_cert_objects)
                 cur_cred.get_gid_caller().verify_chain(trusted_cert_objects)
-
+      
         refs = []
         refs.append("Sig_%s" % self.get_refid())
         parentRefs = self.updateRefID()
         for ref in parentRefs:
             refs.append("Sig_%s" % ref)
+
 
         for ref in refs:
             # If caller explicitly passed in None that means skip xmlsec1 validation.
@@ -853,10 +852,9 @@ class Credential(object):
             if trusted_certs is None:
                 break
 
-#            print "Doing %s --verify --node-id '%s' %s %s 2>&1" % \
-#                (self.xmlsec_path, ref, cert_args, filename)
             verified = os.popen('%s --verify --node-id "%s" %s %s 2>&1' \
                             % (self.xmlsec_path, ref, cert_args, filename)).read()
+
             if not verified.strip().startswith("OK"):
                 # xmlsec errors have a msg= which is the interesting bit.
                 mstart = verified.find("msg=")
@@ -871,7 +869,6 @@ class Credential(object):
         # Verify the parents (delegation)
         if self.parent:
             self.verify_parent(self.parent)
-
         # Make sure the issuer is the target's authority, and is
         # itself a valid GID
         self.verify_issuer(trusted_cert_objects)
@@ -1040,7 +1037,6 @@ class Credential(object):
     # @param dump_parents If true, also dump the parent certificates
     def dump (self, *args, **kwargs):
         print self.dump_string(*args, **kwargs)
-
 
     def dump_string(self, dump_parents=False, show_xml=False):
         result=""
