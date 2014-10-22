@@ -29,11 +29,8 @@ def ping(challenge):
 def GetVersion(options={}):
     return handler.GetVersion(options)
 
-#@rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name=GAPI3_URL)
-@rpcmethod(url_name=GAPI3_URL)
+@rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name=GAPI3_URL)
 def ListResources(credentials, options):
-    print "GAPI3Communication.credentials: %s, type: %s" % (credentials, type(credentials))
-    print "GAPI3Communication - result: ", handler.ListResources(credentials, options)
     return handler.ListResources(credentials, options)
 
 @rpcmethod(signature=[RSPEC_TYPE, URNS_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name=GAPI3_URL)
