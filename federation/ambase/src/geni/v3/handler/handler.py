@@ -30,10 +30,9 @@ class GeniV3Handler(HandlerBase):
     def ListResources(self, credentials=list(), options=dict()):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("list_resources", credentials)
+            self.__credential_manager.validate_for("ListResources", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        
         # Required options validation
         if not options.has_key("geni_rspec_version"):
             return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version required in options")
@@ -50,7 +49,6 @@ class GeniV3Handler(HandlerBase):
         am_geni_rspec_type = str(self.__delegate.get_version().get("geni_ad_rspec_versions")[0].get("type")).lower()
         if user_geni_rspec_version != am_geni_rspec_version or user_geni_rspec_type != am_geni_rspec_type:
             return self.error_result(self.__geni_exception_manager.BADVERSION, "Bad Version: option geni_rspec_version defines an invalid version, type or geni_rspec_version value.")
-        
         # Retrieving raw resources
         geni_available = False
         if options.get("geni_available"):
@@ -69,7 +67,7 @@ class GeniV3Handler(HandlerBase):
     def Describe(self, urns=dict(),credentials=dict(),options=dict()):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("describe", credentials)
+            self.__credential_manager.validate_for("Describe", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         if not options.get("geni_rspec_version"):
@@ -94,7 +92,7 @@ class GeniV3Handler(HandlerBase):
     def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict()):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("allocate", credentials)
+            self.__credential_manager.validate_for("Allocate", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
@@ -105,7 +103,7 @@ class GeniV3Handler(HandlerBase):
             expiration = min(self.__get_expiration(), options["geni_end_time"])
         
         try:
-            allocated_slivers = self.__delegate.reserve(slice_urn, reservation, expiration)    
+            allocated_slivers = self.__delegate.reserve(slice_urn, reservation, expiration)
         except SliceAlreadyExists as e:
             return self.error_result(self.__geni_exception_manager.ALREADYEXISTS, e)
         except AllocationError as e:
@@ -117,7 +115,7 @@ class GeniV3Handler(HandlerBase):
         
     def Provision(self, urns=list(), credentials=list(), options=dict()):
         try:
-            self.__credential_manager.validate_for("provision", credentials)
+            self.__credential_manager.validate_for("Provision", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
          
@@ -145,7 +143,7 @@ class GeniV3Handler(HandlerBase):
     def Delete(self, urns=list(), credentials=list(), options=dict()):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("delete", credentials)
+            self.__credential_manager.validate_for("Delete", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
@@ -169,7 +167,7 @@ class GeniV3Handler(HandlerBase):
     
     def PerformOperationalAction(self, urns=list(), credentials=list(), action=None, options=dict()):
         try:
-            self.__credential_manager.validate_for("provision", credentials)
+            self.__credential_manager.validate_for("PerformOperationalAction", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
@@ -295,6 +293,12 @@ class GeniV3Handler(HandlerBase):
     def listresources_success_result(self, rspec):
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=rspec)
 
+    # TODO REMOVE
+    #def getversion_success_result(self):
+    #    code = dict(geni_code=self.__config.AM_CODE_VERSION,
+    #                am_type=self.__config.AM_TYPE)
+    #    return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=rspec)
+    
     def success_result(self, rspec=None, slivers=[], slice_urn=None, slivers_direct=list(), result=None):
         """
         Prepares "value" struct.
@@ -317,7 +321,6 @@ class GeniV3Handler(HandlerBase):
                 for sliver in slivers:
                     geni_sliver_struct = self.__get_geni_sliver_structure(sliver)
                     value["geni_slivers"].append(geni_sliver_struct)
-            
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def error_result(self, code, output):
@@ -325,13 +328,13 @@ class GeniV3Handler(HandlerBase):
     
     def build_property_list(self, geni_code, value=None, output=None):
         result = {}
+        result["geni_api"] = self.__config.GENI_API_VERSION
         result["code"] = {"geni_code": geni_code}
         if self.__config:
             if self.__config.AM_TYPE:
-                result["code"] = self.__config.AM_TYPE
-            if self.__config.AM_CODE:
-                result["code"] = self.__config.AM_CODE
-                             
+                result["code"]["am_type"] = self.__config.AM_TYPE
+            if self.__config.AM_CODE_VERSION:
+                result["code"]["am_code"] = self.__config.AM_CODE_VERSION
         # Non-zero geni_code implies error: output is required, value is optional
         if geni_code:
             result["output"] = output
@@ -342,7 +345,8 @@ class GeniV3Handler(HandlerBase):
             result["value"] = value
         return result
     
-    def __get_geni_sliver_structure(self, sliver):
+    def __get_geni_sliver_structure(self, resource):
+        sliver = resource.get_sliver()
         sliver_struct = dict()
         sliver_struct["geni_sliver_urn"] = sliver.get_urn()
         sliver_struct["geni_allocation_status"] =  sliver.get_allocation_status()
@@ -373,3 +377,6 @@ class GeniV3Handler(HandlerBase):
     
     def set_geni_exception_manager(self, value):
         self.__geni_exception_manager = value
+    
+    def set_config(self, value):
+        self.__config = value

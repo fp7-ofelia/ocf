@@ -230,7 +230,7 @@ class GID(Certificate):
     def verify_chain(self, trusted_certs = None):
         # do the normal certificate verification stuff
         trusted_root = Certificate.verify_chain(self, trusted_certs)        
-       
+
         if self.parent:
             # make sure the parent's hrn is a prefix of the child's hrn
             if not hrn_authfor_hrn(self.parent.get_hrn(), self.get_hrn()):

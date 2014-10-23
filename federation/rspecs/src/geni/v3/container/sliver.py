@@ -15,78 +15,59 @@ class Sliver:
     def get_urn(self):
         return self.__urn
 
-
     def get_name(self):
         return self.__name
-
 
     def get_slice_urn(self):
         return self.__slice_urn
 
-
     def get_allocation_status(self):
         return self.__allocation_status
-
 
     def get_operational_status(self):
         return self.__operational_status
 
-
     def get_expiration(self):
         return self.__expiration
-
 
     def get_resource(self):
         return self.__resource
 
-
     def get_type(self):
         return self.__type
-
 
     def get_services(self):
         return self.__services
 
-
     def get_client_id(self):
         return self.__client_id
-
 
     def set_urn(self, value):
         self.__urn = value
 
-
     def set_name(self, value):
         self.__name = value
-
 
     def set_slice_urn(self, value):
         self.__slice_urn = value
 
-
     def set_allocation_status(self, value):
         self.__allocation_status = value
-
 
     def set_operational_status(self, value):
         self.__operational_status = value
 
-
     def set_expiration(self, value):
         self.__expiration = value
-
 
     def set_resource(self, value):
         self.__resource = value
 
-
     def set_type(self, value):
         self.__type = value
 
-
     def set_services(self, value):
         self.__services = value
-
 
     def set_client_id(self, value):
         self.__client_id = value
@@ -105,4 +86,4 @@ class Sliver:
     
     def __repr__(self):
         return self.__str__()       
-    
+

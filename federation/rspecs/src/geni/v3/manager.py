@@ -9,10 +9,10 @@ class RSpecManager(RSpecManagerBase):
         self.__parser = ParserManager()
     
     def compose_advertisement(self, resources):
-        return self.__crafter.get_advertisement()
+        return self.__crafter.get_advertisement(resources)
     
     def compose_manifest(self, slivers):
-        return self.__crafter.manifest_slice(slivers)
+        return self.__crafter.manifest_slivers(slivers)
 
     def parse_request(self, request_rspec):
         return self.__parser.parse_request_rspec(request_rspec)

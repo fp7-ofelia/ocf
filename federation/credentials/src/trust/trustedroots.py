@@ -22,7 +22,6 @@ class TrustedRoots:
         gid.save_to_file(fn)
 
     def get_list(self):
-        print 'self.get_file_list():',self.get_file_list()
         gid_list = [GID(filename=cert_file) for cert_file in self.get_file_list()]
         return gid_list
 

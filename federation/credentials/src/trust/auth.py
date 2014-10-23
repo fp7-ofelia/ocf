@@ -59,10 +59,8 @@ class Auth:
             if not error:
                 error = "No valid credentials found" 
             raise InsufficientRights('Access denied: %s' % (str(error)))
-        
         return valid
-        
-        
+    
     def check(self, cred, operation, hrn = None):
         """
         Check the credential against the peer cert (callerGID included 
@@ -74,7 +72,6 @@ class Auth:
         self.client_cred = Credential(string = cred)
         self.client_gid = self.client_cred.get_gid_caller()
         self.object_gid = self.client_cred.get_gid_object()
-        
         # make sure the client_gid is not blank
         if not self.client_gid:
             raise MissingCallerGID(self.client_cred.get_subject())
