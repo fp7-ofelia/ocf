@@ -92,12 +92,12 @@ class GeniV3Handler(HandlerBase):
     def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict()):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("Allocate", credentials)
+            creds = self.__credential_manager.validate_for("Allocate", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        
+        #expiration = self.__get_expiration()
         reservation = self.__rspec_manager.parse_request(rspec)
-        expiration = self.__get_expiration()
+        expiration = self.__credential_manager.get_slice_expiration(creds)
         # It is possible for the user to allocate a sliver with a sooner expiration time
         if "geni_end_time" in options:
             expiration = min(self.__get_expiration(), options["geni_end_time"])
@@ -114,14 +114,14 @@ class GeniV3Handler(HandlerBase):
         return self.success_result(manifest, allocated_slivers)
         
     def Provision(self, urns=list(), credentials=list(), options=dict()):
+        # Credential validation
         try:
-            self.__credential_manager.validate_for("Provision", credentials)
+            creds = self.__credential_manager.validate_for("Provision", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-         
-        # TODO: Implement this method
-        expiration = self.__credential_manager.get_slice_expiration(credentials)
+        
         #expiration = self.__get_expiration()
+        expiration = self.__credential_manager.get_slice_expiration(creds)
         
         if not options.get("geni_rspec_version"):
             return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
@@ -133,7 +133,6 @@ class GeniV3Handler(HandlerBase):
 
         try:
             slivers = self.__delegate.create(urns, expiration)
-            
         except ProvisionError as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
         
@@ -143,7 +142,7 @@ class GeniV3Handler(HandlerBase):
     def Delete(self, urns=list(), credentials=list(), options=dict()):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("Delete", credentials)
+            creds = self.__credential_manager.validate_for("Delete", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
@@ -154,6 +153,9 @@ class GeniV3Handler(HandlerBase):
         # no current slivers at this aggregate may return an empty list of slivers, may 
         # return a list of previous slivers that have since been deleted, or may even 
         # return an error (e.g. SEARCHFAILED or `EXPIRED); details are aggregate specific.
+        
+        #expiration = self.__get_expiration()
+        #expiration = self.__credential_manager.get_slice_expiration(creds)
         
         try:
             result = self.__delegate.delete(urns)
@@ -166,10 +168,13 @@ class GeniV3Handler(HandlerBase):
         return self.delete_success_result(result)
     
     def PerformOperationalAction(self, urns=list(), credentials=list(), action=None, options=dict()):
+        # Credential validation
         try:
-            self.__credential_manager.validate_for("PerformOperationalAction", credentials)
+            creds = self.__credential_manager.validate_for("PerformOperationalAction", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
+        
+        #expiration = self.__credential_manager.get_slice_expiration(creds)
         
         actions = ["geni_start", "geni_restart", "geni_stop"]
         if action not in actions:
@@ -187,10 +192,14 @@ class GeniV3Handler(HandlerBase):
         return self.success_result(slivers_direct=result)
      
     def Status(self, urns=list(), credentials=list(), options=dict()):
+        # Credential validation
         try:
-            self.__credential_manager.validate_for("Status", credentials)
+            creds = self.__credential_manager.validate_for("Status", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
+        
+        #expiration = self.__credential_manager.get_slice_expiration(creds)
+        
         try:
             result = self.__delegate.status(urns)
         except Exception as e:
@@ -199,14 +208,13 @@ class GeniV3Handler(HandlerBase):
         return self.success_result(slivers=result, slice_urn=result[0].get_slice_urn())
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
+        # Credential validation
         try:
-            self.__credential_manager.validate_for("Renew", credentials)
+            creds = self.__credential_manager.validate_for("Renew", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        # TODO: Retrieve slice expiration correctly
         try:
-            # TODO: Implement this method
-            expiration = self.__rfc3339_to_datetime(self.__credential_manager.get_slice_expiration(credentials))
+            expiration = self.__rfc3339_to_datetime(self.__credential_manager.get_slice_expiration(creds))
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.SEARCHFAILED, e)
         # Format dates to expected output
@@ -241,6 +249,9 @@ class GeniV3Handler(HandlerBase):
         return self.success_result(slivers_direct=result)
     
     def ShutDown(self, urns=list(), credentials=list(), options=list()):
+        # Credential validation
+        # creds = ...
+        #expiration = self.__rfc3339_to_datetime(self.__credential_manager.get_slice_expiration(creds))
         return self.error_result(self.__geni_exception_manager.FORBIDDEN, "ShutDown Method is only available for the AM administrators")
     
     def __get_max_expiration(self):
@@ -350,7 +361,7 @@ class GeniV3Handler(HandlerBase):
         sliver_struct = dict()
         sliver_struct["geni_sliver_urn"] = sliver.get_urn()
         sliver_struct["geni_allocation_status"] =  sliver.get_allocation_status()
-        sliver_struct["geni_expires"] = sliver.get_expiration()
+        sliver_struct["geni_expires"] = self.__datetime_to_rfc3339(sliver.get_expiration())
         sliver_struct["geni_operational_status"] = sliver.get_operational_status()
         return sliver_struct
         

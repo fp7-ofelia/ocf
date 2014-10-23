@@ -67,13 +67,11 @@ class CredentialVerifier(object):
         if root_cert_fileordir is None:
             raise Exception("Missing Root certs argument")
         elif os.path.isdir(root_cert_fileordir):
-            print "DDDDDDDDDDDDDDDDDDDDDD"
             files = os.listdir(root_cert_fileordir)
-            print "-------------",files
             self.root_cert_files = []
             for file in files:
                 # FIXME: exclude files that aren't cert files?
-                print file == CredentialVerifier.CATEDCERTSFNAME
+                #print file == CredentialVerifier.CATEDCERTSFNAME
                 if file == CredentialVerifier.CATEDCERTSFNAME:
                     continue
                 self.root_cert_files.append(os.path.expanduser(os.path.join(root_cert_fileordir, file)))
@@ -162,7 +160,6 @@ class CredentialVerifier(object):
             speaksfor_urn = speaksfor_gid.get_urn()
             caller_gid = speaksfor_gid
 
-        print "------------------------------------------",CredentialFactory.getType(cred_strings[0])
 
         # Remove the abac credentials
         cred_strings = [cred_string for cred_string in cred_strings \
@@ -216,6 +213,7 @@ class CredentialVerifier(object):
         result = True
         privs = credential.get_privileges()
         for priv in privileges:
+            
             if not privs.can_perform(priv):
                 result = False
         return result
@@ -242,7 +240,6 @@ class CredentialVerifier(object):
             if cred is None:
                 failure = "Credential was unparseable"
                 continue
-            print "--------------------------------1"
             if cred.get_cred_type() == cred.SFA_CREDENTIAL_TYPE:
                 cS = cred.get_gid_caller().get_urn()
             elif cred.get_cred_type() == ABACCredential.ABAC_CREDENTIAL_TYPE:
@@ -250,35 +247,25 @@ class CredentialVerifier(object):
             else:
                 cS = "Unknown credential type %s" % cred.get_cred_type()
             
-            print "--------------------------------2"
             if tried_creds != "":
                 tried_creds = "%s, %s" % (tried_creds, cS)
             else:
                 tried_creds = cS
-            print "--------------------------------3"
             if cred.get_cred_type() != cred.SFA_CREDENTIAL_TYPE:
                 failure = "Not an SFA credential: " + cS
                 continue
-            print "--------------------------------4"
          
             #if not self.verify_source(gid, cred):
             #    failure = "Cred %s fails: Credential doesn't grant rights to you (%s), but to %s (over object %s)" % (cred.get_gid_caller().get_urn(), gid.get_urn(), cred.get_gid_caller().get_urn(), cred.get_gid_object().get_urn())
             #    continue
          
-            print "--------------------------------5"
             if not self.verify_target(target_urn, cred):
                 failure = "Cred granting rights to %s on %s fails: It grants permissions over a different target, not %s (URNs dont match)" % (cred.get_gid_caller().get_urn(), cred.get_gid_object().get_urn(), target_urn)
                 continue
-            print "--------------------------------6"
             if not self.verify_privileges(privileges, cred):
                 failure = "Cred for %s over %s doesn't provide sufficient privileges" % (cred.get_gid_caller().get_urn(), cred.get_gid_object().get_urn())
                 continue
-            print "--------------------------------7"
             try:
-                print "--------------", self.root_cert_files
-              
-                print cred.verify(self.root_cert_files)
-                
                 if not cred.verify(self.root_cert_files):
                     failure = "Couldn't validate credential for caller %s with target %s with any of %d known root certs" % (cred.get_gid_caller().get_urn(), cred.get_gid_object().get_urn(), len(self.root_cert_files))
                     continue

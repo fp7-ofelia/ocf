@@ -1,6 +1,5 @@
 from ambase.src.abstract.classes.credentialmanagerbase import CredentialManagerBase
 from credentials.src.trustgcf.cred_util import CredentialVerifier
-from settings.src.settings import Settings
 
 class GCFCredentialManager(CredentialManagerBase):
     
@@ -30,7 +29,8 @@ class GCFCredentialManager(CredentialManagerBase):
     def set_root_cert(self,value):
         self.__root_cert = value
 
-    def validate_for(self, credentials, method):
+    def validate_for(self,  method, credentials):
+        credentials = self.__clean_credentials(credentials)
         return self._get_geniv2_validation(method, credentials)
         
     def get_valid_creds(self):
@@ -63,5 +63,13 @@ class GCFCredentialManager(CredentialManagerBase):
             return "deletesliver"
         elif method == "Renew":
             return "renewsliver"
-        raise Exception("Unknown method")
-    
+        raise Exception("Unknown method %s", method)
+
+    def __clean_credentials(self, credentials):
+        creds = list()
+        for cred  in credentials:
+            if cred.get("geni_value"):
+                creds.append(cred["geni_value"])
+            else: 
+                creds.append(cred)
+        return creds
