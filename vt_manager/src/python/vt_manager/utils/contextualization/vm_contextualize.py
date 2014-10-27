@@ -16,7 +16,7 @@ import paramiko
 class VMContextualize(object):
 
     def __init__(self, *args, **kwargs):
-        self.vm_address = kwargs["vm_adress"]
+        self.vm_address = kwargs["vm_address"]
         self.vm_user = kwargs["vm_user"]
         self.vm_user_password = kwargs["vm_password"]
         self.ssh_client = None
@@ -58,7 +58,6 @@ class VMContextualize(object):
             # Either with or without errors, check SSH client and close when necessary
             if self.ssh_client:
                 self.ssh_client.close()
-            print "VMContextualize exception: %s" % str(e)
         return exec_ok
     
     def contextualize_add_pub_key(self, user, key):
@@ -66,7 +65,7 @@ class VMContextualize(object):
         commands = []
         # Below results to be created only if not already exist
         commands.append("useradd %s -m -s /bin/bash" % user)
-        commands.append("mkdir /home/%s/.ssh" % user)
+        commands.append("mkdir -p /home/%s/.ssh" % user)
         commands.append("touch /home/%s/.ssh/authorized_keys" % user)
         commands.append("if [ -z $(grep '%s' /home/%s/.ssh/authorized_keys ) ]; then echo '%s' >> /home/%s/.ssh/authorized_keys; fi" % (key, user, key, user))
         # Get out from the interactive mode
