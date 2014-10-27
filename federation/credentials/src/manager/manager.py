@@ -23,13 +23,15 @@ class CredentialManager(CredentialManagerBase):
     def get_valid_creds(self):
         return ""
 
-    def get_expiration_list(self):
-        return []
+    def get_expiration_list(selfi, credentials):
+        expirations = list()
+        for cred in credentials:
+            expirations.append(cred.expiration)
+        return expirations
 
     def get_slice_expiration(self, credentials):
-        clean_creds = self.__clean_credentials(credentials)
-        # TODO: Retrieve slice expiration from slice credentials
-        return str(credentials)
+        
+        return  ""
 
     def __clean_credentials(self, credentials):
         clean_creds = [c['geni_value'] for c in filter(self.__is_geni_cred, credentials)]

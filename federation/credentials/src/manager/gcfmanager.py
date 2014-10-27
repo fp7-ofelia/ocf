@@ -36,17 +36,20 @@ class GCFCredentialManager(CredentialManagerBase):
     def get_valid_creds(self):
         return ""
 
-    def get_expiration_list(self):
-        return ""
+    def get_expiration_list(self, credentials):
+        expirations = list()
+        for cred in credentials:
+            expirations.append(cred.expiration)
+        return expirations
 
     def get_slice_expiration(self, credentials):
-        # TODO: Retrieve slice expiration from slice credentials
-        return str(credentials)
+        return credentials[0].expiration
 
     def _get_geniv2_validation(self, method, credentials):
-        method = (self._translate_to_geniv2_method(method))
+        method = (self._translate_to_geniv2_method(method),)
         try:
             valid_cred = self.__auth.verify_from_strings(self.__root_cert,credentials,None, method, {})
+            return valid_cred
         except Exception as e:
             raise e
     
