@@ -40,8 +40,8 @@ class VMContextualize(object):
         self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.ssh_client.connect(self.vm_address,username=self.vm_user, password=self.vm_user_password)
         channel = self.ssh_client.invoke_shell()
-        stdin = channel.makefile('wb')
-        stdout = channel.makefile('rb')
+        stdin = channel.makefile("wb")
+        stdout = channel.makefile("rb")
         stdin.write(context_command)
         output = stdout.read()
         #print output
@@ -68,15 +68,16 @@ class VMContextualize(object):
         commands.append("mkdir -p /home/%s/.ssh" % user)
         commands.append("touch /home/%s/.ssh/authorized_keys" % user)
         commands.append("if [ -z $(grep '%s' /home/%s/.ssh/authorized_keys ) ]; then echo '%s' >> /home/%s/.ssh/authorized_keys; fi" % (key, user, key, user))
+        commands.append("chown %s:%s -R /home/%s" % (user, user, user))
         # Get out from the interactive mode
         commands.append("exit\n")
         # Use commands separated by newline to enable multiple commands being issued at a time
         command = "\n".join(commands)
         return self.contextualize(command)
 
-#if __name__ == '__main__':
+#if __name__ == "__main__":
     # With arguments
-#    parser = argparse.ArgumentParser(description='Run ssh through pexpect')
+#    parser = argparse.ArgumentParser(description="Run ssh through pexpect")
 #    parser.add_argument("--address", metavar="a", type=str, required=True,
 #        help="Address of the VM")
 #    parser.add_argument("--user", metavar="u", type=str, required=True,
