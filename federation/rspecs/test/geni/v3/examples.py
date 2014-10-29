@@ -16,3 +16,18 @@ REQUEST_EXAMPLE = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
      </sliver_type>
   </node>
 </rspec>'''
+
+ALL_LINKS = '''<?xmlversion="1.0"encoding="UTF-8"?><rspecxmlns="http://www.geni.net/resources/rspec/3"xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"xsi:schemaLocation="http://www.geni.net/resources/rspec/3http://www.geni.net/resources/rspec/3/ad.xsd"type="advertisement"><linkcomponent_id="urn:publicID:ThisisaURNofLINK0"component_name="urn:publicID:ThisisaURNofLINK0"><propertysource_id="A"dest_id="B"capacity="10thousandTrillions"/><link_typename="HighQualityL2Link"/></link><linkcomponent_id="urn:publicID:ThisisaURNofLINK1"component_name="urn:publicID:ThisisaURNofLINK1"><propertysource_id="A"dest_id="B"capacity="10thousandTrillions"/><link_typename="HighQualityL2Link"/></link><linkcomponent_id="urn:publicID:ThisisaURNofLINK2"component_name="urn:publicID:ThisisaURNofLINK2"><propertysource_id="A"dest_id="B"capacity="10thousandTrillions"/><link_typename="HighQualityL2Link"/></link><linkcomponent_id="urn:publicID:ThisisaURNofLINK3"component_name="urn:publicID:ThisisaURNofLINK3"><propertysource_id="A"dest_id="B"capacity="10thousandTrillions"/><link_typename="HighQualityL2Link"/></link></rspec>'''
+SINGLE_LINK = '''<linkcomponent_id="urn:publicID:ThisisaURNofLINK0"component_name="urn:publicID:ThisisaURNofLINK0"><propertysource_id="A"dest_id="B"capacity="10thousandTrillions"/><link_typename="HighQualityL2Link"/></link>'''
+
+LINK_REQUEST = '''<?xml version="1.0" encoding="UTF-8"?>
+<rspec xmlns="http://www.geni.net/resources/rspec/3"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/ad.xsd"
+       type="advertisement">
+  <link component_id="urn:publicid:aist-se1-dp1" component_name="link-pc111:eth0-cisco3:(null)">
+    <property source_id="Verdaguer" dest_id="dpid5" capacity="*"/>
+    <link_type name="urn:ocf+static_link"/>
+  </link>
+</rspec>'''
+

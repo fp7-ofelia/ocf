@@ -1,3 +1,5 @@
+from rspecs.src.geni.v3.container.resource import Resource
+from rspecs.src.geni.v3.container.link import Link
 class CrafterManager:
     
     #TODO: Take into account extensions
@@ -17,24 +19,53 @@ class CrafterManager:
         output += self.advert_footer()
         return output    
     
-    def advert_template(self):
+    def advert_node_template(self):
         tmpl = """<node component_manager_id="%s" component_name="%s" component_id="%s" exclusive="%s">
 <available now="%s"/>
 </node>
 """
         return tmpl
     
-    def advert_resource(self, resource):
+    def advert_link_template(self):
+        tmpl = '''<link component_id="%s" component_name="%s">
+<property source_id="%s" dest_id="%s" capacity="%s"/>
+<link_type name="%s"/>
+</link> '''
+        return tmpl
+    
+    def advert_resource(self,resource):
+        if isinstance(resource, Link):
+            return self.advert_link(resource)
+        elif isinstance(resource, Resource):
+            return self.advert_node(resource)
+        
+        
+    def advert_node(self, resource):
         resource_component_manager_id = str(resource.get_component_manager_id())
         resource_exclusive = str(resource.get_exclusive()).lower()
         resource_available = str(resource.get_available()).lower()
         resource_component_name = resource.get_component_name()
         resource_component_id = resource.get_component_id()
-        return self.advert_template() % (resource_component_manager_id,
+        return self.advert_node_template() % (resource_component_manager_id,
                        resource_component_name,
                        resource_component_id,
                        resource_exclusive,
                        resource_available)
+    
+    def advert_link(self, link):
+        resource_component_name = link.get_component_name()
+        resource_component_id = link.get_component_id()
+        resource_source_id = link.get_source_id()
+        resource_dest_id = link.get_dest_id()
+        resource_capacity = link.get_capacity()
+        resource_type = link.get_type()
+        return self.advert_link_template() % (resource_component_id, 
+                                              resource_component_name, 
+                                              resource_source_id, 
+                                              resource_dest_id,
+                                              str(resource_capacity),
+                                              resource_type)
+        
     
     def advert_header(self):
         header = """<?xml version="1.0" encoding="UTF-8"?>

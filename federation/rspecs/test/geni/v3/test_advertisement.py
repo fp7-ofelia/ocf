@@ -3,11 +3,15 @@ from rspecs.src.geni.v3.craftermanager import CrafterManager
 from rspecs.test.utils import testcase
 from rspecs.test.geni.v3.examples import RAW_NODES
 from rspecs.test.geni.v3.examples import AD_RSPEC
+from rspecs.test.geni.v3.examples import SINGLE_LINK
+from rspecs.test.geni.v3.examples import ALL_LINKS
+from rspecs.src.geni.v3.container.link import Link
 
 class TestAdvertisement(testcase.TestCase):
     
     def setUp(self):
         self.resources = self.get_default_resources()
+        self.links = self.get_default_links()
         self.manager = CrafterManager()
         
     def tearDown(self):
@@ -26,6 +30,19 @@ class TestAdvertisement(testcase.TestCase):
             resources.append(r)
         return resources
     
+    def get_default_links(self):
+        links = list()
+        for i in range(0,4):
+            l = Link()
+            l.set_component_id("urn:publicID:ThisisaURNofLINK%d" %i)
+            l.set_component_name("urn:publicID:ThisisaURNofLINK%d" %i)
+            l.set_source_id("A")
+            l.set_dest_id("B")
+            l.set_capacity("10thousandTrillions")
+            l.set_type("HighQualityL2Link")
+            links.append(l)
+        return links
+            
     def format_rspec(self, string):
         return string.replace(" ", "").replace("\n","")
     
@@ -41,8 +58,15 @@ class TestAdvertisement(testcase.TestCase):
         for r in self.resources:
             string += self.manager.advert_resource(r)
         string += self.manager.advert_footer()
-        print self.format_rspec(string)
         self.assertEquals(self.format_rspec(AD_RSPEC), self.format_rspec(string))
+        
+    def test_should_advertise_link(self):
+        single_link = self.format_rspec(self.manager.advert_resource(self.links[0]))
+        self.assertEquals(SINGLE_LINK, single_link)
+        
+    def test_should_advertise_links(self):
+        all_links = self.format_rspec(self.manager.get_advertisement(self.links))
+        self.assertEquals(ALL_LINKS, all_links)
     
 if __name__ == '__main__':
     # Allows to run in stand-alone mode

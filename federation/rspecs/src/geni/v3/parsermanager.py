@@ -1,6 +1,7 @@
 from xml.dom.minidom import parseString
 from rspecs.src.geni.v3.container.resource import Resource
 from rspecs.src.geni.v3.container.sliver import Sliver
+from rspecs.src.geni.v3.container.link import Link
 
 class ParserManager:
     
@@ -9,8 +10,13 @@ class ParserManager:
     
     def parse_request_rspec(self,rspec):
         rspec_dom = parseString(rspec)
-        nodes = rspec_dom.getElementsByTagName('node')
-        resources = self.parse_nodes(nodes)
+        resources = list()
+        geni_nodes = rspec_dom.getElementsByTagName('node')
+        geni_links = rspec_dom.getElementsByTagName('link')
+        nodes = self.parse_nodes(geni_nodes)
+        resources.extend(nodes)
+        links = self.parse_links(geni_links)
+        resources.extend(links)
         return resources
     
     def parse_nodes(self, nodes):
@@ -49,6 +55,27 @@ class ParserManager:
                 resource.set_sliver(sliver)
             
             vms.append(resource)
-        
         return vms
        
+    def parse_links(self, link_elems):
+        links = list()
+        for elem in link_elems:
+            elem_attrs = elem.attributes
+            link = Link()
+            if elem_attrs.has_key("component_id"):
+                link.set_component_id(elem_attrs.get("component_id").value)
+            if elem_attrs.has_key("component_name"):
+                link.set_component_id(elem_attrs.get("component_name").value)
+            link_props = elem.getElementsByTagName("property")
+            link_prop = link_props[0].attributes
+            if link_prop.has_key("source_id"):
+                link.set_source_id(link_prop.get("source_id").value)
+            if link_prop.has_key("dest_id"):
+                link.set_dest_id(link_prop.get("dest_id").value)
+            if link_prop.has_key("capacity"):
+                link.set_capacity(link_prop.get("capacity").value)
+            link_type = elem.getElementsByTagName("link_type")[0].attributes
+            if link_type.has_key("name"):
+                link.set_type(link_type.get("name").value)
+            links.append(link)
+        return links        
