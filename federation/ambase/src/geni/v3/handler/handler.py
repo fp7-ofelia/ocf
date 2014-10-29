@@ -9,6 +9,7 @@ from ambase.src.ambase.exceptions import PerformOperationalStateError
 import base64
 import datetime
 import dateutil.parser
+import re
 import zlib
 
 class GeniV3Handler(HandlerBase):
@@ -21,6 +22,18 @@ class GeniV3Handler(HandlerBase):
         self.__config = None
     
     def GetVersion(self, options=dict()):
+        """
+        @param    options		optional structure
+        
+        @return    xmlrpc struct        int geni_api,
+                                        struct geni_api_versions,
+                                        array geni_ad_rspec_versions,
+                                        array geni_request_rspec_versions,
+                                        array geni_credential_types
+        
+        @error ERROR                internal error
+        @error SERVERERROR          server error
+        """
         try:
             value = self.__delegate.get_version()
         except Exception as e:
@@ -28,6 +41,21 @@ class GeniV3Handler(HandlerBase):
         return self.success_result(result=value)
 
     def ListResources(self, credentials=list(), options=dict()):
+        """
+        @param    options               optional structure
+                                        - geni_available
+                                        - geni_compressed
+                                        - geni_rspec_version
+        
+        @return    xmlrpc struct        - value = xml rspec
+        
+        @error BADARGS              one of the required arguments is badly formed or missing
+        @error FORBIDDEN            credential does not grant permission to aggregate
+        @error ERROR                internal error
+        @error SERVERERROR          server error
+        @error UNAVAILABLE          unavailable (eg server in lockdown)
+        @error BADVERSION           bad Version of RSpec requested
+        """
         # Credential validation
         try:
             self.__credential_manager.validate_for("ListResources", credentials)
@@ -227,8 +255,8 @@ class GeniV3Handler(HandlerBase):
         # Format dates to expected output
         try:
             expiration_time = self.__rfc3339_to_datetime(expiration_time)
-        except:
-            pass
+        except Exception as e:
+            return self.error_result(self.__geni_exception_manager.ERROR, e)
         now = datetime.datetime.utcnow()
         # NOTE: Possibly existing on GCF, but not on GENIv3 API. Using it here, though
         if "geni_extend_alap" in options and options["geni_extend_alap"]:
@@ -290,11 +318,8 @@ class GeniV3Handler(HandlerBase):
         Returns a datetime object from an input string formatted according to RFC3339.
         """
         try:
-            if "." in date:
-                # Remove last digits
-                date_form = date[:date.find(".")]
-            else:
-                date_form = date[:-1]
+            # Removes everything after a "+" or a "."
+            date_form = re.sub(r'[\+|\.].+', "", date)
             formatted_date = datetime.datetime.strptime(date_form.replace("T"," "), "%Y-%m-%d %H:%M:%S")
             #formatted_date = datetime.datetime.strptime(date[:-1].replace("T"," "), "%Y-%m-%d %H:%M:%S")
         except:
