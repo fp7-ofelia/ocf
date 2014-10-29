@@ -50,6 +50,6 @@ class HandlerBase:
         return
         
     @abstractmethod
-    def ShutDown(self, urns=list(), credentials=list(), options=list()):
+    def Shutdown(self, slice_urn="", credentials=list(), options=dict()):
         return 
 

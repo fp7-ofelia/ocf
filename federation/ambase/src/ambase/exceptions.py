@@ -10,7 +10,7 @@ class ProvisionError(Exception):
 class DeleteError(Exception):
     pass
 
-class ShutDown(Exception):
+class Shutdown(Exception):
     pass
 
 class UnsupportedState(Exception):

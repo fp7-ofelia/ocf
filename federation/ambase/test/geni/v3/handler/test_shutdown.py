@@ -5,7 +5,7 @@ from ambase.test.utils.mockcredentialmanager import MockCredentialManager
 from ambase.test.utils.mockdelegate import MockDelegate
 from ambase.test.utils.mockrspecmanager import MockRSpecManager
 
-class TestShutDown(testcase.TestCase):
+class TestShutdown(testcase.TestCase):
     """
         Testing very basic behaviour to see 
         whether the Handler is able to respond
@@ -23,7 +23,7 @@ class TestShutDown(testcase.TestCase):
         self.handler = None
         
     def test_should_fail_always(self):
-        self.ret_struct = self.handler.ShutDown()
+        self.ret_struct = self.handler.Shutdown()
         self.assertEquals(GENIExceptionManager.FORBIDDEN, self.ret_struct.get("code").get("geni_code"))
     
 if __name__ == "__main__":

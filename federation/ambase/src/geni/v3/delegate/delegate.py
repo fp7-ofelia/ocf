@@ -3,7 +3,7 @@ from ambase.src.ambase.exceptions import SliceAlreadyExists
 from ambase.src.ambase.exceptions import AllocationError
 from ambase.src.ambase.exceptions import ProvisionError
 from ambase.src.ambase.exceptions import DeleteError
-from ambase.src.ambase.exceptions import ShutDown
+from ambase.src.ambase.exceptions import Shutdown
 from ambase.src.ambase.exceptions import PerformOperationalStateError
 
 class GeniV3Delegate(DelegateBase):

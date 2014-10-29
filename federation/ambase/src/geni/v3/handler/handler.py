@@ -3,7 +3,7 @@ from ambase.src.ambase.exceptions import SliceAlreadyExists
 from ambase.src.ambase.exceptions import AllocationError
 from ambase.src.ambase.exceptions import ProvisionError
 from ambase.src.ambase.exceptions import DeleteError
-from ambase.src.ambase.exceptions import ShutDown
+from ambase.src.ambase.exceptions import Shutdown
 from ambase.src.ambase.exceptions import PerformOperationalStateError
 
 import base64
@@ -238,7 +238,8 @@ class GeniV3Handler(HandlerBase):
             result = self.__delegate.status(urns)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
-                    
+        
+        # FIXME list index out of range
         return self.success_result(slivers=result, slice_urn=result[0].get_slice_urn())
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
@@ -280,11 +281,8 @@ class GeniV3Handler(HandlerBase):
             result = self.__delegate.renew(urns, expiration, geni_best_effort)
         return self.success_result(slivers_direct=result)
     
-    def ShutDown(self, urns=list(), credentials=list(), options=list()):
-        # Credential validation
-        # creds = ...
-        #expiration = self.__rfc3339_to_datetime(self.__credential_manager.get_slice_expiration(creds))
-        return self.error_result(self.__geni_exception_manager.FORBIDDEN, "ShutDown Method is only available for the AM administrators")
+    def Shutdown(self, slice_urn="", credentials=list(), options=dict()):
+        return self.error_result(self.__geni_exception_manager.FORBIDDEN, "Shutdown method is only available for the AM administrators")
     
     def __get_max_expiration(self):
         #six_months = datetime.timedelta(weeks = 6 * 4) #6 months
