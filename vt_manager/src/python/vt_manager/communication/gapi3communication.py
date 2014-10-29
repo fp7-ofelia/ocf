@@ -61,7 +61,7 @@ def Status(urns, creds, options):
 def Renew(urns, creds, expiration_time, options):
     return handler.Renew(urns, creds, expiration_time, options)
 
-@rpcmethod(signature=[SUCCESS_TYPE, URNS_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name=GAPI3_URL)
-def Shutdown(urns, creds):
-    return handler.Shutdown(urns, creds) 
+@rpcmethod(signature=[SUCCESS_TYPE, URN_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name=GAPI3_URL)
+def Shutdown(slice_urn, credentials, options):
+    return handler.Shutdown(slice_urn, credentials, options)
 
