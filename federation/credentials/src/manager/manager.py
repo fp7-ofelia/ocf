@@ -23,19 +23,26 @@ class CredentialManager(CredentialManagerBase):
     def get_valid_creds(self):
         return ""
 
-    def get_expiration_list(self):
-        return []
+    def get_expiration_list(selfi, credentials):
+        expirations = list()
+        for cred in credentials:
+            expirations.append(cred.expiration)
+        return expirations
 
     def get_slice_expiration(self, credentials):
-        # TODO: Retrieve slice expiration from slice credentials
-        return str(credentials)
+        
+        return  ""
+
+    def __clean_credentials(self, credentials):
+        clean_creds = [c['geni_value'] for c in filter(self.__is_geni_cred, credentials)]
+        return clean_creds
 
     def _get_geniv2_validation(self, method, credentials):
         method = self._translate_to_geniv2_method(method)
         try:
             if self.__auth == None:
                 self.__auth = Auth(config=self.__config)
-            credentials = [c['geni_value'] for c in filter(self.__is_geni_cred, credentials)]
+            credentials = self.__clean_credentials(credentials)#[c['geni_value'] for c in filter(self.__is_geni_cred, credentials)]
             valid_cred = self.__auth.checkCredentials(credentials, method)
         except Exception as e:
             raise e

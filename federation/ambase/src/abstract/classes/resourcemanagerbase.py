@@ -10,11 +10,11 @@ class ResourceManagerBase:
         return
     
     @abstractmethod
-    def create_resources(self, urns):
+    def create_resources(self, urns, expiration, users):
         return
     
     @abstractmethod
-    def reserve_resources(self, slice_urn, reservation, expiration):
+    def reserve_resources(self, slice_urn, reservation, expiration, users):
         return
     
     @abstractmethod

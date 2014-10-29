@@ -28,7 +28,7 @@ class Handler:
     def Delete(self, urns=list(), credentials=list(), options=dict()):
         pass
     
-    def ShutDown(self, slice_urn, credentials=list(), options=dict()):
+    def Shutdown(self, slice_urn, credentials=list(), options=dict()):
         pass
     
     

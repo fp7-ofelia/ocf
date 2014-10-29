@@ -1,6 +1,5 @@
 from ambase.src.abstract.classes.credentialmanagerbase import CredentialManagerBase
 from credentials.src.trustgcf.cred_util import CredentialVerifier
-from settings.src.settings import Settings
 
 class GCFCredentialManager(CredentialManagerBase):
     
@@ -30,23 +29,27 @@ class GCFCredentialManager(CredentialManagerBase):
     def set_root_cert(self,value):
         self.__root_cert = value
 
-    def validate_for(self, credentials, method):
+    def validate_for(self,  method, credentials):
+        credentials = self.__clean_credentials(credentials)
         return self._get_geniv2_validation(method, credentials)
         
     def get_valid_creds(self):
         return ""
 
-    def get_expiration_list(self):
-        return ""
+    def get_expiration_list(self, credentials):
+        expirations = list()
+        for cred in credentials:
+            expirations.append(cred.expiration)
+        return expirations
 
     def get_slice_expiration(self, credentials):
-        # TODO: Retrieve slice expiration from slice credentials
-        return str(credentials)
+        return credentials[0].expiration
 
     def _get_geniv2_validation(self, method, credentials):
-        method = (self._translate_to_geniv2_method(method))
+        method = (self._translate_to_geniv2_method(method),)
         try:
             valid_cred = self.__auth.verify_from_strings(self.__root_cert,credentials,None, method, {})
+            return valid_cred
         except Exception as e:
             raise e
     
@@ -63,5 +66,13 @@ class GCFCredentialManager(CredentialManagerBase):
             return "deletesliver"
         elif method == "Renew":
             return "renewsliver"
-        raise Exception("Unknown method")
-    
+        raise Exception("Unknown method %s", method)
+
+    def __clean_credentials(self, credentials):
+        creds = list()
+        for cred  in credentials:
+            if cred.get("geni_value"):
+                creds.append(cred["geni_value"])
+            else: 
+                creds.append(cred)
+        return creds

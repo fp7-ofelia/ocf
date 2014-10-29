@@ -1,5 +1,10 @@
 from ambase.src.abstract.classes.delegatebase import DelegateBase
-
+from ambase.src.ambase.exceptions import SliceAlreadyExists
+from ambase.src.ambase.exceptions import AllocationError
+from ambase.src.ambase.exceptions import ProvisionError
+from ambase.src.ambase.exceptions import DeleteError
+from ambase.src.ambase.exceptions import Shutdown
+from ambase.src.ambase.exceptions import PerformOperationalStateError
 
 class GeniV3Delegate(DelegateBase):
     
@@ -44,51 +49,70 @@ class GeniV3Delegate(DelegateBase):
     def describe(self, urns=dict()):
         return self.__resource_manager.get_resources(urns)
 
-    def reserve(self, slice_urn, reservation, expiration):
+    def reserve(self, slice_urn, reservation, expiration, users=list()):
         """
         Allocate slivers
         """
-        return self.__resource_manager.reserve_resources(slice_urn, reservation, expiration)
+        try:
+            return self.__resource_manager.reserve_resources(slice_urn, reservation, expiration)
+        except SliceAlreadyExists as e:
+            raise SliceAlreadyExists(str(e))
+        except Exception as e:
+            raise AllocationError(str(e))
+
     
-    def create(self, urns=list(), expiration=None):
+    #def create(self, urns=list(), expiration=None, users=list(), geni_best_effort=True):
+    # XXX Default geni_best_effort = False
+    def create(self, urns=list(), expiration=None, users=list(), geni_best_effort=False):
         """
         Provision slivers
         """
-        return self.__resource_manager.create_resources(urns, expiration)
+        try:
+            return self.__resource_manager.create_resources(urns, expiration, users)
+        except Exception as e:
+            raise ProvisionError(e)
     
-    def delete(self, urns=list()):
+    def delete(self, urns=list(), geni_best_effort=False):
         """
         Delete slivers
         """
-        return self.__resource_manager.delete_resources(urns)
+        try:
+            return self.__resource_manager.delete_resources(urns, geni_best_effort)
+        except Exception as e:
+            raise DeleteError(str(e))
     
-    def perform_operational_action(self, urns=list(), action=None, geni_besteffort=True):
-        if action == 'geni_start':
-            return self.__resource_manager.start_resources(urns, geni_besteffort)
-        elif action == 'geni_stop':
-            return self.__resource_manager.stop_resources(urns, geni_besteffort)
-        elif action == 'geni_restart':
-            return  self.__resource_manager.reboot_resources(urns, geni_besteffort)
-        raise Exception("Unknown Operational Action %s" %str(action))
+    #def perform_operational_action(self, urns=list(), action=None, geni_besteffort=True):
+    # XXX Default geni_best_effort = False
+    def perform_operational_action(self, urns=list(), action=None, geni_best_effort=False):
+        try:
+            if action == 'geni_start':
+                return self.__resource_manager.start_resources(urns, geni_best_effort)
+            elif action == 'geni_stop':
+                return self.__resource_manager.stop_resources(urns, geni_best_effort)
+            elif action == 'geni_restart':
+                return  self.__resource_manager.reboot_resources(urns, geni_best_effort)
+            raise PerformOperationalStateError("Unknown Operational Action %s" %str(action))
+        except Exception as e:
+            raise PerformOperationalStateError("PerformOperationalError Failed for action %s. Error was: %s " % (action, str(e)))
     
     def status(self, urns=list()):
         return self.__resource_manager.get_resources(urns)
-        
+    
     def renew(self, urns=list(), expiration_time=None, geni_best_effort=False):
         return self.__resource_manager.renew_resources(urns, expiration_time, geni_best_effort)
-        
+    
     def shut_down(self, urns=list()):
         return None
-
+    
     def get_resource_manager(self):
         return self.__resource_manager
     
     def get_config(self):
         return self.__config
-
+    
     def set_resource_manager(self, value):
         self.__resource_manager = value
-        
+    
     def set_config(self, value):
         self.__config = value
 

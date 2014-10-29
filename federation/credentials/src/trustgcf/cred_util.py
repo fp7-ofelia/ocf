@@ -67,13 +67,11 @@ class CredentialVerifier(object):
         if root_cert_fileordir is None:
             raise Exception("Missing Root certs argument")
         elif os.path.isdir(root_cert_fileordir):
-            print "DDDDDDDDDDDDDDDDDDDDDD"
             files = os.listdir(root_cert_fileordir)
-            print "-------------",files
             self.root_cert_files = []
             for file in files:
                 # FIXME: exclude files that aren't cert files?
-                print file == CredentialVerifier.CATEDCERTSFNAME
+                #print file == CredentialVerifier.CATEDCERTSFNAME
                 if file == CredentialVerifier.CATEDCERTSFNAME:
                     continue
                 self.root_cert_files.append(os.path.expanduser(os.path.join(root_cert_fileordir, file)))
@@ -162,7 +160,6 @@ class CredentialVerifier(object):
             speaksfor_urn = speaksfor_gid.get_urn()
             caller_gid = speaksfor_gid
 
-        print "------------------------------------------",CredentialFactory.getType(cred_strings[0])
 
         # Remove the abac credentials
         cred_strings = [cred_string for cred_string in cred_strings \
@@ -217,6 +214,7 @@ class CredentialVerifier(object):
         privs = credential.get_privileges()
         print privileges
         for priv in privileges:
+            
             if not privs.can_perform(priv):
                 result = False
         return result

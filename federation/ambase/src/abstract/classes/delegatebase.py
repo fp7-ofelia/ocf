@@ -22,7 +22,7 @@ class DelegateBase:
         return
 
     @abstractmethod
-    def reserve(self, slice_urn, am,expiration):
+    def reserve(self, slice_urn, reservation, expiration, users):
         """
         Allocate slivers
         """
@@ -31,7 +31,7 @@ class DelegateBase:
         return
     
     @abstractmethod    
-    def create(self, urns=list()):
+    def create(self, urns, expiration, users):
         """
         Provision slivers
         """

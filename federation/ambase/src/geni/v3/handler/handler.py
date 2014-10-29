@@ -3,12 +3,13 @@ from ambase.src.ambase.exceptions import SliceAlreadyExists
 from ambase.src.ambase.exceptions import AllocationError
 from ambase.src.ambase.exceptions import ProvisionError
 from ambase.src.ambase.exceptions import DeleteError
-from ambase.src.ambase.exceptions import ShutDown
+from ambase.src.ambase.exceptions import Shutdown
 from ambase.src.ambase.exceptions import PerformOperationalStateError
 
 import base64
 import datetime
 import dateutil.parser
+import re
 import zlib
 
 class GeniV3Handler(HandlerBase):
@@ -21,6 +22,18 @@ class GeniV3Handler(HandlerBase):
         self.__config = None
     
     def GetVersion(self, options=dict()):
+        """
+        @param    options		optional structure
+        
+        @return    xmlrpc struct        int geni_api,
+                                        struct geni_api_versions,
+                                        array geni_ad_rspec_versions,
+                                        array geni_request_rspec_versions,
+                                        array geni_credential_types
+        
+        @error ERROR                internal error
+        @error SERVERERROR          server error
+        """
         try:
             value = self.__delegate.get_version()
         except Exception as e:
@@ -28,6 +41,21 @@ class GeniV3Handler(HandlerBase):
         return self.success_result(result=value)
 
     def ListResources(self, credentials=list(), options=dict()):
+        """
+        @param    options               optional structure
+                                        - geni_available
+                                        - geni_compressed
+                                        - geni_rspec_version
+        
+        @return    xmlrpc struct        - value = xml rspec
+        
+        @error BADARGS              one of the required arguments is badly formed or missing
+        @error FORBIDDEN            credential does not grant permission to aggregate
+        @error ERROR                internal error
+        @error SERVERERROR          server error
+        @error UNAVAILABLE          unavailable (eg server in lockdown)
+        @error BADVERSION           bad Version of RSpec requested
+        """
         # Credential validation
         try:
             self.__credential_manager.validate_for("ListResources", credentials)
@@ -84,26 +112,27 @@ class GeniV3Handler(HandlerBase):
         # Crafting slivers to manifest RSpec
         output = self.__rspec_manager.compose_manifest(slivers)
         
-        if "geni_compressed" in options and options["geni_compressed"]:
+        if options.get("geni_compressed", False):
             output = base64.b64encode(zlib.compress(output))
             
-        return self.success_result(output,slivers,slivers[0].get_slice_urn())
+        return self.success_result(output, slivers, slivers[0].get_sliver().get_slice_urn())
 
     def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict()):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("Allocate", credentials)
+            creds = self.__credential_manager.validate_for("Allocate", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        
+        #expiration = self.__get_expiration()
         reservation = self.__rspec_manager.parse_request(rspec)
-        expiration = self.__get_expiration()
+        expiration = self.__credential_manager.get_slice_expiration(creds)
         # It is possible for the user to allocate a sliver with a sooner expiration time
         if "geni_end_time" in options:
-            expiration = min(self.__get_expiration(), options["geni_end_time"])
+            expiration = min(self.__get_expiration(creds), options["geni_end_time"])
+        users = self.__get_users_pubkeys(creds)
         
         try:
-            allocated_slivers = self.__delegate.reserve(slice_urn, reservation, expiration)
+            allocated_slivers = self.__delegate.reserve(slice_urn, reservation, expiration, users)
         except SliceAlreadyExists as e:
             return self.error_result(self.__geni_exception_manager.ALREADYEXISTS, e)
         except AllocationError as e:
@@ -114,15 +143,21 @@ class GeniV3Handler(HandlerBase):
         return self.success_result(manifest, allocated_slivers)
         
     def Provision(self, urns=list(), credentials=list(), options=dict()):
+        # Credential validation
         try:
-            self.__credential_manager.validate_for("Provision", credentials)
+            creds = self.__credential_manager.validate_for("Provision", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-         
-        # TODO: Implement this method
-        expiration = self.__credential_manager.get_slice_expiration(credentials)
-        #expiration = self.__get_expiration()
         
+        #expiration = self.__get_expiration()
+        expiration = self.__credential_manager.get_slice_expiration(creds)
+        if "geni_end_time" in options:
+            #XXX I know, theory says that should be the minimum, but I don't trust the credentials expiration, yet
+            expiration = max(self.__get_expiration(creds), options["geni_end_time"])
+        if not "geni_users" in options:
+            users = self.__get_users_pubkeys(creds)
+        else:
+            users = self.__format_geni_users(options["geni_users"]) 
         if not options.get("geni_rspec_version"):
             return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
         # Options validation
@@ -131,11 +166,12 @@ class GeniV3Handler(HandlerBase):
         if not required_options.issubset(option_list):
             return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
 
+        # geni_best_effort filled up when present
+        geni_best_effort = options.get("geni_best_effort", False)
         try:
-            slivers = self.__delegate.create(urns, expiration)
-            
+            slivers = self.__delegate.create(urns, expiration, users, geni_best_effort)
         except ProvisionError as e:
-            return self.error_result(self.__geni_exception_manager.ERROR, e)
+            return self.error_result(self.__geni_exception_manager.ERROR, str(e))
         
         manifest = self.__rspec_manager.compose_manifest(slivers)
         return self.success_result(manifest, slivers)
@@ -143,7 +179,7 @@ class GeniV3Handler(HandlerBase):
     def Delete(self, urns=list(), credentials=list(), options=dict()):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("Delete", credentials)
+            creds = self.__credential_manager.validate_for("Delete", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
@@ -155,21 +191,24 @@ class GeniV3Handler(HandlerBase):
         # return a list of previous slivers that have since been deleted, or may even 
         # return an error (e.g. SEARCHFAILED or `EXPIRED); details are aggregate specific.
         
+        # geni_best_effort filled up when present
+        geni_best_effort = options.get("geni_best_effort", False)
         try:
-            result = self.__delegate.delete(urns)
+            result = self.__delegate.delete(urns, geni_best_effort)
         # Return error codes depending on given exception
         except DeleteError as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
-        except ShutDown as e:
-            return self.error_result(self.__geni_exception_manager.UNAVAILABLE, e)
         
         return self.delete_success_result(result)
     
     def PerformOperationalAction(self, urns=list(), credentials=list(), action=None, options=dict()):
+        # Credential validation
         try:
-            self.__credential_manager.validate_for("PerformOperationalAction", credentials)
+            creds = self.__credential_manager.validate_for("PerformOperationalAction", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
+        
+        #expiration = self.__credential_manager.get_slice_expiration(creds)
         
         actions = ["geni_start", "geni_restart", "geni_stop"]
         if action not in actions:
@@ -187,33 +226,38 @@ class GeniV3Handler(HandlerBase):
         return self.success_result(slivers_direct=result)
      
     def Status(self, urns=list(), credentials=list(), options=dict()):
+        # Credential validation
         try:
-            self.__credential_manager.validate_for("Status", credentials)
+            creds = self.__credential_manager.validate_for("Status", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
+        
+        #expiration = self.__credential_manager.get_slice_expiration(creds)
+        
         try:
             result = self.__delegate.status(urns)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
-                    
+        
+        # FIXME list index out of range
         return self.success_result(slivers=result, slice_urn=result[0].get_slice_urn())
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
+        # Credential validation
         try:
-            self.__credential_manager.validate_for("Renew", credentials)
+            creds = self.__credential_manager.validate_for("Renew", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        # TODO: Retrieve slice expiration correctly
+        expiration = self.__credential_manager.get_slice_expiration(creds)
         try:
-            # TODO: Implement this method
-            expiration = self.__rfc3339_to_datetime(self.__credential_manager.get_slice_expiration(credentials))
+            expiration = self.__rfc3339_to_datetime(expiration)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.SEARCHFAILED, e)
         # Format dates to expected output
         try:
             expiration_time = self.__rfc3339_to_datetime(expiration_time)
-        except:
-            pass
+        except Exception as e:
+            return self.error_result(self.__geni_exception_manager.ERROR, e)
         now = datetime.datetime.utcnow()
         # NOTE: Possibly existing on GCF, but not on GENIv3 API. Using it here, though
         if "geni_extend_alap" in options and options["geni_extend_alap"]:
@@ -233,15 +277,12 @@ class GeniV3Handler(HandlerBase):
         # When requested expiration time is less than the slice expiration and a valid expiration date, serve
         else:
             # Check options and perform call to delegate
-            if "geni_best_effort" in options:
-                geni_best_effort = options.get("geni_best_effort")
-            else:
-                geni_best_effort = False # Default is false
+            geni_best_effort = options.get("geni_best_effort", False)
             result = self.__delegate.renew(urns, expiration, geni_best_effort)
         return self.success_result(slivers_direct=result)
     
-    def ShutDown(self, urns=list(), credentials=list(), options=list()):
-        return self.error_result(self.__geni_exception_manager.FORBIDDEN, "ShutDown Method is only available for the AM administrators")
+    def Shutdown(self, slice_urn="", credentials=list(), options=dict()):
+        return self.error_result(self.__geni_exception_manager.FORBIDDEN, "Shutdown method is only available for the AM administrators")
     
     def __get_max_expiration(self):
         #six_months = datetime.timedelta(weeks = 6 * 4) #6 months
@@ -249,9 +290,9 @@ class GeniV3Handler(HandlerBase):
         return one_hour
     
     # Helper methods
-    def __get_expiration(self):
+    def __get_expiration(self, creds):
         now = datetime.datetime.utcnow()
-        expires = self.__credential_manager.get_expiration_list()
+        expires = self.__credential_manager.get_expiration_list(creds)
         # max_duration is a datetime.timedelta object
         max_duration = self.__get_max_expiration()
         if max_duration:
@@ -275,7 +316,10 @@ class GeniV3Handler(HandlerBase):
         Returns a datetime object from an input string formatted according to RFC3339.
         """
         try:
-            formatted_date = datetime.datetime.strptime(date[:-1].replace("T"," "), "%Y-%m-%d %H:%M:%S")
+            # Removes everything after a "+" or a "."
+            date_form = re.sub(r'[\+|\.].+', "", date)
+            formatted_date = datetime.datetime.strptime(date_form.replace("T"," "), "%Y-%m-%d %H:%M:%S")
+            #formatted_date = datetime.datetime.strptime(date[:-1].replace("T"," "), "%Y-%m-%d %H:%M:%S")
         except:
             formatted_date = date
         return formatted_date
@@ -284,9 +328,11 @@ class GeniV3Handler(HandlerBase):
         value = list()
         for sliver in slivers:
             sliver_struct = dict()
-            sliver_struct["geni_sliver_urn"] = sliver.get_urn()
-            sliver_struct["geni_allocation_status"] =  sliver.get_allocation_status()
-            sliver_struct["geni_expires"] = sliver.get_expiration()
+            sliver_struct["geni_sliver_urn"] = sliver.get_sliver().get_urn()
+            sliver_struct["geni_allocation_status"] =  sliver.get_sliver().get_allocation_status()
+            sliver_struct["geni_expires"] = sliver.get_sliver().get_expiration()
+            if sliver.get_error_message:
+                sliver_struct["geni_error"] = sliver.get_error_message()
             value.append(sliver_struct)
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
@@ -338,6 +384,7 @@ class GeniV3Handler(HandlerBase):
         # Non-zero geni_code implies error: output is required, value is optional
         if geni_code:
             result["output"] = output
+            result["value"] = ""
             if value:
                 result["value"] = value
         # Zero geni_code implies success: value is required, output is optional
@@ -350,10 +397,31 @@ class GeniV3Handler(HandlerBase):
         sliver_struct = dict()
         sliver_struct["geni_sliver_urn"] = sliver.get_urn()
         sliver_struct["geni_allocation_status"] =  sliver.get_allocation_status()
-        sliver_struct["geni_expires"] = sliver.get_expiration()
+        sliver_struct["geni_expires"] = self.__datetime_to_rfc3339(sliver.get_expiration())
         sliver_struct["geni_operational_status"] = sliver.get_operational_status()
+        if resource.get_error_message():
+            sliver_struct["geni_error"] = resource.get_error_message()
         return sliver_struct
-        
+
+    def __get_users_pubkeys(self, creds):
+        users = list()
+        for cred in creds:
+            user = dict()
+            user_gid = cred.get_gid_caller()
+            user['name'] = user_gid.get_urn()
+            user['keys'] = user_gid.get_pubkey().get_pubkey_string()
+            if not type(user['keys']) == list:
+                user['keys'] = [user['keys']]
+            users.append(user)
+        return users
+
+    def __format_geni_users(self, geni_users):
+        users = list()
+        for user in geni_users:
+            name = user['urn']
+            users.append({'name':name, 'keys':user['keys']})
+        return user
+ 
     def get_delegate(self):
         return self.__delegate
     

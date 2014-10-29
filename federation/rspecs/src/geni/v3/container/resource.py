@@ -13,6 +13,7 @@ class Resource:
         self.__available = None
         self.__exclusive = None
         self.__type = None
+        self.__error_message = None
     
     def get_id(self):
         return self.__id
@@ -50,6 +51,9 @@ class Resource:
     def get_type(self):
         return self.__type
 
+    def get_error_message(self):
+        return self.__error_message
+
     def set_id(self, value):
         self.__id = value
 
@@ -85,6 +89,9 @@ class Resource:
         
     def set_type(self, value):
         self.__type = value
+
+    def set_error_message(self, value):
+        self.__error_mesage = value
         
 #    def add_sliver(self, value):
 #        if not type(self.__slivers) == list:

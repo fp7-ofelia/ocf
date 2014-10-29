@@ -74,10 +74,10 @@ class CrafterManager:
             sliver = resource.get_sliver() 
             result += self.manifest_template() % (sliver.get_client_id(), resource.get_component_id(), resource.get_component_manager_id(), sliver.get_urn())
             if sliver.get_type():
-                result += self.manifest_sliver_type_template() %(resource.get_id)
+                result += self.manifest_sliver_type_template() % (resource.get_id())
             if sliver.get_services():
                 services = sliver.get_services()
-                result += self.manifest_services_template() %(services["login"]["hostname"], services["login"]["username"])
+                result += self.manifest_services_template() % (services["login"]["hostname"], services["login"]["username"])
             result += self.manifest_node_close_template()
         result += self.manifest_footer()
         return result
