@@ -9,7 +9,8 @@ class TestCredentials(unittest.TestCase):
         self.credential_manager = CredentialManager()
 
     def test_should_check_correct_credential(self):
-        print self.credential_manager.validate_for([self.cred], "ListResources")
-        
+        print self.cred
+        self.credential_manager.validate_for([self.cred],"ListResources")
+    
 if __name__ == "__main__":
     unittest.main()

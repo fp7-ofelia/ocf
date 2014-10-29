@@ -2,7 +2,7 @@ import credparsing as credutils
 import os.path
 import re
 import xmlrpclib
-from settings.src.settings import MY_ROOTS_DIR
+from settings.src.settings import Settings 
 
 
 def api_call(method_name, endpoint, params=[], user_name='alice', verbose=False):
@@ -31,7 +31,7 @@ class SafeTransportWithCert(xmlrpclib.SafeTransport):
 
 def ssl_call(method_name, params, endpoint, key_path='alice-key.pem', cert_path='alice-cert.pem', host='127.0.0.1', port=8440):
     #creds_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../..', 'cert'))
-    creds_path = MY_ROOTS_DIR
+    creds_path = Settings.MY_ROOTS_DIR
     if not os.path.isabs(key_path):
         key_path = os.path.join(creds_path, key_path)
     if not os.path.isabs(cert_path):
@@ -84,7 +84,7 @@ def getusercred(user_cert_filename = "alice-cert.pem", geni_api = 3):
         omni.py -o -p mystuff getusercred
 """
     #creds_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../..', 'cert'))
-    creds_path = MY_ROOTS_DIR
+    creds_path = Settings.MY_ROOTS_DIR
     cert_path = os.path.join(creds_path, user_cert_filename)
     user_cert = open(cert_path, "r").read()
     # Contacting GCH for it by passing the certificate
@@ -104,7 +104,7 @@ def getusercred(user_cert_filename = "alice-cert.pem", geni_api = 3):
 
 def get_creds_file_contents(filename):
     #creds_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '../..', 'creds'))
-    creds_path = MY_ROOTS_DIR
+    creds_path = Settings.MY_ROOTS_DIR
     if not os.path.isabs(filename):
         filename = os.path.join(creds_path, filename)
     filename = os.path.abspath(os.path.expanduser(filename))

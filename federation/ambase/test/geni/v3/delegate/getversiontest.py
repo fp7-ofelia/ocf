@@ -11,6 +11,7 @@ class TestGetVersion(unittest.TestCase):
         self.delegate = GeniV3Delegate()
         self.delegate.set_config(config)
         self.version = self.delegate.get_version()
+        print self.version
 
     def test_should_return_success_result(self):
         self.assertEquals(dict, type(self.version))

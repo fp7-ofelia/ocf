@@ -30,6 +30,8 @@ JK9yxZ7Nytw=
     def test_should_check_correct_credential(self):
         creds = self.credential_verifier.verify_from_strings(self.own_gid_string, [self.cred], None,["listnodes"], {})
         print creds
-        print creds[0].expiration
+       # print creds[0].expiration
+        print creds[0].get_gid_caller().get_hrn()
+        print creds[0].get_gid_caller().get_pubkey().get_pubkey_string()
         
         

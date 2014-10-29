@@ -23,7 +23,7 @@ class GCFCredentialManager(CredentialManagerBase):
         
     def set_config(self, value):
         self.__config = value
-        root_cert = open(self.__config.ROOT_CERT_LOCATION, 'r').read()
+        root_cert = open(self.__config.ROOT_CERT, 'r').read()
         self.__root_cert = root_cert
         self.__auth = CredentialVerifier(self.__config.TRUSTED_ROOTS_DIR)
         
