@@ -9,7 +9,7 @@ class Sliver:
         self.__expiration = None
         self.__resource = None
         self.__type = None
-        self.__services = dict()
+        self.__services = list()
         self.__client_id = None
 
     def get_urn(self):
