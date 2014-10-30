@@ -3,12 +3,14 @@ from rspecs.src.geni.v3.container.resource import Resource
 class Link(Resource):
     
     def __init__(self):
+        Resource.__init__(self)
         self.__source_id = None
         self.__dest_id = None
         self.__type = None
         #TODO add fancy fields
         self.__capacity = None
         self.__latency = None
+        
 
     def get_source_id(self):
         return self.__source_id

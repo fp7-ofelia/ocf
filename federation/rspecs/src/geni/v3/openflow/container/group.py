@@ -3,6 +3,7 @@ from rspecs.src.geni.v3.container.resource import Resource
 class Group(Resource):
     
     def __init__(self):
+        Resource.__init__(self)
         self.__name = None
         self.__dpids = list()
         self.__matches = list()

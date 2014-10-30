@@ -3,6 +3,7 @@ from rspecs.src.geni.v3.container.resource import Resource
 class Match(Resource):
     
     def __init__(self):
+        Resource.__init__(self)
         self.__group = None
         self.__dl_src = list()
         self.__dl_dst = list()

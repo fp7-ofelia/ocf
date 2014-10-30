@@ -3,6 +3,7 @@ from rspecs.src.geni.v3.container.resource import Resource
 class Link(Resource):
     
     def __init__(self):
+        Resource.__init__(self)
         self.__src_dpid = None
         self.__src_port = None
         self.__dst_dpid = None

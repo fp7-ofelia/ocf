@@ -3,6 +3,7 @@ from rspecs.src.geni.v3.container.resource import Resource
 class Controller(Resource):
     
     def __init__(self):
+        Resource.__init__(self)
         self.__uri = None
         self.__port = None
         self.__type = None
