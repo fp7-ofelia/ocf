@@ -14,7 +14,8 @@ class CrafterManager:
         Return advertisement with information of resources.
         """
         output = self.advert_header()
-        for resource in resources:
+        for resource in resources: 
+            print "-------------------------------",output
             output += self.advert_resource(resource)
         output += self.advert_footer()
         return output    
@@ -34,10 +35,13 @@ class CrafterManager:
         return tmpl
     
     def advert_resource(self,resource):
-        if isinstance(resource, Link):
+        resource_dir = dir(resource)
+        if resource_dir == dir(Link()):
             return self.advert_link(resource)
-        elif isinstance(resource, Resource):
+        elif resource_dir == dir(Resource()):
             return self.advert_node(resource)
+        else:
+            return ""
         
         
     def advert_node(self, resource):
