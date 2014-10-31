@@ -11,6 +11,7 @@ In the beginning phase, only the user's public keys are loaded into the target V
 #import argparse
 #import pexpect
 import paramiko
+from Crypto import Random
 
 
 class VMContextualize(object):
@@ -35,6 +36,8 @@ class VMContextualize(object):
         #child.expect("password:")
         #child.sendline(self.vm_user_password)
         #return child.interact()
+        # Hack: randomize before paramiko runs to avoid a bug when launching this with multiprocessing
+        Random.atfork()
         self.ssh_client = paramiko.SSHClient()
         self.ssh_client.load_system_host_keys()
         self.ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -74,24 +77,3 @@ class VMContextualize(object):
         # Use commands separated by newline to enable multiple commands being issued at a time
         command = "\n".join(commands)
         return self.contextualize(command)
-
-#if __name__ == "__main__":
-    # With arguments
-#    parser = argparse.ArgumentParser(description="Run ssh through pexpect")
-#    parser.add_argument("--address", metavar="a", type=str, required=True,
-#        help="Address of the VM")
-#    parser.add_argument("--user", metavar="u", type=str, required=True,
-#        help="User of the VM")
-#    parser.add_argument("--password", metavar="p", type=str, required=True,
-#        help="Password for the user of the VM")
-#    args = parser.parse_args()
-#    # Or using kwargs
-#    params = {
-#                "vm_adress": args.address,
-#                "vm_user": args.user,
-#                "vm_password": args.password,
-#            }
-#    vm_context = VMContextualize(**params)
-#    key_user = "unix_user"
-#    key_contents = "public_key contents"
-#    vm_context.contextualize_add_pub_key(key_user, key_contents)
