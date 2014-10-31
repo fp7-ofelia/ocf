@@ -81,17 +81,19 @@ class GeniV3Delegate(DelegateBase):
         except Exception as e:
             raise DeleteError(str(e))
     
-    #def perform_operational_action(self, urns=list(), action=None, geni_besteffort=True):
-    # XXX Default geni_best_effort = False
-    def perform_operational_action(self, urns=list(), action=None, geni_best_effort=False):
+    def perform_operational_action(self, urns=list(), action=None, geni_best_effort=False, options=dict()):
         try:
-            if action == 'geni_start':
+            if action == "geni_start":
                 return self.__resource_manager.start_resources(urns, geni_best_effort)
-            elif action == 'geni_stop':
+            elif action == "geni_stop":
                 return self.__resource_manager.stop_resources(urns, geni_best_effort)
-            elif action == 'geni_restart':
+            elif action == "geni_restart":
                 return  self.__resource_manager.reboot_resources(urns, geni_best_effort)
-            raise PerformOperationalStateError("Unknown Operational Action %s" %str(action))
+            elif action == "geni_update_users":
+                return  self.__resource_manager.update_resources_users(urns, geni_best_effort, options)
+            elif action == "geni_console_url":
+                return  self.__resource_manager.retrieve_resources_url(urns, geni_best_effort)
+            raise PerformOperationalStateError("Unknown Operational Action %s" % str(action))
         except Exception as e:
             raise PerformOperationalStateError("PerformOperationalError Failed for action %s. Error was: %s " % (action, str(e)))
     
