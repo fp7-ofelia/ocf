@@ -176,7 +176,12 @@ class GeniV3Handler(HandlerBase):
         try:
             slivers = self.__delegate.create(urns, expiration, users, geni_best_effort)
         except ProvisionError as e:
-            return self.error_result(self.__geni_exception_manager.ERROR, str(e))
+            if "NO ALLOCATION FOUND" in str(e).upper():
+                return self.error_result(self.__geni_exception_manager.SEARCHFAILED, str(e))
+            elif "RE-PROVISIONING" in str(e).upper():
+                return self.error_result(self.__geni_exception_manager.EXPIRED, str(e))
+            else:
+                return self.error_result(self.__geni_exception_manager.ERROR, str(e))
         
         manifest = self.__rspec_manager.compose_manifest(slivers)
         return self.success_result(manifest, slivers)
@@ -227,9 +232,9 @@ class GeniV3Handler(HandlerBase):
         try:
             result = self.__delegate.perform_operational_action(urns, action, best_effort, options) 
         except PerformOperationalStateError as e:
-            if "BUSY" in e.message:
+            if "BUSY" in str(e).upper():
                 return self.error_result(self.__geni_exception_manager.BUSY, e)
-            elif "REFUSED" in e.message:
+            elif "REFUSED" in str(e).upper():
                 return self.error_result(self.__geni_exception_manager.REFUSED, e)
             else:
                 return self.error_result(self.__geni_exception_manager.BADARGS, e)
