@@ -90,16 +90,30 @@ class VTAMDriver:
         # NOTE that "geni_best_effort" is False by default. This is not how it is intended to work
         vm_params  = self.__urn_to_vm_params(urn)
         reservations = Reservation.objects.filter(**vm_params)
+        # Provisioning a VM must be made after an Allocate. Allocate:Provisioning follow 1:1 ratio
         if not reservations:
-            raise Exception("No Reservations Found")
+            # Be cautious when changing the messages, as handler depends on those
+            raise Exception("No allocation found")
+        
+        # Retrieve only the reservations that are provisioned
+        reservations = Reservation.objects.filter(**vm_params).filter(is_provisioned=False)
+        
+        if not reservations:
+            # Be cautious when changing the messages, as handler depends on those
+            raise Exception("Re-provisioning not possible. Try allocating first")
+        
         slivers_to_manifest = list()
+        
         for r in reservations:
             try:
-                provisioningRSpec = self.get_action_instance(r)
+                provisioning_rspec = self.get_action_instance(r)
                 with self.__mutex_thread:
-                    SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning,provisioningRSpec,self.__agent_callback_url)
+                    SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning,provisioning_rspec,self.__agent_callback_url)
                 vms = VirtualMachine.objects.filter(**vm_params)
                 self.__store_user_keys(users, vms)
+                # When reservation (allocation) is fulfilled, mark appropriately
+                r.set_provisioned(True)
+                r.save()
             except Exception as e:
                 if geni_best_effort:
                     manifested_resource = self.__convert_to_resources_with_slivers(r.server,vms,expiration)
