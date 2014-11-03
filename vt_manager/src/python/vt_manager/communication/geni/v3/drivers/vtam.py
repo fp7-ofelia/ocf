@@ -50,7 +50,7 @@ class VTAMDriver:
        self.GENI_FAILED = "geni_failed"
        self.GENI_PENDING_TO_ALLOCATE = "geni_pending_allocation"
        self.GENI_UPDATING_USERS = "geni_updating_users"
-
+       
        self.__config = None
 
     def get_specific_server_and_vms(self, urn, geni_available=True):
@@ -78,6 +78,12 @@ class VTAMDriver:
             else:
                 continue
         return resources        
+
+    def __validate_precondition_states(self, vm, method_name=""):
+        method_name += " action"
+        # Methods that alter VirtualMachine should not operate on VMs in a transient state ("..." on it)
+        if "..." in self.__translate_to_operational_state(vm):
+            raise Exception("REFUSED to perform %s on sliver in a transient state" % str(method_name))
     
     def create_vms(self, urn, expiration=None, users=list(), geni_best_effort=True):
         #TODO: Manage Exceptions,
@@ -112,7 +118,6 @@ class VTAMDriver:
             else:
                 slivers_to_manifest.append(manifested_resource)
         self.__add_expiration(expiration, reservations[0].projectName, reservations[0].sliceName)
-        self.__store_user_keys(users, vms)
         return slivers_to_manifest       
     
     def reserve_vms(self, slice_urn, reservation, expiration=None, users=list()):
@@ -221,6 +226,8 @@ class VTAMDriver:
         for server in servers:
             vms = server.getChildObject().getVMs(**params)
             for vm in vms:
+                # Return "REFUSED" exception if sliver is in a transient state
+                self.__validate_precondition_states(vm, action)
                 # Return "BUSY" exception if sliver is in incorrect operational state
                 if self.__translate_to_operational_state(vm) == self.GENI_UPDATING_USERS:
                     raise Exception("BUSY sliver in state '%s'" % self.GENI_UPDATING_USERS)
@@ -234,9 +241,10 @@ class VTAMDriver:
                 except Exception as e:
                     try:
                         if self.get_geni_best_effort_mode():
-                            resource = self.__convert_to_resources_with_slivers(server, [vm])
+                            resource = self.__convert_to_resources_with_slivers(server, [vm])[0]
                             resource.set_error_message(str(e))
-                            resources.extend(resource)
+                            #resources.extend(resource)
+                            resources.append(resource)
                             continue
                         else:
                             raise e
@@ -312,6 +320,9 @@ class VTAMDriver:
         return hrn_to_urn(self.__config.CM_HRN + "." + str(server_name) + "." + str(name),"interface")
 
     def __convert_to_resources_with_slivers(self, server, vms, expiration=None):
+        """
+        Always return a list of slivers, independently of the number of resources inside.
+        """
         resource = self.__convert_to_resource(server)
         resources = list()
         for vm in vms:
@@ -478,17 +489,20 @@ class VTAMDriver:
     
     def __translate_to_operational_state(self, vm):
         # TODO Extend
+        """
+        Defines mapping between OFELIA and GENI states
+        """
         if isinstance(vm, Reservation):
             return self.GENI_NOT_READY
         else:
             if "running" in vm.state:
                 return self.GENI_READY
+            elif "contextualizing..." in vm.state:
+                return self.GENI_UPDATING_USERS
             elif "ing..." in vm.state:
                 return self.GENI_CONFIGURING 
             elif "failed" in vm.state:
                 return self.GENI_FAILED
-            elif vm.state == self.GENI_UPDATING_USERS:
-                return self.GENI_UPDATING_USERS
             else:
                 return self.GENI_NOT_READY
     
@@ -525,40 +539,132 @@ class VTAMDriver:
         """
         geni_update_users: The credentials[] argument must include credentials over the slice as usual. The options struct must include the geni_users option as specified in AM API v3 and with the semantics described above. This action is only legal on slivers in the geni_ready operational state. This action immediately moves all such slivers to a new geni_updating_users operational state. Slivers stays in that state until the aggregate completes the needed changes, at which time the slivers change back to the geni_ready operational state. Slivers may be in the geni_updating_users state for several minutes; during this time no other operational actions can be taken on the slivers.
         """
-        
+        self.set_geni_best_effort_mode(geni_best_effort)
         vms = list()
         resources = list()
         for urn in urns:
             params = self.__urn_to_vm_params(urn)
             servers = VTServer.objects.all()
-            vm_server_pairs = list()
             resources = list()
             for server in servers:
                 vms = server.getChildObject().getVMs(**params)
-        if self.__store_user_keys(geni_users, vms):
+        
+        # Check preconditions (VMs must be in allowed state prior to update the keys)
+        # If not on "best effort" mode, honor or revoke all requests
+        if not self.get_geni_best_effort_mode():
             for vm in vms:
+                # Return "REFUSED" exception if sliver is in a transient state
+                self.__validate_precondition_states(vm, "PerformOperationalAction")
+                # Only acts on slivers with state "geni_ready"
+                if self.__translate_to_operational_state(vm) != self.GENI_READY:
+                    raise Exception("REFUSED to perform OperationalAction on sliver not ready (maybe stopped or configuring)")
+        
+        # Store user's SSH keys
+        self.__store_user_keys(geni_users, vms)
+        for vm in vms:
+            try:
+                # Return "REFUSED" exception if sliver is in a transient state
+                self.__validate_precondition_states(vm, "PerformOperationalAction")
                 # Only acts on slivers with state "geni_ready"
                 if self.__translate_to_operational_state(vm) != self.GENI_READY:
                     raise Exception("REFUSED to perform OperationalAction on sliver not ready (maybe stopped or configuring)")
                 else: 
-                    # Store keys and contextualize afterwards
+                    # Contextualize independently of the SSH keys stored this time
+                    # Note that user might lose access to VM at some point after creation
                     ip = self.__get_ip_from_vm(vm)
                     vm_dict = self.__vm_to_ssh_keys_params_list(vm, geni_users)
-                    self.__contextualize_vm(vm, ip)
                     # If no error was found, change operational status to "geni_updating_users"
                     try:
                         # NOTE that this is somewhat insecure
-                        vm.state = self.GENI_UPDATING_USERS
+                        vm.state = "contextualizing..." # New state for states similar to self.GENI_UPDATING_USERS
+                        vm.save()
                     except:
                         pass
+                    self.__contextualize_vm(vm, ip)
                 # Create resources with proper format
                 servers = VTServer.objects.all()
                 for server in servers:
+                    # The server for the VM has been just found
                     vms = server.getChildObject().getVMs(**params)
                     if vms:
-                        # The server for the VM has been just found
+                        # Create resources with proper format
                         resource = self.__convert_to_resources_with_slivers(server, [vm])
                         resources.extend(resource)
+            except Exception as e:
+                try:
+                    if self.get_geni_best_effort_mode():
+                        # Create resources with proper format
+                        resource = self.__convert_to_resources_with_slivers(server, [vm])[0]
+                        resource.set_error_message(str(e))
+                        resources.append(resource)
+                        continue
+                    else:
+                        raise e
+                except Exception as e:
+                    raise e
+            # If no error was found, change operational status back to "geni_ready"
+            # (after information of slivers is sent to client)
+            try:
+                # NOTE that this is somewhat insecure
+                vm.state = "running" # New state for states similar to self.GENI_READY
+                vm.save()
+            except:
+                pass
+        return resources
+    
+    def cancel_update_keys(self, urns, geni_best_effort=False):
+        self.set_geni_best_effort_mode(geni_best_effort)
+        vms = list()
+        resources = list()
+        servers = VTServer.objects.all()
+        
+        if not self.get_geni_best_effort_mode():
+            for urn in urns:
+                params = self.__urn_to_vm_params(urn)
+                for server in servers:
+                    vms = server.getChildObject().getVMs(**params)
+                    # Check preconditions (VMs must be in allowed state prior to update the keys)
+                    # If not on "best effort" mode, honor or revoke all requests
+                    for vm in vms:
+                        # NOTE that this method acts on transient states, as it is its aim to revert some of them
+                        # Only acts on slivers with state "geni_updating_users"
+                        if self.__translate_to_operational_state(vm) != self.GENI_UPDATING_USERS:
+                            raise Exception("REFUSED to perform OperationalAction on sliver that had not updated users")
+        
+        for urn in urns:
+            params = self.__urn_to_vm_params(urn)
+            resources = list()
+            for server in servers:
+                # The server for the VM has been just found
+                vms = server.getChildObject().getVMs(**params)
+                for vm in vms:
+                    try:
+                        # Only acts on slivers with state "geni_updating_users"
+                        if self.__translate_to_operational_state(vm) != self.GENI_UPDATING_USERS:
+                            raise Exception("REFUSED to perform OperationalAction on sliver that had not updated users")
+                        else:
+                            # If no error was found, change operational status to "geni_ready"
+                            try:
+                                # NOTE that this is somewhat insecure
+                                vm.state = "running" # State equivalent to self.GENI_READY
+                                vm.save()
+                            except:
+                                pass
+                    except Exception as e:
+                        try:
+                            if self.get_geni_best_effort_mode():
+                                # Create resources with proper format
+                                resource = self.__convert_to_resources_with_slivers(server, [vm])[0]
+                                resource.set_error_message(str(e))
+                                resources.append(resource)
+                                continue
+                            else:
+                                raise e
+                        except Exception as e:
+                            raise e
+                    # Create resources with proper format
+                    resource = self.__convert_to_resources_with_slivers(server, [vm])
+                    resources.extend(resource)
         return resources
     
     def __contextualize_vm(self, vm, ip):
@@ -573,6 +679,7 @@ class VTAMDriver:
         try:
             for vm_key in vm_keys:
                 with self.__mutex_process:
+                    # FIXME Sometimes do not work properly and keys are not getting to the VM
                     ServiceProcess.startMethodInNewProcess(vm_context.contextualize_add_pub_key, 
                                     [vm_key.get_user_name(), vm_key.get_ssh_key()], self.__agent_callback_url)
         except Exception as e:
@@ -586,7 +693,7 @@ class VTAMDriver:
                 }
         if not users:
             params_list.append(params)
-        
+       
         for user in users:
             # Reuse "params" structure by operating on a new structure
             params_user = copy.deepcopy(params)

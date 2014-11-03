@@ -17,9 +17,6 @@ class ProvisioningResponseDispatcher():
 	Handles the Agent responses when action status changes
 	'''
         
-        GENI_READY = "geni_ready"
-        GENI_UPDATING_USERS = "geni_updating_users"
-        
 	@staticmethod
 	def processResponse(rspec):
 		logging.debug("PROCESSING RESPONSE processResponse() STARTED...")
@@ -75,10 +72,6 @@ class ProvisioningResponseDispatcher():
                                         logging.debug("Sending response to plug-in in sendAsync")
                                         if str(vm.callBackURL) == 'SFA.OCF.VTM':
                                                 logging.debug("callback: %s" % vm.callBackURL)
-                                                
-                                                # Change GENI_UPDATING_USERS operational status to GENI_READY
-                                                if vm.getState() == ProvisioningResponseDispatcher.GENI_UPDATING_USERS:
-                                                    vm.setState(ProvisioningResponseDispatcher.GENI_READY)
                                                 # Start VM just after creating sliver/VM
                                                 if created and was_creating:
                                                     from vt_manager.communication.sfa.drivers.VTSfaDriver import VTSfaDriver

@@ -36,16 +36,12 @@
 	            <td> <span title = "uuid: {{vmSlices|dictKeyLookup:vm.sliceName}}">{{vm.sliceName }}</span></td>
 	            <td id = td_vm{{vm.id}}> {{vm.state }}</td>
 	            <td id = td_vm_actions{{vm.id}}>
-					<center><div>
-					{% if vm.state == "running" %}
+			<center><div>
+		    {% if vm.state == "running" %}
                         <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'stop')">Stop</a> |
                         <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'reboot')">Reboot</a>
                     {% endif %}
-                    {% if  vm.state == "created (stopped)"%}
-                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
-                        <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
-                    {% endif %}
-                    {% if vm.state == "stopped"%}
+                    {% if vm.state == "created (stopped)" or vm.state == "stopped" %}
                         <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'start')">Start</a> |
                         <a href="JavaScript:void(0)" onclick="handleVMaction({{server.id}},{{vm.id}},'delete')">Delete</a>
                     {% endif %}
