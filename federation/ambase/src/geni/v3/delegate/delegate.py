@@ -91,6 +91,8 @@ class GeniV3Delegate(DelegateBase):
                 return  self.__resource_manager.reboot_resources(urns, geni_best_effort)
             elif action == "geni_update_users":
                 return  self.__resource_manager.update_resources_users(urns, geni_best_effort, options)
+            elif action == "geni_updating_users_cancel":
+                return  self.__resource_manager.cancel_update_resources_users(urns, geni_best_effort)
             elif action == "geni_console_url":
                 return  self.__resource_manager.retrieve_resources_url(urns, geni_best_effort)
             raise PerformOperationalStateError("Unknown Operational Action %s" % str(action))

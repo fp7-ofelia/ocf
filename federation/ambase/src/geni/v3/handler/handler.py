@@ -213,7 +213,8 @@ class GeniV3Handler(HandlerBase):
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
 
-        actions = ["geni_start", "geni_restart", "geni_stop", "geni_update_users", "geni_console_url"]
+        actions = ["geni_start", "geni_restart", "geni_stop", "geni_update_users",
+                        "geni_updating_users_cancel", "geni_console_url"]
         # TODO Add geni_updating_users_cancel
         if action not in actions:
             return self.error_result(self.__geni_exception_manager.UNSUPPORTED, "Unsupported Action")
@@ -226,9 +227,9 @@ class GeniV3Handler(HandlerBase):
         try:
             result = self.__delegate.perform_operational_action(urns, action, best_effort, options) 
         except PerformOperationalStateError as e:
-            if "BUSY" in e:
+            if "BUSY" in e.message:
                 return self.error_result(self.__geni_exception_manager.BUSY, e)
-            elif "REFUSED" in e:
+            elif "REFUSED" in e.message:
                 return self.error_result(self.__geni_exception_manager.REFUSED, e)
             else:
                 return self.error_result(self.__geni_exception_manager.BADARGS, e)
@@ -388,7 +389,7 @@ class GeniV3Handler(HandlerBase):
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def error_result(self, code, output):
-        return self.build_property_list(code, output=output)
+        return self.build_property_list(code, output=str(output))
     
     def build_property_list(self, geni_code, value=None, output=None):
         result = {}
