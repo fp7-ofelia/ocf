@@ -114,8 +114,13 @@ class GeniV3Handler(HandlerBase):
         
         if options.get("geni_compressed", False):
             output = base64.b64encode(zlib.compress(output))
-            
-        return self.success_result(output, slivers, slivers[0].get_sliver().get_slice_urn())
+
+        if slivers:
+            slice_urn = slivers[0].get_sliver().get_slice_urn()
+        else:
+            slice_urn = urns[0]
+
+        return self.success_result(output, slivers, slice_urn)
 
     def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict()):
         # Credential validation
@@ -171,7 +176,12 @@ class GeniV3Handler(HandlerBase):
         try:
             slivers = self.__delegate.create(urns, expiration, users, geni_best_effort)
         except ProvisionError as e:
-            return self.error_result(self.__geni_exception_manager.ERROR, str(e))
+            if "NO ALLOCATION FOUND" in str(e).upper():
+                return self.error_result(self.__geni_exception_manager.SEARCHFAILED, str(e))
+            elif "RE-PROVISIONING" in str(e).upper():
+                return self.error_result(self.__geni_exception_manager.EXPIRED, str(e))
+            else:
+                return self.error_result(self.__geni_exception_manager.ERROR, str(e))
         
         manifest = self.__rspec_manager.compose_manifest(slivers)
         return self.success_result(manifest, slivers)
@@ -207,22 +217,32 @@ class GeniV3Handler(HandlerBase):
             creds = self.__credential_manager.validate_for("PerformOperationalAction", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        
-        #expiration = self.__credential_manager.get_slice_expiration(creds)
-        
-        actions = ["geni_start", "geni_restart", "geni_stop"]
+
+        actions = ["geni_start", "geni_restart", "geni_stop", "geni_update_users",
+                        "geni_updating_users_cancel", "geni_console_url"]
+        # TODO Add geni_updating_users_cancel
         if action not in actions:
             return self.error_result(self.__geni_exception_manager.UNSUPPORTED, "Unsupported Action")
-        
+
         if options.get("geni_best_effort"):
             best_effort = True
         else:
             best_effort = False
         
         try:
-            result = self.__delegate.perform_operational_action(urns, action, best_effort)
+            result = self.__delegate.perform_operational_action(urns, action, best_effort, options) 
         except PerformOperationalStateError as e:
-            return self.error_result(self.__geni_exception_manager.BADARGS, e)
+            if "BUSY" in str(e).upper():
+                return self.error_result(self.__geni_exception_manager.BUSY, e)
+            elif "REFUSED" in str(e).upper():
+                return self.error_result(self.__geni_exception_manager.REFUSED, e)
+            else:
+                return self.error_result(self.__geni_exception_manager.BADARGS, e)
+        
+        # Format undefined for this option, since it is "not fully implemented"        
+        if action == "geni_console_url":
+            return result
+        
         return self.success_result(slivers_direct=result)
      
     def Status(self, urns=list(), credentials=list(), options=dict()):
@@ -239,8 +259,11 @@ class GeniV3Handler(HandlerBase):
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
         
-        # FIXME list index out of range
-        return self.success_result(slivers=result, slice_urn=result[0].get_slice_urn())
+        if result:
+            slice_urn = result[0].get_sliver().get_slice_urn()
+        else:
+            slice_urn = urns[0]
+        return self.success_result(slivers=result, slice_urn=slice_urn)
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
         # Credential validation
@@ -331,12 +354,13 @@ class GeniV3Handler(HandlerBase):
             sliver_struct["geni_sliver_urn"] = sliver.get_sliver().get_urn()
             sliver_struct["geni_allocation_status"] =  sliver.get_sliver().get_allocation_status()
             sliver_struct["geni_expires"] = sliver.get_sliver().get_expiration()
-            if sliver.get_error_message:
+            if not sliver.get_error_message() == None:
                 sliver_struct["geni_error"] = sliver.get_error_message()
             value.append(sliver_struct)
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def listresources_success_result(self, rspec):
+        print "\n\n\n\n\nlistresources_success_result: %s\n\n\n\n\n\n" % str(self.build_property_list(self.__geni_exception_manager.SUCCESS, value=rspec))
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=rspec)
 
     # TODO REMOVE
@@ -370,7 +394,7 @@ class GeniV3Handler(HandlerBase):
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def error_result(self, code, output):
-        return self.build_property_list(code, output=output)
+        return self.build_property_list(code, output=str(output))
     
     def build_property_list(self, geni_code, value=None, output=None):
         result = {}
