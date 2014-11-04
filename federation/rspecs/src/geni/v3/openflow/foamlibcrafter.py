@@ -2,7 +2,7 @@
 
 from cStringIO import StringIO
 from lxml import etree as ET
-from settings.src import settings as config
+
 
 class FOAMLibCrafter:
     
@@ -13,6 +13,13 @@ class FOAMLibCrafter:
         #TOPONSv1 = "http://geni.bssoftworks.com/rspec/ext/topo/1"
         self.PGNS = "http://www.geni.net/resources/rspec/3"
         self.XSNS = "http://www.w3.org/2001/XMLSchema-instance"
+        self.__config = None
+        
+    def get_config(self):
+        return self.__config
+    
+    def set_config(self, value):
+        self.__config = value
     
     def get_advertisement(self, resources):
         NSMAP = {None: "%s" % (self.PGNS),
@@ -71,9 +78,9 @@ class FOAMLibCrafter:
   
         def add_dpid(od, datapath):
             dpids = ET.SubElement(od, "{%s}datapath" %(self.OFNSv3))
-            dpids.attrib["component_id"] = "urn:publicid:IDN+openflow:%s+datapath+%s" % (config.HRN, str(datapath))
-            dpids.attrib["component_manager_id"] = "urn:publicid:IDN+openflow:%s+cm" % (config.HRN)
-            dpids.attrib["dpid"] = str(datapath)
+            dpids.attrib["component_id"] = datapath.get_component_id()#"urn:publicid:IDN+openflow:%s+datapath+%s" % (config.HRN, str(datapath))
+            dpids.attrib["component_manager_id"] = datapath.get_component_manager_id()#"urn:publicid:IDN+openflow:%s+cm" % (config.HRN)
+            dpids.attrib["dpid"] = str(datapath.get_datapath())
                 
         def add_port(od, port):
             ps = ET.SubElement(od, "{%s}port" %(self.OFNSv3))
@@ -81,8 +88,8 @@ class FOAMLibCrafter:
                 
         def add_device(od, device):
             devices = ET.SubElement(od, "{%s}device" %(self.OFNSv3))
-            devices.attrib["component_id"] = "urn:publicid:IDN+federation:%s+device+%s" % (config.HRN, device)
-            devices.attrib["component_manager_id"] = "urn:publicid:IDN+federation:%s+cm" % (config.HRN)
+            devices.attrib["component_id"] = device.get_component_id() #"urn:publicid:IDN+federation:%s+device+%s" % (config.HRN, device)
+            devices.attrib["component_manager_id"] = device.get_component_manager_id()#"urn:publicid:IDN+federation:%s+cm" % (config.HRN)
                 
         if federated:
             add = add_device
@@ -90,10 +97,10 @@ class FOAMLibCrafter:
             add = add_dpid
  
         od = ET.SubElement(rspec, "{%s}link" % (self.OFNSv3))
-        od.attrib["component_id"] = "urn:publicid:IDN+openflow:%s+link+%s_%s_%s_%s" %(config.HRN,str(link.get_src_dpid().get_datapath()), str(link.get_src_port().get_num()),str(link.get_dst_dpid().get_datapath()),str(link.get_dst_port().get_num()))
-        add(od, link.get_src_dpid().get_datapath())
+        od.attrib["component_id"] = link.get_component_id()#"urn:publicid:IDN+openflow:%s+link+%s_%s_%s_%s" %(config.HRN,str(link.get_src_dpid().get_datapath()), str(link.get_src_port().get_num()),str(link.get_dst_dpid().get_datapath()),str(link.get_dst_port().get_num()))
+        add(od, link.get_src_dpid())
         add_port(od, link.get_src_port().get_num())
-        add(od,link.get_dst_dpid().get_datapath())
+        add(od,link.get_dst_dpid())
         add_port(od,link.get_dst_port().get_num()) 
         
     def get_manifest(self, flowspace):

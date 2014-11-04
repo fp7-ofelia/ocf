@@ -4,7 +4,7 @@ from rspecs.src.geni.v3.openflow.container.dpid import DPID
 from rspecs.src.geni.v3.openflow.container.port import Port
 from rspecs.src.geni.v3.openflow.container.link import Link
 from rspecs.test.geni.v3.openflow.expectedoutputs import EXPECTED_AD_RSPEC
-from settings.src import settings as config
+from settings.src.settings import Settings as config
 
 
 class TestAdvertisement(unittest.TestCase):
@@ -50,6 +50,8 @@ class TestAdvertisement(unittest.TestCase):
         link.set_src_port(old_dpid.get_ports()[0])
         link.set_dst_dpid(dpid)
         link.set_dst_port(dpid.get_ports()[0])
+        link.set_component_id("urn:publicid:IDN+openflow:%s+link+%s_%s_%s_%s" %(config.HRN,str(link.get_src_dpid().get_datapath()), str(link.get_src_port().get_num()),str(link.get_dst_dpid().get_datapath()),str(link.get_dst_port().get_num())))
+        
         return link
     
     def format_rspec(self, string):
