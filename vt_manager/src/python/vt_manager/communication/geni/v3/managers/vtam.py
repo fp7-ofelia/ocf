@@ -10,7 +10,7 @@ class VTAMRM(ResourceManagerBase):
         self.REBOOT_ACTION = "REBOOT"
         self.DELETE_ACTION = "DELETE"
 
-    def get_resources(self, urns=None, geni_available=True):
+    def get_resources(self, urns=None, geni_available=False):
         servers = list()
         if urns:
             for urn in urns:

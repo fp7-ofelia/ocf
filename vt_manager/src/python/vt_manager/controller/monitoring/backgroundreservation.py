@@ -3,7 +3,7 @@ from datetime import datetime
 import threading
 
 
-class BackgroundExpirationMonitoring(threading.Thread):
+class BackgroundReservationMonitoring(threading.Thread):
       
     period = 3600*6  #seconds
    

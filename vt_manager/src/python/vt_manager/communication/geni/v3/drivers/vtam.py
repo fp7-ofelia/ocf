@@ -53,7 +53,10 @@ class VTAMDriver:
        
        self.__config = None
 
-    def get_specific_server_and_vms(self, urn, geni_available=True):
+    def get_specific_server_and_vms(self, urn, geni_available=False):
+        """
+        When 'available' is False or unspecified, all resources must be retrieved.
+        """
         params =  self.__urn_to_vm_params(urn)
         servers = VTServer.objects.all()
         resources = list() 
@@ -66,7 +69,10 @@ class VTAMDriver:
                 resources.extend(resources)
         return resources
 
-    def get_all_servers(self, geni_available = True):
+    def get_all_servers(self, geni_available=False):
+        """
+        When 'available' is False or unspecified, all resources must be retrieved.
+        """
         resources = list()
         servers = VTServer.objects.all()
         for server in servers:
@@ -290,8 +296,8 @@ class VTAMDriver:
         resource.set_component_id(component_id)
         resource.set_component_manager_name(component_manager_name)
         resource.set_component_name(component_name)
-        #Default params
-        resource.set_available(True)
+        # Default params
+        resource.set_available(server.available)
         resource.set_exclusive(False)
         
         return resource
