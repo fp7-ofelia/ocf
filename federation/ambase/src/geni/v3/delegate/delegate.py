@@ -44,7 +44,8 @@ class GeniV3Delegate(DelegateBase):
         return versions
     
     def list_resources(self, geni_available=False):
-        return self.__resource_manager.get_resources()
+        # No URNs are passed to this command, thus set to "None"
+        return self.__resource_manager.get_resources(None, geni_available)
     
     def describe(self, urns=dict()):
         return self.__resource_manager.get_resources(urns)

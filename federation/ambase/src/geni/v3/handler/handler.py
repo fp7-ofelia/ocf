@@ -78,10 +78,7 @@ class GeniV3Handler(HandlerBase):
         if user_geni_rspec_version != am_geni_rspec_version or user_geni_rspec_type != am_geni_rspec_type:
             return self.error_result(self.__geni_exception_manager.BADVERSION, "Bad Version: option geni_rspec_version defines an invalid version, type or geni_rspec_version value.")
         # Retrieving raw resources
-        geni_available = False
-        if options.get("geni_available"):
-            if geni_available:
-                geni_available = True
+        geni_available = options.get("geni_available", False)
         resources = self.__delegate.list_resources(geni_available)
         
         # Crafting resources into RSpec
@@ -360,7 +357,6 @@ class GeniV3Handler(HandlerBase):
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def listresources_success_result(self, rspec):
-        print "\n\n\n\n\nlistresources_success_result: %s\n\n\n\n\n\n" % str(self.build_property_list(self.__geni_exception_manager.SUCCESS, value=rspec))
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=rspec)
 
     # TODO REMOVE
