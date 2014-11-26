@@ -22,18 +22,6 @@ class GeniV3Handler(HandlerBase):
         self.__config = None
     
     def GetVersion(self, options=dict()):
-        """
-        @param    options		optional structure
-        
-        @return    xmlrpc struct        int geni_api,
-                                        struct geni_api_versions,
-                                        array geni_ad_rspec_versions,
-                                        array geni_request_rspec_versions,
-                                        array geni_credential_types
-        
-        @error ERROR                internal error
-        @error SERVERERROR          server error
-        """
         try:
             value = self.__delegate.get_version()
         except Exception as e:
@@ -41,21 +29,6 @@ class GeniV3Handler(HandlerBase):
         return self.success_result(result=value)
 
     def ListResources(self, credentials=list(), options=dict()):
-        """
-        @param    options               optional structure
-                                        - geni_available
-                                        - geni_compressed
-                                        - geni_rspec_version
-        
-        @return    xmlrpc struct        - value = xml rspec
-        
-        @error BADARGS              one of the required arguments is badly formed or missing
-        @error FORBIDDEN            credential does not grant permission to aggregate
-        @error ERROR                internal error
-        @error SERVERERROR          server error
-        @error UNAVAILABLE          unavailable (eg server in lockdown)
-        @error BADVERSION           bad Version of RSpec requested
-        """
         # Credential validation
         try:
             self.__credential_manager.validate_for("ListResources", credentials)
@@ -80,10 +53,8 @@ class GeniV3Handler(HandlerBase):
         # Retrieving raw resources
         geni_available = options.get("geni_available", False)
         resources = self.__delegate.list_resources(geni_available)
-        
         # Crafting resources into RSpec
         output = self.__rspec_manager.compose_advertisement(resources)
-        
         # Preparing the output
         if options.get("geni_compressed", False):
             output = base64.b64encode(zlib.compress(output))
@@ -106,14 +77,21 @@ class GeniV3Handler(HandlerBase):
         # Retrieving slivers to manifest
         slivers = self.__delegate.describe(urns)
         
+        
         # Crafting slivers to manifest RSpec
         output = self.__rspec_manager.compose_manifest(slivers)
         
         if options.get("geni_compressed", False):
             output = base64.b64encode(zlib.compress(output))
 
+        if not type(slivers) == list():
+            slivers = [slivers]
+
         if slivers:
-            slice_urn = slivers[0].get_sliver().get_slice_urn()
+            try:
+                slice_urn = slivers[0].get_sliver().get_slice_urn()
+            except:
+                slice_urn = slivers[0].get_slice_urn()
         else:
             slice_urn = urns[0]
 
@@ -141,7 +119,9 @@ class GeniV3Handler(HandlerBase):
             return self.error_result(self.__geni_exception_manager.ERROR, e)
         
         manifest = self.__rspec_manager.compose_manifest(allocated_slivers)
-        
+        if not type(allocated_slivers) == list:
+            allocated_slivers = [allocated_slivers]
+
         return self.success_result(manifest, allocated_slivers)
         
     def Provision(self, urns=list(), credentials=list(), options=dict()):
@@ -167,7 +147,6 @@ class GeniV3Handler(HandlerBase):
         option_list = set(options["geni_rspec_version"].keys())
         if not required_options.issubset(option_list):
             return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
-
         # geni_best_effort filled up when present
         geni_best_effort = options.get("geni_best_effort", False)
         try:
@@ -181,6 +160,8 @@ class GeniV3Handler(HandlerBase):
                 return self.error_result(self.__geni_exception_manager.ERROR, str(e))
         
         manifest = self.__rspec_manager.compose_manifest(slivers)
+        if not type(slivers) == list:
+            slivers = [slivers]
         return self.success_result(manifest, slivers)
     
     def Delete(self, urns=list(), credentials=list(), options=dict()):
@@ -255,9 +236,15 @@ class GeniV3Handler(HandlerBase):
             result = self.__delegate.status(urns)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
-        
+
+        if not type(result) == list():
+            result = [result]
+ 
         if result:
-            slice_urn = result[0].get_sliver().get_slice_urn()
+            try:
+               slice_urn = result[0].get_sliver().get_slice_urn()
+            except:
+               slice_urn = result[0].get_slice_urn()
         else:
             slice_urn = urns[0]
         return self.success_result(slivers=result, slice_urn=slice_urn)
@@ -346,13 +333,20 @@ class GeniV3Handler(HandlerBase):
     
     def delete_success_result(self, slivers):
         value = list()
+        
         for sliver in slivers:
+            try:
+                sliver = sliver.get_sliver()
+                error_msg = sliver.get_error_message()
+            except:
+                sliver = sliver
+                error_msg = None
             sliver_struct = dict()
-            sliver_struct["geni_sliver_urn"] = sliver.get_sliver().get_urn()
-            sliver_struct["geni_allocation_status"] =  sliver.get_sliver().get_allocation_status()
-            sliver_struct["geni_expires"] = sliver.get_sliver().get_expiration()
-            if not sliver.get_error_message() == None:
-                sliver_struct["geni_error"] = sliver.get_error_message()
+            sliver_struct["geni_sliver_urn"] = sliver.get_urn()
+            sliver_struct["geni_allocation_status"] =  sliver.get_allocation_status()
+            sliver_struct["geni_expires"] = sliver.get_expiration()
+            if not error_msg == None:
+                sliver_struct["geni_error"] = error_msg
             value.append(sliver_struct)
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
@@ -413,14 +407,19 @@ class GeniV3Handler(HandlerBase):
         return result
     
     def __get_geni_sliver_structure(self, resource):
-        sliver = resource.get_sliver()
+        try:
+            sliver = resource.get_sliver()
+            error_message = resource.get_error_message()
+        except:
+            sliver = resource
+            error_message = None
         sliver_struct = dict()
         sliver_struct["geni_sliver_urn"] = sliver.get_urn()
         sliver_struct["geni_allocation_status"] =  sliver.get_allocation_status()
         sliver_struct["geni_expires"] = self.__datetime_to_rfc3339(sliver.get_expiration())
         sliver_struct["geni_operational_status"] = sliver.get_operational_status()
-        if resource.get_error_message():
-            sliver_struct["geni_error"] = resource.get_error_message()
+        if error_message:
+            sliver_struct["geni_error"] = error_message
         return sliver_struct
 
     def __get_users_pubkeys(self, creds):

@@ -60,8 +60,8 @@ class GCFCredentialManager(CredentialManagerBase):
             return "listnodes"
         elif method == "Describe" or method == "Status":
             return "sliverstatus"
-        elif method == "PerforOperationalAction":
-            return "startslice"
+        elif method == "PerformOperationalAction":
+            return "createsliver"
         elif method == "Delete":
             return "deletesliver"
         elif method == "Renew":

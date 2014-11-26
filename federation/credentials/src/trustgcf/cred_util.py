@@ -212,7 +212,6 @@ class CredentialVerifier(object):
         as specified in credentials, to names of operations.'''
         result = True
         privs = credential.get_privileges()
-        print privileges
         for priv in privileges:
             
             if not privs.can_perform(priv):
