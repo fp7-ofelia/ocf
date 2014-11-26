@@ -1,20 +1,21 @@
 from django.db import models
-from django.contrib import auth
+from django.contrib.auth import models as auth_models
+#from django.contrib import auth
 from openflow.optin_manager.flowspace.models import FlowSpace
 
 class UserFlowSpace(FlowSpace):
     '''
     Holds information about the verified flowspace for each user
     '''
-    user            = models.ForeignKey(auth.models.User, related_name = "user")        
-    approver     = models.ForeignKey(auth.models.User, related_name = "approver")
+    user            = models.ForeignKey(auth_models.User, related_name = "user")        
+    approver     = models.ForeignKey(auth_models.User, related_name = "approver")
 
 class AdminFlowSpace(FlowSpace):
     '''
     Holds information about the verified flowspace for each admin
     This is the flowspace that can be delegated to each user
     '''
-    user           = models.ForeignKey(auth.models.User)
+    user           = models.ForeignKey(auth_models.User)
 
       
 '''
@@ -42,12 +43,38 @@ class Experiment(models.Model):
     def __unicode__(self):
         return "experiment: %s:%s" % (self.project_name,self.slice_name)
 
+class ExpiringFlowSpaces(models.Model):
+    slice_urn = models.CharField(blank=True, null=True, max_length = 2048)
+    expires = models.CharField(max_length = 1024)
+
+class Reservation(models.Model):
+    slice_id = models.CharField(max_length = 1024)
+    project_name = models.CharField(max_length = 1024)
+    project_desc = models.CharField(blank=True, max_length = 1024)
+    slice_name = models.CharField(max_length = 1024)
+    slice_desc = models.CharField(blank=True, max_length = 1024)
+    controller_url= models.CharField(max_length = 1024)
+    owner_email = models.CharField(blank=True, max_length = 1024)
+    owner_password = models.CharField(blank=True, max_length = 2048)
+    slice_urn = models.CharField(blank=True, null=True, max_length = 2048) 
+    expiration = models.CharField(blank=True, max_length = 255)
+
+class ReservationFlowSpace(FlowSpace):
+    dpid = models.CharField(max_length = 30)
+    direction = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
+    port_number_s = models.IntegerField("Start of Port Range", blank=True, default=0)
+    port_number_e = models.IntegerField("End of Port Range", blank=True, default=0xFFFF)
+    expiration = models.CharField(max_length = 255)
+    res = models.ForeignKey(Reservation)
+    slice_urn = models.CharField(blank=True, null=True, max_length = 2048)     
+    urn = models.CharField(blank=True, null=True, max_length = 2048)
 class ExperimentFLowSpace(FlowSpace):
     dpid          = models.CharField(max_length = 30)
     direction     = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional
     port_number_s = models.IntegerField("Start of Port Range", blank=True, default=0)
     port_number_e = models.IntegerField("End of Port Range", blank=True, default=0xFFFF)
     exp           = models.ForeignKey(Experiment)
+
     def __unicode__(self):
         fs_desc = super(ExperimentFLowSpace, self).__unicode__()
         
@@ -74,7 +101,7 @@ class UserOpts(models.Model):
     '''
     Holds information about all opt-ins
     '''
-    user            = models.ForeignKey(auth.models.User)
+    user            = models.ForeignKey(auth_models.User)
     priority        = models.IntegerField()
     experiment      = models.ForeignKey(Experiment)
     nice            = models.BooleanField(default = True)

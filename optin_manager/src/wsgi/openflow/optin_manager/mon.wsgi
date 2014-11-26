@@ -14,6 +14,7 @@ sys.path.insert(0,PYTHON_DIR)
 
 from openflow.optin_manager.monitoring.BackgroundMonitor import BackgroundMonitor
 from openflow.optin_manager.monitoring.background_expiration_monitoring import BackgroundExpirationMonitoring
+from openflow.optin_manager.monitoring.reservation import BackgroundReservationMonitoring
 BackgroundMonitor.monitor()
 BackgroundExpirationMonitoring.monitor()
-
+BackgroundReservationMonitoring.monitor()

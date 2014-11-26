@@ -310,7 +310,8 @@ class VTAMDriver:
             if not network_interface.switchID:
                 continue
                 #network_interface.switchID = "OfeliaVPNGateWay"
-            component_id = self.__get_link_urn(network_interface.name, network_interface.switchID, server.name)
+            dpid_port = "%s_%s" % (network_interface.switchID, network_interface.port)
+            component_id = self.__get_link_urn(network_interface.name, dpid_port, server.name)
             link.set_component_id(component_id)
             link.set_component_name(component_id)
             link.set_capacity("1024MB/s")
@@ -322,18 +323,17 @@ class VTAMDriver:
 
     def __get_link_urn(self, source, dst, server_name):
         name = self.__correct_iface_name(source)
-        return hrn_to_urn("ocf.ofam" + "." + str(server_name)+ "." + str(name) + "-" + str(dst),"link")
+        return hrn_to_urn(self.__config.CM_HRN + "." + str(server_name)+ "." + str(name) + "-" + str(dst),"link")
 
     def __correct_iface_name(self, iface_name):
+        # Returns correct eth name from server
         if "." not in iface_name:
     	    return iface_name.replace(iface_name[-1], str(int(iface_name[-1])-1))
         else:
             return self.__correct_iface_name(iface_name.split(".")[0])
 
     def __get_foreign_urn(self, dpid):
-        if dpid == "OfeliaVPNGateWay":
-            return "OfeliaVPN"
-        return hrn_to_urn("ocf.ofam" + "." + str(dpid),"datapath")
+        return hrn_to_urn(self.__config.FOREIGN_HRN + "." + str(dpid),"datapath")
 
     def __get_port_urn(self, port, server_name):
         name = self.__correct_iface_name(port)

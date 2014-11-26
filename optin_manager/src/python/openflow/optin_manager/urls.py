@@ -32,6 +32,7 @@ urlpatterns = patterns('',
 
     # sfa
     rpc_url(r'^xmlrpc/sfa/?$', name='optin_sfa'),
+    rpc_url(r'^xmlrpc/geni/3/?$', name='gapi3')
 
 )
 

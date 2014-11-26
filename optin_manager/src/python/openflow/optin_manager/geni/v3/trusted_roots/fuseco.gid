@@ -1,0 +1,56 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number: 11176992416681457503 (0x9b1ca7627d88775f)
+    Signature Algorithm: sha1WithRSAEncryption
+        Issuer: C=DE, ST=Berlin, L=Berlin, O=Fraunhofer FOKUS, OU=NGNI, CN=ca.fiteagle-fuseco.fokus.fraunhofer.de
+        Validity
+            Not Before: Jun  5 10:33:13 2013 GMT
+            Not After : Jun  3 10:33:13 2023 GMT
+        Subject: C=DE, ST=Berlin, L=Berlin, O=Fraunhofer FOKUS, OU=NGNI, CN=ca.fiteagle-fuseco.fokus.fraunhofer.de
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+                Public-Key: (1024 bit)
+                Modulus:
+                    00:f0:c6:be:e0:01:10:b2:99:e5:b1:02:ec:68:88:
+                    1e:e1:12:24:ff:80:2e:f2:db:ca:6a:b8:dc:86:a3:
+                    76:ec:8f:11:8e:44:2c:c1:14:5b:68:c4:f4:48:3a:
+                    a4:4e:ee:60:bf:0d:29:80:d2:fa:61:23:bb:ff:de:
+                    68:56:b5:ba:28:a8:58:ea:4e:8f:12:a5:6c:20:a9:
+                    84:de:ba:3a:2d:8f:91:df:25:d1:af:e7:4a:33:44:
+                    70:cb:d2:44:4d:07:26:17:8b:72:aa:c6:9b:b0:97:
+                    8f:47:16:b9:f2:b1:d4:01:db:a4:65:9f:16:24:87:
+                    18:e3:98:f8:19:f0:27:fc:e9
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Basic Constraints: critical
+                CA:TRUE
+            X509v3 Subject Alternative Name: 
+                URI:urn:publicid:IDN+fiteagle-fuseco.fokus.fraunhofer.de+authority+root
+    Signature Algorithm: sha1WithRSAEncryption
+         1c:80:a1:f6:f8:cc:85:91:fa:3c:cc:93:a6:c9:36:0b:f0:f8:
+         df:49:cf:56:1d:29:a7:3b:ec:05:07:ed:13:d1:0d:2a:77:50:
+         5f:d4:d2:ce:dc:18:79:70:c3:1b:7e:6a:7b:a2:38:c1:9d:8b:
+         cf:0e:8c:49:fa:e1:67:62:db:8d:0e:18:a5:81:95:d7:b3:94:
+         f3:f9:7a:41:e5:03:3c:f6:00:6b:4c:33:d7:7a:e1:4c:c4:36:
+         a2:54:56:ac:d1:5d:3b:21:b4:c5:31:e4:f2:f4:b6:df:5b:80:
+         a0:9e:c7:6f:ff:55:84:4e:23:13:69:cf:2b:da:0b:04:0c:e1:
+         f4:cb
+-----BEGIN CERTIFICATE-----
+MIIC9zCCAmCgAwIBAgIJAJscp2J9iHdfMA0GCSqGSIb3DQEBBQUAMIGKMQswCQYD
+VQQGEwJERTEPMA0GA1UECAwGQmVybGluMQ8wDQYDVQQHDAZCZXJsaW4xGTAXBgNV
+BAoMEEZyYXVuaG9mZXIgRk9LVVMxDTALBgNVBAsMBE5HTkkxLzAtBgNVBAMMJmNh
+LmZpdGVhZ2xlLWZ1c2Vjby5mb2t1cy5mcmF1bmhvZmVyLmRlMB4XDTEzMDYwNTEw
+MzMxM1oXDTIzMDYwMzEwMzMxM1owgYoxCzAJBgNVBAYTAkRFMQ8wDQYDVQQIDAZC
+ZXJsaW4xDzANBgNVBAcMBkJlcmxpbjEZMBcGA1UECgwQRnJhdW5ob2ZlciBGT0tV
+UzENMAsGA1UECwwETkdOSTEvMC0GA1UEAwwmY2EuZml0ZWFnbGUtZnVzZWNvLmZv
+a3VzLmZyYXVuaG9mZXIuZGUwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJAoGBAPDG
+vuABELKZ5bEC7GiIHuESJP+ALvLbymq43IajduyPEY5ELMEUW2jE9Eg6pE7uYL8N
+KYDS+mEju//eaFa1uiioWOpOjxKlbCCphN66Oi2Pkd8l0a/nSjNEcMvSRE0HJheL
+cqrGm7CXj0cWufKx1AHbpGWfFiSHGOOY+BnwJ/zpAgMBAAGjYzBhMA8GA1UdEwEB
+/wQFMAMBAf8wTgYDVR0RBEcwRYZDdXJuOnB1YmxpY2lkOklETitmaXRlYWdsZS1m
+dXNlY28uZm9rdXMuZnJhdW5ob2Zlci5kZSthdXRob3JpdHkrcm9vdDANBgkqhkiG
+9w0BAQUFAAOBgQAcgKH2+MyFkfo8zJOmyTYL8PjfSc9WHSmnO+wFB+0T0Q0qd1Bf
+1NLO3Bh5cMMbfmp7ojjBnYvPDoxJ+uFnYtuNDhilgZXXs5Tz+XpB5QM89gBrTDPX
+euFMxDaiVFas0V07IbTFMeTy9LbfW4Cgnsdv/1WETiMTac8r2gsEDOH0yw==
+-----END CERTIFICATE-----

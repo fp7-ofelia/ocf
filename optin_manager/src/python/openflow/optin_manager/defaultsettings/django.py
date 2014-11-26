@@ -22,6 +22,11 @@ except ImportError:
         location = location + "/share/optin_manager"
         
 SRC_DIR = location
+AM_LIB_LOCATION = join(os.getenv("OCF_PATH"), "core/lib/am/")
+# Add AM code
+sys.path.append(AM_LIB_LOCATION)
+sys.path.append(join(os.getenv("OCF_PATH"), "core/lib/"))
+
 '''Base location of non-python source files.'''
 
 try:

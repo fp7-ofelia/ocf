@@ -35,44 +35,47 @@ class FlowSpace(models.Model):
           
     def __unicode__(self):
         expression = ""
-        if (self.mac_src_s  == self.mac_src_e):
-            expression = expression + ("MAC Source Addr: %s, " % (int_to_mac(self.mac_src_s)))
-        elif (self.mac_src_s > 0 or self.mac_src_e < 0xFFFFFFFFFFFF):
-            expression = expression + ("MAC Source Addr: %s-%s, " % (int_to_mac(self.mac_src_s), int_to_mac(self.mac_src_e)))
-        if (self.mac_dst_s  == self.mac_dst_e):
-            expression = expression + ("MAC Destination Addr: %s, " % (int_to_mac(self.mac_dst_s)))
-        elif (self.mac_dst_s > 0 or self.mac_dst_e < 0xFFFFFFFFFFFF): 
-            expression = expression + ("MAC Destination Addr: %s-%s, " % (int_to_mac(self.mac_dst_s), int_to_mac(self.mac_dst_e))) 
-        if (self.eth_type_s == self.eth_type_e): 
-            expression = expression + ("Eth Type: 0x%x, " % (self.eth_type_s)) 
-        elif (self.eth_type_s > 0 or self.eth_type_e < 0xFFFF): 
-            expression = expression + ("Eth Type: 0x%x-0x%x, " % (self.eth_type_s,self.eth_type_e)) 
-        if (self.vlan_id_s == self.vlan_id_e): 
-            expression = expression + ("VLAN id: %d, " % (self.vlan_id_s)) 
-        elif (self.vlan_id_s > 0 or self.vlan_id_e < 0xFFF): 
-            expression = expression + ("VLAN id: %d-%d, " % (self.vlan_id_s,self.vlan_id_e)) 
-        if (self.ip_src_s == self.ip_src_e):    
-            expression = expression + ("IP Source Addr: %s, " % (int_to_dotted_ip(self.ip_src_s)))
-        elif (self.ip_src_s > 0 or self.ip_src_e < 0xFFFFFFFF):    
-            expression = expression + ("IP Source Addr: %s-%s, " % (int_to_dotted_ip(self.ip_src_s), int_to_dotted_ip(self.ip_src_e)))
-        if (self.ip_dst_s == self.ip_dst_e):    
-            expression = expression + ("IP Destination Addr: %s, " % (int_to_dotted_ip(self.ip_dst_s)))
-        elif (self.ip_dst_s > 0 or self.ip_dst_e < 0xFFFFFFFF):    
-            expression = expression + ("IP Destination Addr: %s-%s, " % (int_to_dotted_ip(self.ip_dst_s), int_to_dotted_ip(self.ip_dst_e)))
-        if (self.ip_proto_s == self.ip_proto_e):    
-            expression = expression + ("IP Protocol Number: %s, " % (self.ip_proto_s)) 
-        elif (self.ip_proto_s > 0 or self.ip_proto_e < 0xFF):    
-            expression = expression + ("IP Protocol Number: %s-%s, " % (self.ip_proto_s, self.ip_proto_e)) 
-        if (self.tp_src_s == self.tp_src_e):    
-            expression = expression + ("Transport Source Port: %s, " % (self.tp_src_s))
-        elif (self.tp_src_s > 0 or self.tp_src_e < 0xFFFF):    
-            expression = expression + ("Transport Source Port: %s-%s, " % (self.tp_src_s, self.tp_src_e))
-        if (self.tp_dst_s == self.tp_dst_e):    
-            expression = expression + ("Transport Destination Port: %s, " % (self.tp_dst_s))
-        if (self.tp_dst_s > 0 or self.tp_dst_e < 0xFFFF):    
-            expression = expression + ("Transport Destination Port: %s-%s, " % (self.tp_dst_s, self.tp_dst_e))
-        if expression == "":
-            expression = "All"
+        try:
+            if (self.mac_src_s  == self.mac_src_e):
+                expression = expression + ("MAC Source Addr: %s, " % (int_to_mac(self.mac_src_s)))
+            elif (self.mac_src_s > 0 or self.mac_src_e < 0xFFFFFFFFFFFF):
+                expression = expression + ("MAC Source Addr: %s-%s, " % (int_to_mac(self.mac_src_s), int_to_mac(self.mac_src_e)))
+            if (self.mac_dst_s  == self.mac_dst_e):
+                expression = expression + ("MAC Destination Addr: %s, " % (int_to_mac(self.mac_dst_s)))
+            elif (self.mac_dst_s > 0 or self.mac_dst_e < 0xFFFFFFFFFFFF): 
+                expression = expression + ("MAC Destination Addr: %s-%s, " % (int_to_mac(self.mac_dst_s), int_to_mac(self.mac_dst_e))) 
+            if (self.eth_type_s == self.eth_type_e): 
+                expression = expression + ("Eth Type: 0x%x, " % (self.eth_type_s)) 
+            elif (self.eth_type_s > 0 or self.eth_type_e < 0xFFFF): 
+                expression = expression + ("Eth Type: 0x%x-0x%x, " % (self.eth_type_s,self.eth_type_e)) 
+            if (self.vlan_id_s == self.vlan_id_e): 
+                expression = expression + ("VLAN id: %d, " % (self.vlan_id_s)) 
+            elif (self.vlan_id_s > 0 or self.vlan_id_e < 0xFFF): 
+                expression = expression + ("VLAN id: %d-%d, " % (self.vlan_id_s,self.vlan_id_e)) 
+            if (self.ip_src_s == self.ip_src_e):    
+                expression = expression + ("IP Source Addr: %s, " % (int_to_dotted_ip(self.ip_src_s)))
+            elif (self.ip_src_s > 0 or self.ip_src_e < 0xFFFFFFFF):    
+                expression = expression + ("IP Source Addr: %s-%s, " % (int_to_dotted_ip(self.ip_src_s), int_to_dotted_ip(self.ip_src_e)))
+            if (self.ip_dst_s == self.ip_dst_e):    
+                expression = expression + ("IP Destination Addr: %s, " % (int_to_dotted_ip(self.ip_dst_s)))
+            elif (self.ip_dst_s > 0 or self.ip_dst_e < 0xFFFFFFFF):    
+                expression = expression + ("IP Destination Addr: %s-%s, " % (int_to_dotted_ip(self.ip_dst_s), int_to_dotted_ip(self.ip_dst_e)))
+            if (self.ip_proto_s == self.ip_proto_e):    
+                expression = expression + ("IP Protocol Number: %s, " % (self.ip_proto_s)) 
+            elif (self.ip_proto_s > 0 or self.ip_proto_e < 0xFF):    
+                expression = expression + ("IP Protocol Number: %s-%s, " % (self.ip_proto_s, self.ip_proto_e)) 
+            if (self.tp_src_s == self.tp_src_e):    
+                expression = expression + ("Transport Source Port: %s, " % (self.tp_src_s))
+            elif (self.tp_src_s > 0 or self.tp_src_e < 0xFFFF):    
+                expression = expression + ("Transport Source Port: %s-%s, " % (self.tp_src_s, self.tp_src_e))
+            if (self.tp_dst_s == self.tp_dst_e):    
+                expression = expression + ("Transport Destination Port: %s, " % (self.tp_dst_s))
+            if (self.tp_dst_s > 0 or self.tp_dst_e < 0xFFFF):    
+                expression = expression + ("Transport Destination Port: %s-%s, " % (self.tp_dst_s, self.tp_dst_e))
+            if expression == "":
+                expression = "All"
+        except Exception as e:
+            expression = self.stringify()
         return expression
                      
 #        return ("MAC Source Addr: %s-%s , MAC Destination Addr: %s-%s # IP Source Addr: %s-%s , \
