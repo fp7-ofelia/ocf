@@ -29,14 +29,10 @@ def ping(challenge):
 
 @rpcmethod(signature=[VERSION_TYPE], url_name=GAPI3_URL)
 def GetVersion(options={}):
-    print "-------------------------------------GetVersion"
-    print handler.GetVersion(options)
-    print "-----------------------------------------------"
     return handler.GetVersion(options)
 
 @rpcmethod(signature=[RSPEC_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name=GAPI3_URL)
 def ListResources(credentials, options):
-    print "-------------------------------------ListResources"
     return handler.ListResources(credentials, options)
 
 @rpcmethod(signature=[RSPEC_TYPE, URNS_TYPE, CREDENTIALS_TYPE, OPTIONS_TYPE], url_name=GAPI3_URL)
