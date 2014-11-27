@@ -15,6 +15,7 @@ from openflow.optin_manager.opts.models import Reservation
 from openflow.optin_manager.opts.models import ReservationFlowSpace
 from openflow.optin_manager.opts.models import ExpiringFlowSpaces
 
+
 from openflow.optin_manager.geni.v3.utils.optin import OptinUtils
 from openflow.optin_manager.geni.v3.utils.sliver import SliverUtils
 from openflow.optin_manager.geni.v3.utils.flowvisor import FlowVisorWrap
@@ -109,7 +110,7 @@ class OptinDriver:
             rfs = res.reservationflowspace_set.all()#ReservationFlowSpace.objects.filter(urn=urn)
             slivers = self.__get_create_slice_params(rfs)
             self.__sliver_manager.create_of_sliver(urn, res.project_name, res.project_desc, res.slice_name, res.slice_desc, res.controller_url, res.owner_email, res.owner_password, slivers) 
-            ExpiringFlowSpaces(slice_urn=urn, expires=expiration).save()
+            ExpiringFlowSpaces(slice_urn=urn, expiration=expiration).save()
             rfs.delete()
             res.delete()
             manifest = self.__convert_to_resource(urn, expiration)
@@ -159,7 +160,7 @@ class OptinDriver:
         flowspaces = ExpiringFlowSpaces.objects.filter(slice_urn=urn)
         if flowspaces:
             flowspace = flowspaces[0]
-            flowspace.expires = expiration
+            flowspace.expiration = expiration
             flowspace.save()
 	    return self.__convert_to_resource(urn, expiration)
         else:
@@ -209,16 +210,31 @@ class OptinDriver:
     def __crud_flow_space(self, urn, action):
         try:
             slivers = self.__convert_to_resource(urn)
+            prov_status, alloc_status = self.__get_geni_status(urn)
+            if not alloc_status == self.GENI_PROVISIONED:
+                raise Exception("Operational Actions can be only performed to provisioned slivers")
+
             if action == "delete":
                 self.__sliver_manager.delete_of_sliver(urn)
                 slivers.set_operational_status(self.GENI_NOT_READY)
                 slivers.set_allocation_status(self.GENI_UNALLOCATED)
+
             elif action == "start" or action == "reboot":
-                slivers.set_operational_status(self.GENI_READY)
-                slivers.set_allocation_status(self.GENI_PROVISIONED)
+                if not prov_status in [self.GENI_READY, self.GENI_CONFIGURING]:
+                    self.__sliver_manager.opt_in(urn)
+                    prov_status, alloc_status = self.__get_geni_status(urn)
+                    slivers.set_operational_status(prov_status)
+                    slivers.set_allocation_status(alloc_status)
+                
             elif action == "stop":
+                self.__sliver_manager.opt_out(urn)
                 slivers.set_operational_status(self.GENI_NOT_READY)
                 slivers.set_allocation_status(self.GENI_PROVISIONED)
+                expiring_fs = ExpiringFlowSpaces.objects.filter(slice_urn=urn)[0]
+                if prov_status == self.GENI_READY:  
+                    expiring_fs.was_granted = True
+                    expiring_fs.save()
+                
             
             return slivers
         except Exception as e:
@@ -228,13 +244,10 @@ class OptinDriver:
 
     def __convert_to_resource(self, urn, expiration=None):
         exps = Experiment.objects.filter(slice_urn=urn)
-        print "------------------",urn
-        for ex in  Experiment.objects.all():
-            print ex.slice_urn, urn, ex.slice_urn == urn
         
         if exps:
             experiment = exps[0]
-            expiration = ExpiringFlowSpaces.objects.filter(slice_urn=experiment.slice_urn)[0].expires
+            expiration = ExpiringFlowSpaces.objects.filter(slice_urn=experiment.slice_urn)[0].expiration
             efs = experiment.experimentflowspace_set.all()     
             return self.__parse_to_fs_object(urn,experiment, efs, expiration)
         elif Reservation.objects.filter(slice_urn=urn):
@@ -391,7 +404,8 @@ class OptinDriver:
         experiment_params['owner_email'] = fs.get_email()
         experiment_params['project_desc'] = fs.get_description()
         experiment_params['project_name'] = urn
-        experiment_params['slice_name'] = urn  
+        experiment_params['slice_name'] = urn 
+        experiment_params['slice_id'] = uuid.uuid4() 
         return experiment_params
 
     def __urn_to_fs_params(self, urn):

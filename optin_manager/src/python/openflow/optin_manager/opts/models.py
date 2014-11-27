@@ -45,7 +45,8 @@ class Experiment(models.Model):
 
 class ExpiringFlowSpaces(models.Model):
     slice_urn = models.CharField(blank=True, null=True, max_length = 2048)
-    expires = models.CharField(max_length = 1024)
+    expiration = models.CharField(blank=True, null=True, max_length = 1024)
+    was_granted = models.BooleanField(default = True) 
 
 class Reservation(models.Model):
     slice_id = models.CharField(max_length = 1024)

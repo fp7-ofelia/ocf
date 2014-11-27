@@ -9,6 +9,7 @@ from openflow.optin_manager.opts.models import ExperimentFLowSpace
 from openflow.optin_manager.opts.models import UserOpts
 from openflow.optin_manager.opts.models import OptsFlowSpace
 from openflow.optin_manager.opts.models import MatchStruct
+from openflow.optin_manager.opts.models import ExpiringFlowSpaces
 
 from openflow.optin_manager.xmlrpc_server.ch_api import convert_star
 from openflow.optin_manager.xmlrpc_server.ch_api import om_ch_translate
@@ -16,6 +17,7 @@ from openflow.optin_manager.flowspace.utils import parseFVexception
 
 from openflow.optin_manager.flowspace.utils import int_to_dotted_ip
 
+from openflow.optin_manager.opts.autofsgranter import auto_fs_granter
 import traceback
 
 class SliverUtils:
@@ -189,20 +191,19 @@ class SliverUtils:
     @staticmethod
     def delete_of_sliver(urn):
         try:
-            slice_urn = Experiment.objects.get(slice_urn = urn).slice_id
-            mult_exp = Experiment.objects.all()
-            single_exp = Experiment.objects.get(slice_id = slice_urn)
+            single_exp = Experiment.objects.filter(slice_urn = urn)[0]
+            slice_urn = single_exp.slice_urn
         except Experiment.DoesNotExist as e:
             raise e
         fv = FVServerProxy.objects.all()[0]
         try:
             success = fv.proxy.api.deleteSlice(single_exp.slice_id)
-        except Exception,e:
+        except Exception as e:
             
             if "slice does not exist" in str(e):
                 success = True
             else:
-                raise "" #TODO: think how to solve this. 
+                raise e #TODO: think how to solve this. 
     
         # get all flowspaces opted into this exp
         ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)
@@ -221,3 +222,51 @@ class SliverUtils:
     
         single_exp.delete()
         return 1
+
+    @staticmethod
+    def opt_out(urn):
+        try:
+            single_exp = Experiment.objects.filter(slice_urn = urn)[0]
+            slice_urn = single_exp.slice_urn
+        except Experiment.DoesNotExist as e:
+            raise e
+        fv = FVServerProxy.objects.all()[0]
+        try:
+            success = fv.proxy.api.deleteSlice(single_exp.slice_id)
+        except Exception as e:
+
+            if "slice does not exist" in str(e):
+                success = True
+            else:
+                raise e #TODO: think how to solve this. 
+    
+        # get all flowspaces opted into this exp
+        ofs = OptsFlowSpace.objects.filter(opt__experiment = single_exp)
+    
+        # delete all match structs for each flowspace
+        for fs in ofs:
+            MatchStruct.objects.filter(optfs = fs).delete()
+    
+        # delete all flowspaces opted into this exp
+        ofs.delete()
+        try:
+            UserOpts.objects.filter(experiment = single_exp).delete()
+        except:
+            pass #Probably is the best for now
+
+        return 1
+
+    @staticmethod
+    def opt_in(urn):
+        expiring_fs = ExpiringFlowSpaces.objects.filter(slice_urn = urn)[0]
+        if expiring_fs.was_granted:
+            exp = Experiment.objects.filter(slice_urn = urn)[0]
+            auto_fs_granter(exp)
+            return 1
+        else:
+            pass #Let's see if is convenient to send an email
+             
+                     
+
+
+        
