@@ -134,13 +134,20 @@ class OFShell:
 		return 1
 
         def SliverStatus(self, slice_urn):
-            sliver_status = get_sliver_status(slice_urn)
-            if len(sliver_status) == 0:
-                xrn = Xrn(slice_urn, 'slice')
-                slice_leaf = xrn.get_leaf()
-                sliver_status = ['The requested flowspace for slice %s is still pending for approval' %slice_leaf]
-            granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
-            return [granted_fs]
+            try:
+                print "-----------------------------------------------------------SliverStatus"
+                sliver_status = get_sliver_status(slice_urn)
+                print sliver_status
+                if len(sliver_status) == 0:
+                    xrn = Xrn(slice_urn, 'slice')
+                    slice_leaf = xrn.get_leaf()
+                    sliver_status = ['The requested flowspace for slice %s is still pending for approval' %slice_leaf]
+                granted_fs = {'granted_flowspaces':get_sliver_status(slice_urn)}
+                return [granted_fs]
+            except Exception as e:
+                import traceback
+                print traceback.print_exc()
+                raise e
 
         def check_req_switches(self, switch_slivers):
             available_switches = self.get_raw_switches()

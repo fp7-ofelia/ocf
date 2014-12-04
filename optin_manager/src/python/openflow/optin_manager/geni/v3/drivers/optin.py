@@ -54,6 +54,7 @@ class OptinDriver:
 
     def get_specific_devices(self, urn,geni_available=True):
         try:
+            urn = self.__generate_sliver_urn_from_slice_urn(urn)
             #flowspace = FlowSpace()
             #exps = ExperimentFLowSpace.objects.filter(slice_urn = urn)
             #exp = exps[0].exp
@@ -106,7 +107,10 @@ class OptinDriver:
     
     def create_flowspace(self, urn, expiration=None, users=list(), geni_best_effort=True):
         try:
-            res = Reservation.objects.filter(slice_urn=urn)[0]        
+            urn = self.__generate_sliver_urn_from_slice_urn(urn)
+            params = self.__urn_to_fs_params(urn)
+            #res = Reservation.objects.filter(slice_urn=urn)[0] 
+            res = Reservation.objects.filter(**params)[0]       
             rfs = res.reservationflowspace_set.all()#ReservationFlowSpace.objects.filter(urn=urn)
             slivers = self.__get_create_slice_params(rfs)
             self.__sliver_manager.create_of_sliver(urn, res.project_name, res.project_desc, res.slice_name, res.slice_desc, res.controller_url, res.owner_email, res.owner_password, slivers) 
@@ -124,9 +128,9 @@ class OptinDriver:
         try:
             if not expiration:
                 expiration = datetime.utcnow() + timedelta(hours=1)
-
+            
             reservation_params = self.__get_experiment_params(reservation,slice_urn) 
-            reservation_params['slice_urn'] = slice_urn
+            #reservation_params['slice_urn'] = slice_urn
             r = Reservation(**reservation_params)
             r.expiration = expiration
             r.save()
@@ -148,7 +152,7 @@ class OptinDriver:
         except Exception as e:
             print traceback.print_exc()
             raise e
-        reservation.set_urn(slice_urn)
+        reservation.set_urn(reservation_params["slice_urn"])
         reservation.set_state("Pending of Provision")
 
         reservation.set_expiration(expiration)
@@ -157,6 +161,8 @@ class OptinDriver:
         return reservation 
     
     def renew_fs(self, urn, expiration):
+        urn = self.__generate_sliver_urn_from_slice_urn(urn)
+
         flowspaces = ExpiringFlowSpaces.objects.filter(slice_urn=urn)
         if flowspaces:
             flowspace = flowspaces[0]
@@ -192,6 +198,7 @@ class OptinDriver:
         self.__geni_best_effort_mode = value
 
     def __get_geni_status(self, urn):
+        urn = self.__generate_sliver_urn_from_slice_urn(urn)
         exps = Experiment.objects.filter(slice_urn=urn)
         if exps:
             exp_fss = exps[0].experiementflowspace_set.all()
@@ -209,6 +216,7 @@ class OptinDriver:
 
     def __crud_flow_space(self, urn, action):
         try:
+            urn = self.__generate_sliver_urn_from_slice_urn(urn)
             slivers = self.__convert_to_resource(urn)
             prov_status, alloc_status = self.__get_geni_status(urn)
             if not alloc_status == self.GENI_PROVISIONED:
@@ -243,6 +251,8 @@ class OptinDriver:
             raise e
 
     def __convert_to_resource(self, urn, expiration=None):
+        
+        sliver_urn = self.__generate_sliver_urn_from_slice_urn(urn)
         exps = Experiment.objects.filter(slice_urn=urn)
         
         if exps:
@@ -251,17 +261,18 @@ class OptinDriver:
             efs = experiment.experimentflowspace_set.all()     
             return self.__parse_to_fs_object(urn,experiment, efs, expiration)
         elif Reservation.objects.filter(slice_urn=urn):
-            reservation = Reservation.objects.filter(slice_urn=urn)[0]
+            reservation = Reservation.objects.filter(slice_urn=sliver_urn)[0]
             expiration.reservation.expiration
             efs = reservation.reservationflowspace_set.all()
-            return self.__parse_to_fs_object(urn, reservation, efs, expiration)
+            return self.__parse_to_fs_object(sliver_urn, reservation, efs, expiration, slice_urn=urn)
         return None
 
-    def __parse_to_fs_object(self,urn=None, experiment=None, exp_flowspace=None, expiration=None):
+    def __parse_to_fs_object(self,urn=None, experiment=None, exp_flowspace=None, expiration=None, slice_urn=None):
         flowspace = FlowSpace()
         flowspace.set_description(experiment.slice_desc)
         flowspace.set_urn(urn)
         flowspace.set_email(str(experiment.owner_email))
+        flowspace.set_slice_urn(slice_urn)
         flowspace.set_state(self.GENI_NOT_READY)
         provisioning_status, allocation_status = self.__get_geni_status(urn)                  
         flowspace.set_allocation_status(allocation_status)
@@ -397,24 +408,29 @@ class OptinDriver:
 
         return str(max_exp).replace(" ", "T") + "Z"
 
-    def __get_experiment_params(self, fs,urn=None ,extra_params=dict()):
+    def __get_experiment_params(self, fs,slice_urn=None ,extra_params=dict()):
         experiment_params = dict()
         experiment_params['slice_desc'] = fs.get_description()
         experiment_params['controller_url'] = fs.get_controller().get_url()
         experiment_params['owner_email'] = fs.get_email()
         experiment_params['project_desc'] = fs.get_description()
-        experiment_params['project_name'] = urn
-        experiment_params['slice_name'] = urn 
+        experiment_params['project_name'] = slice_urn
+        experiment_params['slice_name'] = slice_urn
+        experiment_params['slice_urn'] = self.__generate_sliver_urn_from_slice_urn(slice_urn) 
         experiment_params['slice_id'] = uuid.uuid4() 
         return experiment_params
 
+    def __generate_sliver_urn_from_slice_urn(self, slice_urn):
+        hrn, urn_type = urn_to_hrn(slice_urn)
+        leaf = hrn.split(".")[-1]
+        return hrn_to_urn(self.__config.CM_HRN+"."+str(leaf), "sliver") 
+
     def __urn_to_fs_params(self, urn):
-        hrn, hrn_type = urn_to_hrn(urn)
-        if hrn_type == "sliver":
-            value = hrn.split(".")[-1]
-            return {"id":int(value)}
-        elif hrn_type == "slice":
-            return {"project_name":hrn, "slice_name":hrn, "slice_id": uuid.uuid4(), "slice_urn": slice_urn}
+        hrn, urn_type = urn_to_hrn(urn)
+        if urn_type == "sliver":
+            return {"slice_urn":urn}
+        elif urn_type == "slice":
+            return {"project_name":urn}
               
     def __translate_to_flow_space_model(self, match, dpid, port, model=None):
         fs = OptinUtils.format_flowspaces(match, port.get_num())
