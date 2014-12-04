@@ -223,7 +223,8 @@ class VTAMDriver:
             for params in params_list:
                 VirtualMachineKeys.objects.filter(**params).delete()
         resources = self.__crud_vm(urn, Action.PROVISIONING_VM_DELETE_TYPE)
-        expiration = ExpiringComponents.objects.filter(slice = vm_params["sliceName"])[0].expires
+        if vms:
+            expiration = ExpiringComponents.objects.filter(slice = vm_params["sliceName"])[0].expires
         for resource in resources:
             resource.set_allocation_state(self.GENI_UNALLOCATED)
             resource.set_operational_state(self.GENI_PENDING_TO_ALLOCATE)
