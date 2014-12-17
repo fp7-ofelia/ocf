@@ -53,6 +53,9 @@ class VTAMDriver:
        
        self.__config = None
 
+    def get_version(self):
+        return None
+
     def get_specific_server_and_vms(self, urn, geni_available=False):
         """
         When 'available' is False or unspecified, all resources must be retrieved.
@@ -541,9 +544,9 @@ class VTAMDriver:
         for urn in urns:
             vm_params =  self.__urn_to_vm_params(urn)
             vms = VirtualMachine.objects.filter(**vm_params)
-            vm_data = dict()
-            vm_data["host"] = dict()
             for vm in vms:
+                vm_data = dict()
+                vm_data["host"] = dict()
                 access_data = self.__generate_vt_am_services(vm)
                 vm_data["host"]["name"] = vm.name
                 vm_data["login"] = []
