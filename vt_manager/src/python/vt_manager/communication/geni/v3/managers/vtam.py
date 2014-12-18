@@ -10,6 +10,9 @@ class VTAMRM(ResourceManagerBase):
         self.REBOOT_ACTION = "REBOOT"
         self.DELETE_ACTION = "DELETE"
 
+    def get_version(self):
+        return {} 
+
     def get_resources(self, urns=None, geni_available=False):
         servers = list()
         if urns:
@@ -24,8 +27,6 @@ class VTAMRM(ResourceManagerBase):
             servers = self.__driver.get_all_servers(geni_available)
             return servers
     
-    #def create_resources(self, urns, expiration=None, users=list(), geni_best_effort=True):
-    # XXX Default geni_best_effort = False
     def create_resources(self, urns, expiration=None, users=list(), geni_best_effort=False):
         created_resources = list()
         for urn in urns:
@@ -47,31 +48,15 @@ class VTAMRM(ResourceManagerBase):
         #reserved_resources =  self.__update_reservation(reserved_resources)  #TODO
         return reserved_resources
     
-    #def delete_resources(self, urns, geni_best_effort):
-    # XXX Default geni_best_effort = False
     def delete_resources(self, urns, geni_best_effort=False):
-#        deleted_resources = list()
-#        for urn in urns:
-#            resource = self.__driver.delete_vms(urn, geni_best_effort)
-#            if type(resource) == list:
-#                deleted_resources.extend(resource)
-#            else:
-#                deleted_resources.append(resource)
-#        return deleted_resources
         return self.__crud_resources(urns, geni_best_effort, self.DELETE_ACTION)
     
-    #def start_resources(self, urns, geni_best_effort=True):
-    # XXX Default geni_best_effort = False
     def start_resources(self, urns, geni_best_effort=False):
         return self.__crud_resources(urns, geni_best_effort, self.START_ACTION)
     
-    #def stop_resources(self, urns, geni_best_effort):
-    # XXX Default geni_best_effort = False
     def stop_resources(self, urns, geni_best_effort=False):
         return self.__crud_resources(urns, geni_best_effort, self.STOP_ACTION) 
     
-    #def reboot_resources(self, urns, geni_best_effort):
-    # XXX Default geni_best_effort = False
     def reboot_resources(self, urns, geni_best_effort=False):
         return self.__crud_resources(urns, geni_best_effort, self.REBOOT_ACTION)
     
@@ -120,10 +105,7 @@ class VTAMRM(ResourceManagerBase):
         """
         return self.__driver.retrieve_access_data(urns, geni_best_effort)
     
-    #def renew_resources(self, urns, expiration, geni_best_effort):
-    # XXX Default geni_best_effort = False
     def renew_resources(self, urns, expiration, geni_best_effort=False):
-        # XXX FINISH
         resources = list()
         self.__driver.set_geni_best_effort_mode(geni_best_effort)
         for urn in urns:

@@ -77,24 +77,26 @@ class GeniV3Handler(HandlerBase):
         # Retrieving slivers to manifest
         slivers = self.__delegate.describe(urns)
         
-        
         # Crafting slivers to manifest RSpec
         output = self.__rspec_manager.compose_manifest(slivers)
         
         if options.get("geni_compressed", False):
             output = base64.b64encode(zlib.compress(output))
 
-        if not type(slivers) == list():
-            slivers = [slivers]
-
         if slivers:
+            # Only act if there is a result
+            if not type(slivers) == list:
+                slivers = [slivers]
             try:
                 slice_urn = slivers[0].get_sliver().get_slice_urn()
             except:
+                # FIXME Error: slivers is a list with 3 levels in some cases
+                print "slivers::: ", slivers
                 slice_urn = slivers[0].get_slice_urn()
         else:
             slice_urn = urns[0]
-
+        
+        print "-------------------", len(slivers)
         return self.success_result(output, slivers, slice_urn)
 
     def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict()):
@@ -236,17 +238,23 @@ class GeniV3Handler(HandlerBase):
             result = self.__delegate.status(urns)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
-
-        if not type(result) == list():
-            result = [result]
- 
+        print "-----------------------------------", result
+       
         if result:
+            # Only act if there is a result
+            if not type(result) == list:
+                result = [result]
             try:
+               
                slice_urn = result[0].get_sliver().get_slice_urn()
+               print "OK"
             except:
                slice_urn = result[0].get_slice_urn()
+               print "OK2"
         else:
+                                 
             slice_urn = urns[0]
+            print "OK3" 
         return self.success_result(slivers=result, slice_urn=slice_urn)
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
@@ -353,12 +361,6 @@ class GeniV3Handler(HandlerBase):
     def listresources_success_result(self, rspec):
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=rspec)
 
-    # TODO REMOVE
-    #def getversion_success_result(self):
-    #    code = dict(geni_code=self.__config.AM_CODE_VERSION,
-    #                am_type=self.__config.AM_TYPE)
-    #    return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=rspec)
-    
     def success_result(self, rspec=None, slivers=[], slice_urn=None, slivers_direct=list(), result=None):
         """
         Prepares "value" struct.

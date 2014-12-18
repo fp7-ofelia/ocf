@@ -52,6 +52,12 @@ class OptinDriver:
         self.__config = None
         self.__sliver_manager = SliverUtils
 
+    def get_version(self):
+        #TODO Add F4F Extensions
+        #TODO Add FELIX Extesions, if any
+        version = {"urn" : self.__generate_component_manager_id()}
+    
+
     def get_specific_devices(self, urn,geni_available=True):
         try:
             urn = self.__generate_sliver_urn_from_slice_urn(urn)
@@ -115,9 +121,9 @@ class OptinDriver:
             slivers = self.__get_create_slice_params(rfs)
             self.__sliver_manager.create_of_sliver(urn, res.project_name, res.project_desc, res.slice_name, res.slice_desc, res.controller_url, res.owner_email, res.owner_password, slivers) 
             ExpiringFlowSpaces(slice_urn=urn, expiration=expiration).save()
+            manifest = self.__convert_to_resource(urn, expiration)
             rfs.delete()
             res.delete()
-            manifest = self.__convert_to_resource(urn, expiration)
         except Exception as e:
             print traceback.print_exc()
             raise e
@@ -364,7 +370,7 @@ class OptinDriver:
         return dpid_links
      
     #URN Stuff
-    def __generate_component_manager_id(self, server):
+    def __generate_component_manager_id(self, server=None):
         return hrn_to_urn(self.__config.CM_HRN, "authority+cm")
     
     def __generate_component_manager_name(self, server):
@@ -401,6 +407,8 @@ class OptinDriver:
 
     def __get_slice_expiration(self, expiration=None):
         max_exp = datetime.utcnow() + timedelta(days=31)
+        expiration.replace("T", " ")
+        expiration.replace("Z", "")
         if expiration:
             expiration = datetime.strptime(str(expiration),"%Y-%m-%d %H:%M:%S")
             selected =  str(max(expiration, max_exp)) 

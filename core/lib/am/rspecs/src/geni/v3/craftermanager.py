@@ -15,7 +15,6 @@ class CrafterManager:
         """
         output = self.advert_header()
         for resource in resources: 
-            print "-------------------------------",output
             output += self.advert_resource(resource)
         output += self.advert_footer()
         return output    
@@ -109,7 +108,7 @@ class CrafterManager:
             sliver = resource.get_sliver() 
             result += self.manifest_template() % (sliver.get_client_id(), resource.get_component_id(), resource.get_component_manager_id(), sliver.get_urn())
             if sliver.get_type():
-                result += self.manifest_sliver_type_template() % (resource.get_id())
+                result += self.manifest_sliver_type_template() % (sliver.get_type())
             if sliver.get_services():
                 services = sliver.get_services()
                 for service in services:

@@ -9,6 +9,9 @@ class OptinRM(ResourceManagerBase):
         self.STOP_ACTION = "STOP"
         self.REBOOT_ACTION = "REBOOT"
         self.DELETE_ACTION = "DELETE"
+ 
+    def get_version(self):
+        return self.__driver.get_version()
 
     def get_resources(self, urns=None, geni_available=True):
         if urns:

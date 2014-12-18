@@ -41,6 +41,7 @@ class GeniV3Delegate(DelegateBase):
                         geni_ad_rspec_versions=adver,
                         geni_credential_types=credential_types)
         versions.keys().sort()
+        extensions = self.__resource_manager.get_version()
         return versions
     
     def list_resources(self, geni_available=False):

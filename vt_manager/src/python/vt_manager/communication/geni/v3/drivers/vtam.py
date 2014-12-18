@@ -68,8 +68,8 @@ class VTAMDriver:
                 continue
             vms = server.getChildObject().getVMs(**params)
             if vms:
-                resources = self.__convert_to_resources_with_slivers(server, vms)
-                resources.extend(resources)
+                converted_resources = self.__convert_to_resources_with_slivers(server, vms)
+                resources.extend(converted_resources)
         return resources
 
     def get_all_servers(self, geni_available=False):
@@ -349,6 +349,7 @@ class VTAMDriver:
         """
         resource = self.__convert_to_resource(server)
         resources = list()
+        
         for vm in vms:
             if not expiration:
                 try:
