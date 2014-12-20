@@ -90,13 +90,10 @@ class GeniV3Handler(HandlerBase):
             try:
                 slice_urn = slivers[0].get_sliver().get_slice_urn()
             except:
-                # FIXME Error: slivers is a list with 3 levels in some cases
-                print "slivers::: ", slivers
                 slice_urn = slivers[0].get_slice_urn()
         else:
             slice_urn = urns[0]
         
-        print "-------------------", len(slivers)
         return self.success_result(output, slivers, slice_urn)
 
     def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict()):
@@ -141,7 +138,7 @@ class GeniV3Handler(HandlerBase):
         if not "geni_users" in options:
             users = self.__get_users_pubkeys(creds)
         else:
-            users = self.__format_geni_users(options["geni_users"]) 
+            users = self.__format_geni_users(options["geni_users"])
         if not options.get("geni_rspec_version"):
             return self.error_result(self.__geni_exception_manager.BADARGS, "Bad Arguments: option geni_rspec_version does not have a version, type or geni_rspec_version fields.")
         # Options validation
@@ -238,7 +235,6 @@ class GeniV3Handler(HandlerBase):
             result = self.__delegate.status(urns)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
-        print "-----------------------------------", result
        
         if result:
             # Only act if there is a result
@@ -247,14 +243,10 @@ class GeniV3Handler(HandlerBase):
             try:
                
                slice_urn = result[0].get_sliver().get_slice_urn()
-               print "OK"
             except:
                slice_urn = result[0].get_slice_urn()
-               print "OK2"
         else:
-                                 
             slice_urn = urns[0]
-            print "OK3" 
         return self.success_result(slivers=result, slice_urn=slice_urn)
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
@@ -429,10 +421,10 @@ class GeniV3Handler(HandlerBase):
         for cred in creds:
             user = dict()
             user_gid = cred.get_gid_caller()
-            user['name'] = user_gid.get_urn()
-            user['keys'] = user_gid.get_pubkey().get_pubkey_string()
-            if not type(user['keys']) == list:
-                user['keys'] = [user['keys']]
+            user["name"] = user_gid.get_urn()
+            user["keys"] = user_gid.get_pubkey().get_pubkey_string()
+            if not type(user["keys"]) == list:
+                user["keys"] = [user["keys"]]
             users.append(user)
         return users
 
