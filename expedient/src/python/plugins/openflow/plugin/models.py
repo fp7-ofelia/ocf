@@ -272,7 +272,9 @@ production networks, and is currently deployed in several universities.
             # Carolina 2014/03/10: do not add datapath_id when no flowspace is requested for it
             if d['flowspace']:
                 sw_slivers.append(d)
-            
+                # Carolina 2015/01/08: do not allow starting a slice with a flowspace spanning all the VLANs
+                if d['flowspace'][0].get("vlan_id_start") == "*" and d['flowspace'][0].get("vlan_id_start") == "*":
+                    raise Exception("Opt-in Manager FlowSpaces require the use of VLAN or a VLAN Range")
         return sw_slivers
 
     ###################################################################

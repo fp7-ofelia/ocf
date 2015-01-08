@@ -236,7 +236,7 @@ div.steps {
 			<span class="next_link">
 				<input type="button" value="Clear" onclick="document.location='{% url flowspace slice.id %}';"/>
 				{% if done %}
-				<input type="submit" value="Save and exit" onclick="javascript: if (confirm('Flowspace(s) will be saved before exiting. Are you ready?')) { changeFlowSpaceFormActionURL('{% url save_flowspace slice.id %}'); return true; } else { return false; }"/>
+				<input type="submit" id="form_request" value="Save and exit" onclick="javascript: if (confirm('Flowspace(s) will be saved before exiting. Are you ready?')) { changeFlowSpaceFormActionURL('{% url save_flowspace slice.id %}'); return true; } else { return false; }"/>
 				{% else %}
 				<input type="button" value="Next" onclick="document.location='{% url gcf_sshkeys slice.id %}';"/>
 				{% endif %}

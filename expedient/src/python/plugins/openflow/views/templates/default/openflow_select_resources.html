@@ -497,14 +497,16 @@ $(document).ready(function(){
   {% endfor %}
 
   {% if openflow_aggs or planetlab_aggs %}
-  <input type="submit" id="next_button" name="next_button" value="Next" />
-  <input type="button" id="select_button" name="select_button" value="Select..." />
-  <div id="select_topology_nodes_buttons_div" style="display: none">
-    <input type="button" id="select_none_button" name="select_none_button" value="None" />
-    <input type="button" id="select_tree_button" name="select_tree_button" value="Tree" />
-    <input type="button" id="select_all_button" name="select_all_button" value="All" />
+  <div class="center">
+    <input type="submit" id="next_button" name="next_button" value="Next" />
+    <input type="button" id="select_button" name="select_button" value="Select..." />
+      <div id="select_topology_nodes_buttons_div" style="display: none">
+      <input type="button" id="select_none_button" name="select_none_button" value="None" />
+      <input type="button" id="select_tree_button" name="select_tree_button" value="Tree" />
+      <input type="button" id="select_all_button" name="select_all_button" value="All" />
+    </div>
+    <input type="button" value="Cancel" onclick="javascript:document.location = '{% url slice_detail slice.id %}'" />
   </div>
-  <input type="button" value="Cancel" onclick="javascript:document.location = '{% url slice_detail slice.id %}'" />
   {% endif %}
 </form>
 

@@ -163,6 +163,9 @@ $(":submit[id^=form_create], :submit[id^=form_request], :submit[id^=form_update]
                 results[index] = checkNumber(id,submitID + " memory");
             } else if (contains("url",id)) {
                 results[index] = checkNotBlank(id,submitID + " URL");
+            /* Flowspace request */
+            //} else if (contains("vlan_id",id)) {
+            //    results[index] = checkNumber(id,submitID + " VLAN");
             }
         } else if (contains("select",type)) {
             results[index] = checkDropDownSelected(id);
