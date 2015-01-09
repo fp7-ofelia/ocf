@@ -21,35 +21,35 @@ logging=amsoil.core.log.getLogger('XenServer')
 
 
 def validate_agent_url_wrapper():
-        VTServer.validate_agent_url()
+    VTServer.validate_agent_url()
 
 class XenServer(VTServer):
     """Virtualization Server Class."""
-        
+         
     __tablename__ = 'vt_manager_xenserver'
     __table_args__ = {'extend_existing':True}
-
+    
     vtserver_ptr_id = db.Column(db.Integer, db.ForeignKey('vt_manager_vtserver.id'), primary_key=True)
     vtserver = db.relationship("VTServer", backref="xenserver")
-
+    
     '''VMs array'''
     vms = association_proxy("xenserver_vms", "xenvm")
-
+    
     '''Private methods'''
     def __tupleContainsKey(tu,key):
-    	for val in tu:
+        for val in tu:
             if val[0] == key:
-            	return True
-            return False
-
+                return True
+        return False
+    
     def __addInterface(self,interface):
         if not isinstance(interface,NetworkInterface):
             raise Exception("Cannot add an interface if is not a NetworkInterface object instance")
-
+    
     '''Constructors'''
     @staticmethod
     def constructor(name, os_type, os_distribution, os_version, agent_url, agent_password, save=True):
-    	self = XenServer()
+        self = XenServer()
         try:
             self.set_name(name)
             self.set_virt_tech(VirtTechClass.VIRT_TECH_TYPE_XEN)
@@ -58,19 +58,19 @@ class XenServer(VTServer):
             self.set_os_version(os_version)
             self.set_agent_url(agent_url)
             self.set_agent_password(agent_password)
-	    self.do_save = save
-	    if save:
-	    	db.session.add(self)
-	    	db.session.commit()
+            self.do_save = save
+            if save:
+                db.session.add(self)
+                db.session.commit()
             return self
-	except Exception as e:
+        except Exception as e:
             print e
             self.destroy()
             raise e
-
+    
     '''Updater'''
     def updateServer(self,name,os_type,os_distribution,os_version,agent_url,agent_password,save=True):
-    	try:
+        try:
             self.set_name(name)
             self.set_virt_tech(VirtTechClass.VIRT_TECH_TYPE_XEN)
             self.set_os_type(os_type)
@@ -78,24 +78,24 @@ class XenServer(VTServer):
             self.set_os_version(os_version)
             self.set_agent_url(agent_url)
             self.set_agent_password(agent_password)
-	    self.do_save = save
-	    if save:
-	    	db.session.add(self)
-	    	db.session.commit()
-   	    return self
-   	except Exception as e:
+            self.do_save = save
+            if save:
+                db.session.add(self)
+                db.session.commit()
+            return self
+        except Exception as e:
             print e
             self.destroy()
             raise e
-
+    
     '''Destructor'''
     def destroy(self):
-    	with MutexStore.get_object_lock(self.get_lock_identifier()):
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
             # Destroy interfaces
             for inter in self.network_interfaces.all():
-            	inter.destroy()
-	    db.session.delete(self)
-	    db.session.commit()
+                inter.destroy()
+            db.session.delete(self)
+            db.session.commit()
     
     ''' Public interface methods '''
     def get_vms(self,**kwargs):
@@ -103,31 +103,31 @@ class XenServer(VTServer):
         
     def get_vm(self,**kwargs):
         return self.vms.filter_by(**kwargs).one()
-
+    
     def create_vm(self, name, uuid, project_id, project_name, slice_id, slice_name, os_type, os_version, os_dist, memory, disc_space_gb, number_of_cpus, callback_url, hd_setup_type, hd_oorigin_path, virt_setup_type,save=True):
-	logging.debug("**************************** Server 1")
-	with MutexStore.get_object_lock(self.get_lock_identifier()):
-	    logging.debug("******************************* Server 2")
-	    if len(XenVM.query.filter_by(uuid=uuid).all()) > 0:
-		logging.debug("*************************** Server FAIL")
-    		raise Exception("Cannot create a Virtual Machine with the same UUID as an existing one")
+        logging.debug("**************************** Server 1")
+        with MutexStore.get_object_lock(self.get_lock_identifier()):
+            logging.debug("******************************* Server 2")
+            if len(XenVM.query.filter_by(uuid=uuid).all()) > 0:
+                logging.debug("*************************** Server FAIL")
+                raise Exception("Cannot create a Virtual Machine with the same UUID as an existing one")
             # Allocate interfaces for the VM
-	    logging.debug("*************************** Server 3")
+            logging.debug("*************************** Server 3")
             interfaces = self.createEnslavedVMInterfaces()
-            # Call factory	
-	    logging.debug("**************************** Server 4")
+            # Call factory        
+            logging.debug("**************************** Server 4")
             vm = XenVM.create(name,uuid,project_id,project_name,slice_id,slice_name,os_type,os_version,os_dist,memory,disc_space_gb,number_of_cpus,callback_url,interfaces,hd_setup_type,hd_origin_path,virt_setup_type,save)
-	    logging.debug("**************************** Server 5")
-	    self.vms.append(vm)	
-	    self.auto_save()
-	    logging.debug("**************************** Server 6")
+            logging.debug("**************************** Server 5")
+            self.vms.append(vm)        
+            self.auto_save()
+            logging.debug("**************************** Server 6")
             return vm
 
     def deleteVM(self,vm):
-    	with MutexStore.get_object_lock(self.get_lock_identifier()):
+            with MutexStore.get_object_lock(self.get_lock_identifier()):
             if vm not in self.vms.all():
-            	raise Exception("Cannot delete a VM from pool if it is not already in")
+                raise Exception("Cannot delete a VM from pool if it is not already in")
             db_session.delete(vm)
-	    db_session.commit()
+            db_session.commit()
             vm.destroy()
-	    self.auto_save()
+            self.auto_save()
