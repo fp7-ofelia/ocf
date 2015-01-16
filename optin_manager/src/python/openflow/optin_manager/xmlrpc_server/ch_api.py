@@ -97,6 +97,14 @@ def convert_star(fs):
     om_ch_translate.attr_funcs.items():
         ch_start = "%s_start" % ch_name
         ch_end = "%s_end" % ch_name
+       
+        #Checking that the request has a defined a VLAN or a VLAN range, if not an Exception is raised
+        if ch_name == "vlan_id":
+            if ch_start not in fs or fs[ch_start] == "*":
+                raise Exception("Opt-in Manager FlowSpaces require the use of VLAN or a VLAN Range")
+            if ch_end not in fs or fs[ch_end] == "*":
+                raise Exception("Opt-in Manager FlowSpaces require the use of VLAN or a VLAN Range")
+ 
         if ch_start not in fs or fs[ch_start] == "*":
             temp[ch_start] = to_str(0)
         if ch_end not in fs or fs[ch_end] == "*":
@@ -314,8 +322,12 @@ def create_slice(slice_id, project_name, project_description,
                     efs.direction = get_direction(sfs['direction'])
                 else:
                     efs.direction = 2
-                        
-                fs = convert_star(sfs)
+                try:       
+                    fs = convert_star(sfs)
+                except Exception as exc:
+                    #The most probably cause is the fs was requested without VLANs
+                    e.delete()
+                    raise exc
                 for attr_name,(to_str, from_str, width, om_name, of_name) in \
                 om_ch_translate.attr_funcs.items():
                     ch_start ="%s_start"%(attr_name)
@@ -755,7 +767,16 @@ def get_used_vlans(range_len=1, direct_output=False):
         rnd = random.randrange(0, len(vlans))
         # Return random VLAN [from 0 to len(vlans)-1] for all the available to minimise collisions
         return [vlans[rnd]]
-          
+
+@rpcmethod()
+def ListResources(args=None):
+    # Used in ListResources for external monitoring (e.g. FELIX monitoring)
+    from openflow.optin_manager.geni.v3.configurators.optin import HandlerConfigurator
+    rspec_manager = HandlerConfigurator.get_optin_rspec_manager()
+    driver = HandlerConfigurator.get_optin_driver()
+    resources_data = driver.get_all_devices()
+    return rspec_manager.compose_advertisement(resources_data)
+
 @check_fv_set
 @rpcmethod()
 def get_ocf_am_version(args=None):
