@@ -14,7 +14,9 @@ from vt_manager.common.rpc4django import rpcmethod
 from vt_manager.common.rpc4django import *
 from threading import Thread
 #TODO: Provisional import to make test with VTPlanner. Use SFA API whe stable
-from vt_manager.communication.sfa.managers.AggregateManager import AggregateManager
+#from vt_manager.communication.sfa.managers.AggregateManager import AggregateManager
+# Used in ListResources for external monitoring (e.g. FELIX monitoring)
+from vt_manager.communication.geni.v3.configurators.handlerconfigurator import HandlerConfigurator
 
 #XXX: Sync Thread for VTPlanner
 from vt_manager.utils.ServiceProcess import ServiceProcess
@@ -99,6 +101,13 @@ def listResources(remoteHashValue, projectUUID = 'None', sliceUUID ='None'):
 	
 	v,s = getattr (DispatcherLauncher,"processInformation")(remoteHashValue, projectUUID, sliceUUID)
 	return v,s
+
+@rpcmethod(url_name="plugin")
+def ListResources():
+	rspec_manager = HandlerConfigurator.get_vt_am_rspec_manager()
+	driver = HandlerConfigurator.get_vt_am_driver()
+	resources_data = driver.get_all_servers()
+	return rspec_manager.compose_advertisement(resources_data)
 
 @rpcmethod(url_name="plugin")
 def ListResourcesAndNodes(slice_urn='None'):
