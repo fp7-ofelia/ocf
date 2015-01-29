@@ -151,7 +151,12 @@ class VTAMDriver:
         server_name = server_hrn.split(".")[-1]
         server = VTServer.objects.get(name=server_name).getChildObject()
         server_id = server.id 
-        reservation_name = str(random.randint(0,1000*1000))
+        if reservation.get_id():
+            if Reservation.objects.filter(sliceName=slice_hrn, projectName=slice_hrn, name=reservation.get_id()) or VirtualMachine.objects.filter(sliceName=slice_hrn, projectName=slice_hrn, name=reservation.get_id()):
+                raise Exception("There is another VM with client id %s on this slice already <GENI PROVISIONED> or <GENI ALLOCATED>" %reservation.get_id())
+            reservation_name = reservation.get_id()
+        else:
+            reservation_name = str(random.randint(0,1000*1000))
         
         if expiration == None:
             expiration = datetime.utcnow() + timedelta(hours=1) 
@@ -163,13 +168,15 @@ class VTAMDriver:
         reserved_vm.set_project_name(slice_hrn)
         reserved_vm.set_name(reservation_name)
         reserved_vm.set_valid_until(str(expiration))
+        reserved_vm.uuid = str(uuid.uuid4())
         reserved_vm.save()
         
         # Set information for sliver
-        reservation.get_sliver().set_urn(hrn_to_urn(server_hrn+"."+reservation_name, "sliver"))
+        reservation.get_sliver().set_urn(hrn_to_urn(server_hrn+"."+str(reserved_vm.id), "sliver"))
         reservation.get_sliver().set_allocation_status(self.GENI_ALLOCATED)
         reservation.get_sliver().set_expiration(expiration)
         reservation.get_sliver().set_operational_status(self.GENI_NOT_READY)
+        reservation.get_sliver().set_client_id(reservation_name)
         reservation.set_allocation_status = self.GENI_ALLOCATED
         #vm_params = self.__urn_to_vm_params(slice_urn)
         #self.__store_user_keys(users, vm_params)
@@ -357,16 +364,19 @@ class VTAMDriver:
                 except Exception as e:
                     print e
             new_resource = copy.deepcopy(resource)
+            new_resource.set_id(vm.name)
+
             sliver = Sliver()
             sliver.set_type("VM")
             sliver.set_expiration(expiration)
-            sliver.set_client_id(new_resource.get_component_manager_id())
+            sliver.set_client_id(vm.name)
             sliver.set_urn(self.__generate_sliver_urn(vm))
             sliver.set_services(self.__generate_vt_am_services(vm))
             sliver.set_allocation_status(self.__translate_to_allocation_state(vm))
             sliver.set_operational_status(self.__translate_to_operational_state(vm))
             sliver.set_expiration(expiration)
             new_resource.set_sliver(sliver)
+            
             resources.append(copy.deepcopy(new_resource))
         return resources
     
@@ -376,8 +386,11 @@ class VTAMDriver:
         vm_ip = self.__get_ip_from_vm(vm)
         login_services = [{"login":{"authentication":"ssh", "hostname":vm_ip, "port": "22", "username":"root", "pasword":"openflow"}}]
         keys = VirtualMachineKeys.objects.filter(vm_uuid=vm.uuid)
+        used_user_names = []
         for key in keys:
-            login_services.append({"login":{"authentication":"ssh-keys", "hostname":vm_ip, "port": "22", "username":key.user_name}})
+            if not key.user_name in used_user_names:
+                login_services.append({"login":{"authentication":"ssh-keys", "hostname":vm_ip, "port": "22", "username":key.user_name}})
+                used_user_names.append(key.user_name)
         return login_services
 
     #URN Stuff
@@ -443,7 +456,7 @@ class VTAMDriver:
         vm["slice-id"] = str(uuid.uuid4())	
  	vm["project-name"] = reservation.get_project_name()
  	vm["slice-name"]= reservation.get_slice_name()
- 	vm["uuid"] = str(uuid.uuid4())
+ 	vm["uuid"] = reservation.uuid
         vm["virtualization-type"] = reservation.server.getVirtTech()
  	vm["server-id"] = reservation.server.getUUID()
         vm["name"] = reservation.get_name()

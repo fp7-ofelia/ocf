@@ -48,13 +48,18 @@ def get_sliver_status(slice_id, **kwargs):
             if not existing_fs:
                 fs_dict['openflow'].append(openflow_dict)
                 gfs_list.append(fs_dict)
-
+        print "----------------------------------------------------"
+        import pprint
+        pprint.pprint(gfs_list)
         return gfs_list
 
     try:
-        exp = Experiment.objects.filter(slice_id = slice_id)
-        if exp and len(exp) == 1:
-            opts = exp[0].useropts_set.all()
+        print "----------------------------------"
+        print slice_id 
+        exp = Experiment.objects.filter(slice_urn = slice_id)[0]
+        print "Experiment",exp
+        if exp: 
+            opts = exp.useropts_set.all()
             if opts:
                 gfs = opts[0].optsflowspace_set.all()
                 gfs = parse_granted_flowspaces(gfs)
@@ -63,6 +68,8 @@ def get_sliver_status(slice_id, **kwargs):
         else:
             gfs = []
     except Exception,e:
+        import traceback
+        traceback.print_exc()
         raise e
 
     return gfs

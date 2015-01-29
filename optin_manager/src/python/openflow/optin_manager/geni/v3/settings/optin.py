@@ -20,7 +20,9 @@ class OptinConfig(Settings):
     AD_RSPEC_VERSION = 3
     AD_RSPEC_SCHEMA = "http://www.geni.net/resources/rspec/3/ad.xsd"
     AD_RSPEC_NAMESPACE = "http://www.geni.net/resources/rspec/3"
-    AD_RSPEC_EXTENSIONS = []
-    
+    AD_RSPEC_EXTENSIONS = [{"openflow":"http://www.geni.net/resources/rspec/ext/openflow/3"}]
+   
+    REQ_RSPEC_EXTENSIONS = [{"openflow":"http://www.geni.net/resources/rspec/ext/openflow/3"}]
+     
     GENI_API_VERSION = 3
-    AM_URL = "https://llull.ctx.i2cat.net:8443/xmlrpc/geni/3"
+    AM_URL = "https://137.222.204.27:8443/xmlrpc/geni/3/"

@@ -13,6 +13,7 @@ class Reservation(models.Model):
     name = models.CharField(max_length = 512, default="", verbose_name = "Reservation name")
     projectName = models.CharField(max_length = 1024, default="")
     sliceName = models.CharField(max_length = 1024, default="")
+    uuid  = models.CharField(max_length = 1024, default="")
     
 
     def get_name(self):

@@ -72,13 +72,15 @@ class ProvisioningResponseDispatcher():
                                         logging.debug("Sending response to plug-in in sendAsync")
                                         if str(vm.callBackURL) == 'SFA.OCF.VTM':
                                                 logging.debug("callback: %s" % vm.callBackURL)
+                                                print "-------------->PRD: Created:", created, "Was_creating:", was_creating, "vm_started:", vm_started 
+                                                print "-------------->PRD Action:", action, action.server.__dict__ 
                                                 # Start VM just after creating sliver/VM
                                                 if created and was_creating:
                                                     from vt_manager.communication.sfa.drivers.VTSfaDriver import VTSfaDriver
                                                     driver = VTSfaDriver(None)
                                                     driver.crud_slice(vm.sliceName,vm.projectName, "start_slice")
-                                                    return
-     
+                                                    ProvisioningResponseDispatcher.__clean_up_reservations(vm.uuid)
+                                                    return 
                                                 #if was_created and vm_started:
                                                 if vm_started:
                                                     ifaces = vm.getNetworkInterfaces()
@@ -89,7 +91,6 @@ class ProvisioningResponseDispatcher():
                                                     # Contextualize VMs
                                                     ProvisioningResponseDispatcher.__contextualize_vm(vm, ip)
                                                     # Cleaning up reservation objects
-                                                    ProvisioningResponseDispatcher.__clean_up_reservations(vm.name)
 					        return
 					XmlRpcClient.callRPCMethod(vm.getCallBackURL(), "sendAsync", XmlHelper.craftXmlClass(rspec))
 					if failedOnCreate == 1:
@@ -228,14 +229,14 @@ class ProvisioningResponseDispatcher():
 			vm.setState(VirtualMachine.FAILED_STATE)
         
         @staticmethod
-        def __clean_up_reservations(vm_name):
+        def __clean_up_reservations(vm_id):
             try:
                 logging.debug("ProvisioningResponseDispatcher.py.__clean_up_reservations...")
-                logging.debug("vm_name... %s" % vm_name)
-                logging.debug("reservation object: %s" % str(Reservation.objects.get(name = vm_name)))
-                Reservation.objects.get(name = vm_name).delete()
+                logging.debug("vm_uuid... %s" % vm_id)
+                logging.debug("reservation object: %s" % str(Reservation.objects.get(uuid = vm_id)))
+                Reservation.objects.get(uuid = vm_id).delete()
             except Exception as e:
-                logging.debug("Failed to delete reservation for VM with name: %s. Exception: %s" % (str(vm_name), e))
+                logging.debug("Failed to delete reservation for VM with name: %s. Exception: %s" % (str(vm_id), e))
                 return
         
         @staticmethod
