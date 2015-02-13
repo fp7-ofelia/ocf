@@ -371,10 +371,12 @@ class OptinDriver:
      
     #URN Stuff
     def __generate_component_manager_id(self, server=None):
-        return hrn_to_urn(self.__config.CM_HRN, "authority+cm")
+        hrn = "openflow." + self.__config.CM_HRN
+        return hrn_to_urn(hrn, "authority+cm")
     
     def __generate_component_manager_name(self, server):
-        return hrn_to_urn(self.__config.CM_HRN, "authority+cm")
+        hrn = "openflow." + self.__config.CM_HRN
+        return hrn_to_urn(hrn, "authority+cm")
 
     def __generate_dpid_component_id(self, dpid):
         hrn = "openflow." + self.__config.CM_HRN + "." + str(dpid.get_datapath())
