@@ -221,25 +221,32 @@ class OptinDriver:
         raise Exception("Slice Does Not Exists")    
 
     def __crud_flow_space(self, urn, action):
+        """
+        PerformOperationalAction-related logic.
+        """
         try:
             urn = self.__generate_sliver_urn_from_slice_urn(urn)
             slivers = self.__convert_to_resource(urn)
             prov_status, alloc_status = self.__get_geni_status(urn)
+            # Special case for deleting allocated slivers
+            if alloc_status == self.GENI_ALLOCATED and action == "delete":
+                res = Reservation.objects.filter(slice_urn=urn)[0]
+                rfs = res.reservationflowspace_set.all()
+                rfs.delete()
+                res.delete()
+                return slivers
             if not alloc_status == self.GENI_PROVISIONED:
                 raise Exception("Operational Actions can be only performed to provisioned slivers")
-
             if action == "delete":
                 self.__sliver_manager.delete_of_sliver(urn)
                 slivers.set_operational_status(self.GENI_NOT_READY)
                 slivers.set_allocation_status(self.GENI_UNALLOCATED)
-
             elif action == "start" or action == "reboot":
                 if not prov_status in [self.GENI_READY, self.GENI_CONFIGURING]:
                     self.__sliver_manager.opt_in(urn)
                     prov_status, alloc_status = self.__get_geni_status(urn)
                     slivers.set_operational_status(prov_status)
                     slivers.set_allocation_status(alloc_status)
-                
             elif action == "stop":
                 self.__sliver_manager.opt_out(urn)
                 slivers.set_operational_status(self.GENI_NOT_READY)
@@ -248,8 +255,6 @@ class OptinDriver:
                 if prov_status == self.GENI_READY:  
                     expiring_fs.was_granted = True
                     expiring_fs.save()
-                
-            
             return slivers
         except Exception as e:
             import traceback
@@ -268,7 +273,7 @@ class OptinDriver:
             return self.__parse_to_fs_object(urn,experiment, efs, expiration)
         elif Reservation.objects.filter(slice_urn=urn):
             reservation = Reservation.objects.filter(slice_urn=sliver_urn)[0]
-            expiration.reservation.expiration
+            expiration = reservation.expiration
             efs = reservation.reservationflowspace_set.all()
             return self.__parse_to_fs_object(sliver_urn, reservation, efs, expiration, slice_urn=urn)
         return None
@@ -409,13 +414,12 @@ class OptinDriver:
 
     def __get_slice_expiration(self, expiration=None):
         max_exp = datetime.utcnow() + timedelta(days=31)
-        expiration.replace("T", " ")
-        expiration.replace("Z", "")
         if expiration:
-            expiration = datetime.strptime(str(expiration),"%Y-%m-%d %H:%M:%S")
+            expiration = expiration.replace("T", " ")
+            expiration = expiration.replace("Z", "")
+            expiration = datetime.strptime(str(expiration),"%Y-%m-%d %H:%M:%S.%f")
             selected =  str(max(expiration, max_exp)) 
             return selected.replace(" ", "T") + "Z"
-
         return str(max_exp).replace(" ", "T") + "Z"
 
     def __get_experiment_params(self, fs,slice_urn=None ,extra_params=dict()):

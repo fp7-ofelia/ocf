@@ -43,8 +43,19 @@ class OptinRM(ResourceManagerBase):
     def delete_resources(self, urns, geni_best_effort):
         return self.__crud_resources(urns, geni_best_effort, self.DELETE_ACTION)
 
-    def renew_resources(self, urns, expiration, geni_best_effort):
-        return None
+    def renew_resources(self, urns, expiration, geni_best_effort=False):
+        resources = list()
+        self.__driver.set_geni_best_effort_mode(geni_best_effort)
+        for urn in urns:
+            try:
+                resource = self.__driver.renew_fs(urn, expiration)
+            except Exception as e:
+                raise e
+            if type(resource) == list:
+                resources.extend(resource)
+            else:
+                resources.append(resource)
+        return resources
 
     def __crud_resources(self, urns, geni_best_effort, action):
         self.__driver.set_geni_best_effort_mode(geni_best_effort)
