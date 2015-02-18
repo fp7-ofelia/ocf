@@ -112,9 +112,9 @@ class FOAMLibCrafter:
 
         rspec = ET.Element("rspec", nsmap=NSMAP)
         rspec.attrib["{%s}schemaLocation" % (self.XSNS)] = self.PGNS + " " \
-                     "http://www.geni.net/resources/rspec/3/ad.xsd " + \
+                     "http://www.geni.net/resources/rspec/3/manifest.xsd " + \
                      self.OFNSv3 + " " \
-                     "http://www.geni.net/resources/rspec/ext/openflow/3/of-ad.xsd"
+                     "http://www.geni.net/resources/rspec/ext/openflow/3/of-resv.xsd"
         rspec.attrib["type"] = "manifest"
         
         od = ET.SubElement(rspec, "{%s}sliver" % (self.OFNSv3))

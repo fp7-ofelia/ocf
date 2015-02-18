@@ -232,12 +232,16 @@ class OptinDriver:
             if alloc_status == self.GENI_ALLOCATED and action == "delete":
                 res = Reservation.objects.filter(slice_urn=urn)[0]
                 rfs = res.reservationflowspace_set.all()
+                efs = ExpiringFlowSpaces.objects.filter(slice_urn=urn)
+                efs.delete()
                 rfs.delete()
                 res.delete()
                 return slivers
             if not alloc_status == self.GENI_PROVISIONED:
                 raise Exception("Operational Actions can be only performed to provisioned slivers")
             if action == "delete":
+                efs = ExpiringFlowSpaces.objects.filter(slice_urn=urn)
+                efs.delete()
                 self.__sliver_manager.delete_of_sliver(urn)
                 slivers.set_operational_status(self.GENI_NOT_READY)
                 slivers.set_allocation_status(self.GENI_UNALLOCATED)
