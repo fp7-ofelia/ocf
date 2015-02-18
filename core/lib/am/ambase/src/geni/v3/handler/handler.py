@@ -363,7 +363,7 @@ class GeniV3Handler(HandlerBase):
                 geni_sliver_special_struct = self.__get_geni_sliver_structure(sliver)
                 value.append(geni_sliver_special_struct)
         elif result != None:
-            value = result   
+            value = result
         else:    
             value = dict()
             if rspec:

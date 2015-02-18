@@ -359,7 +359,6 @@ class VTAMDriver:
         """
         resource = self.__convert_to_resource(server)
         resources = list()
-        
         for vm in vms:
             if not expiration:
                 try:
@@ -368,12 +367,12 @@ class VTAMDriver:
                     print e
             new_resource = copy.deepcopy(resource)
             new_resource.set_id(vm.name)
-
             sliver = Sliver()
             sliver.set_type("VM")
             sliver.set_expiration(expiration)
             sliver.set_client_id(vm.name)
             sliver.set_urn(self.__generate_sliver_urn(vm))
+            sliver.set_slice_urn(hrn_to_urn(vm.sliceName, "slice"))
             sliver.set_services(self.__generate_vt_am_services(vm))
             sliver.set_allocation_status(self.__translate_to_allocation_state(vm))
             sliver.set_operational_status(self.__translate_to_operational_state(vm))

@@ -266,10 +266,8 @@ class OptinDriver:
             raise e
 
     def __convert_to_resource(self, urn, expiration=None):
-        
         sliver_urn = self.__generate_sliver_urn_from_slice_urn(urn)
         exps = Experiment.objects.filter(slice_urn=urn)
-        
         if exps:
             experiment = exps[0]
             expiration = ExpiringFlowSpaces.objects.filter(slice_urn=experiment.slice_urn)[0].expiration
@@ -287,7 +285,7 @@ class OptinDriver:
         flowspace.set_description(experiment.slice_desc)
         flowspace.set_urn(urn)
         flowspace.set_email(str(experiment.owner_email))
-        flowspace.set_slice_urn(slice_urn)
+        flowspace.set_slice_urn(urn) # slice_urn == urn (optin)
         flowspace.set_state(self.GENI_NOT_READY)
         provisioning_status, allocation_status = self.__get_geni_status(urn)                  
         flowspace.set_allocation_status(allocation_status)
