@@ -226,6 +226,9 @@ class VTAMDriver:
 
     def delete_vm(self, urn):
         vm_params  = self.__urn_to_vm_params(urn)
+        # Deleting allocated slivers
+        Reservation.objects.filter(**vm_params).delete()
+        # Deleting provisioned slivers
         vms = VirtualMachine.objects.filter(**vm_params)
         # Remove SSH keys for each deleted VM
         for vm in vms:

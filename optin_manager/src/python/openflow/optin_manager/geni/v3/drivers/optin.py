@@ -308,7 +308,7 @@ class OptinDriver:
         res = Reservation.objects.filter(slice_urn = urn)
         if res:
             return self.GENI_NOT_READY, self.GENI_ALLOCATED
-        raise Exception("Slice Does Not Exists")
+        raise Exception("Slice Does Not Exist")
 
 
     def __get_switches(self):
@@ -417,7 +417,10 @@ class OptinDriver:
         if expiration:
             expiration = expiration.replace("T", " ")
             expiration = expiration.replace("Z", "")
-            expiration = datetime.strptime(str(expiration),"%Y-%m-%d %H:%M:%S.%f")
+            try:
+               expiration = datetime.strptime(str(expiration),"%Y-%m-%d %H:%M:%S.%f")
+            except:
+                expiration = datetime.strptime(str(expiration),"%Y-%m-%d %H:%M:%S")
             selected =  str(max(expiration, max_exp)) 
             return selected.replace(" ", "T") + "Z"
         return str(max_exp).replace(" ", "T") + "Z"
