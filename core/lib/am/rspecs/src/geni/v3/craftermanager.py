@@ -117,7 +117,7 @@ class CrafterManager:
             if sliver.get_services():
                 services = sliver.get_services()
                 for service in services:
-                    if service["login"]["username"] == "root":
+                    if service["login"]["username"].startswith("root:"):
                         result += self.manifest_services_template_root() % service["login"]["hostname"]
                     else:
                         result += self.manifest_services_template() % (service["login"]["hostname"], service["login"]["username"])
