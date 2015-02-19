@@ -102,14 +102,14 @@ class GeniV3Handler(HandlerBase):
             creds = self.__credential_manager.validate_for("Allocate", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        #expiration = self.__get_expiration()
         reservation = self.__rspec_manager.parse_request(rspec)
+        # expiration == self.__get_expiration(creds)
+        # First is datetime, Second is RFC3339
         expiration = self.__credential_manager.get_slice_expiration(creds)
-        # It is possible for the user to allocate a sliver with a sooner expiration time
+        # It is to request for sliver expiration time < credentials expiration time
         if "geni_end_time" in options:
             expiration = min(self.__get_expiration(creds), options["geni_end_time"])
         users = self.__get_users_pubkeys(creds)
-        
         try:
             allocated_slivers = self.__delegate.reserve(slice_urn, reservation, expiration, users)
         except SliceAlreadyExists as e:
@@ -255,9 +255,9 @@ class GeniV3Handler(HandlerBase):
             creds = self.__credential_manager.validate_for("Renew", credentials)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
-        expiration = self.__credential_manager.get_slice_expiration(creds)
+        slice_expiration = self.__credential_manager.get_slice_expiration(creds)
         try:
-            expiration = self.__rfc3339_to_datetime(expiration)
+            slice_expiration = self.__rfc3339_to_datetime(slice_expiration)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.SEARCHFAILED, e)
         # Format dates to expected output
@@ -268,24 +268,28 @@ class GeniV3Handler(HandlerBase):
         now = datetime.datetime.utcnow()
         # NOTE: Possibly existing on GCF, but not on GENIv3 API. Using it here, though
         if "geni_extend_alap" in options and options["geni_extend_alap"]:
-            if expiration < expiration_time:
-                expiration = expiration_time
+            if slice_expiration < expiration_time:
+                slice_expiration = expiration_time
         # If slice already expired & user tries to extend...
-        if expiration < expiration_time:
+        if slice_expiration < expiration_time:
             # Fail the call, the requested expiration exceeds the slice expir.
             msg = "Expired slice or slivers: Requested expiration %s exceeds sliver expiration %s" \
-                   % (expiration_time, expiration)
+                   % (expiration_time, slice_expiration)
             return self.error_result(self.__geni_exception_manager.EXPIRED, msg)
         # If user tries to extend to a past date...
         elif expiration_time < now:
             msg = "Expired slice or slivers: Requested expiration %s is in the past (current time: %s)" \
-                   % (expiration_time, now.strftime("%Y-%m-%d %H:%M:%S"))
+                   % (expiration_time, now.strftime("%Y-%m-%d %H:%M:%S.%f"))
             return self.error_result(self.__geni_exception_manager.ERROR, msg)
         # When requested expiration time is less than the slice expiration and a valid expiration date, serve
         else:
             # Check options and perform call to delegate
             geni_best_effort = options.get("geni_best_effort", False)
-            result = self.__delegate.renew(urns, expiration, geni_best_effort)
+            try:
+                result = self.__delegate.renew(urns, expiration_time, geni_best_effort)
+            except Exception as e:
+                if "NOT FOUND" in str(e).upper():
+                    return self.error_result(self.__geni_exception_manager.SEARCHFAILED, str(e))
         return self.success_result(slivers_direct=result)
     
     def Shutdown(self, slice_urn="", credentials=list(), options=dict()):
@@ -313,9 +317,12 @@ class GeniV3Handler(HandlerBase):
         try:
             # Hint: use "strict_rfc3339" package for validation: strict_rfc3339.validate_rfc3339(...)
             # May also be computed as date.replace(...).isoformat("T")
-            formatted_date = date.replace(tzinfo=dateutil.tz.tzutc()).strftime("%Y-%m-%d %H:%M:%S").replace(" ", "T")+"Z"
+            formatted_date = date.replace(tzinfo=dateutil.tz.tzutc()).strftime("%Y-%m-%d %H:%M:%S.%f").replace(" ", "T")+"Z"
         except:
-            formatted_date = date
+            try:
+                formatted_date = date.replace(tzinfo=dateutil.tz.tzutc()).strftime("%Y-%m-%d %H:%M:%S").replace(" ", "T")+"Z"
+            except:
+                formatted_date = date
         return formatted_date
     
     def __rfc3339_to_datetime(self, date):
@@ -324,9 +331,14 @@ class GeniV3Handler(HandlerBase):
         """
         try:
             # Removes everything after a "+" or a "."
-            date_form = re.sub(r'[\+|\.].+', "", date)
-            formatted_date = datetime.datetime.strptime(date_form.replace("T"," "), "%Y-%m-%d %H:%M:%S")
-            #formatted_date = datetime.datetime.strptime(date[:-1].replace("T"," "), "%Y-%m-%d %H:%M:%S")
+            #date_form = re.sub(r'[\+|\.].+', "", date)
+            # Removes everything after a "+"
+            date_form = re.sub(r'[\+].+', "", date)
+            try:
+                formatted_date = datetime.datetime.strptime(date_form.replace("T"," "), "%Y-%m-%d %H:%M:%S.%f")
+                #formatted_date = datetime.datetime.strptime(date[:-1].replace("T"," "), "%Y-%m-%d %H:%M:%S")
+            except:
+                formatted_date = datetime.datetime.strptime(date_form.replace("T"," "), "%Y-%m-%d %H:%M:%S")
         except:
             formatted_date = date
         return formatted_date

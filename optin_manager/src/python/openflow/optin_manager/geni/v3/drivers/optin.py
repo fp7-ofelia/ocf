@@ -168,21 +168,21 @@ class OptinDriver:
     
     def renew_fs(self, urn, expiration):
         urn = self.__generate_sliver_urn_from_slice_urn(urn)
-
         flowspaces = ExpiringFlowSpaces.objects.filter(slice_urn=urn)
-        if flowspaces:
-            flowspace = flowspaces[0]
+#        if flowspaces:
+#            flowspace = flowspaces[0]
+        for flowspace in flowspaces:
             flowspace.expiration = expiration
             flowspace.save()
 	    return self.__convert_to_resource(urn, expiration)
         else:
-            reservations = Reservations.objects.filter(slice_urn=urn)
-            if reservations:
-                reservation = reservations[0]
+            reservations = Reservation.objects.filter(slice_urn=urn)
+#            if reservations:
+                #reservation = reservations[0]
+            for reservation in reservations:
                 reservation.expiration = expiration
                 reservation.save()
                 return self.__convert_to_resource(urn, expiration)
-
         raise Exception("Sliver not Found")
    
     def start_flow_space(self, urn):
@@ -230,12 +230,17 @@ class OptinDriver:
             prov_status, alloc_status = self.__get_geni_status(urn)
             # Special case for deleting allocated slivers
             if alloc_status == self.GENI_ALLOCATED and action == "delete":
-                res = Reservation.objects.filter(slice_urn=urn)[0]
-                rfs = res.reservationflowspace_set.all()
+#                res = Reservation.objects.filter(slice_urn=urn)[0]
+                reservations = Reservation.objects.filter(slice_urn=urn)
+                for res in reservations:
+                    rfs = res.reservationflowspace_set.all()
+                    rfs.delete()
+                    res.delete()
                 efs = ExpiringFlowSpaces.objects.filter(slice_urn=urn)
                 efs.delete()
-                rfs.delete()
-                res.delete()
+                # Needed for coherent output
+                slivers.set_operational_status(self.GENI_NOT_READY)
+                slivers.set_allocation_status(self.GENI_UNALLOCATED)
                 return slivers
             if not alloc_status == self.GENI_PROVISIONED:
                 raise Exception("Operational Actions can be only performed to provisioned slivers")
@@ -268,14 +273,18 @@ class OptinDriver:
     def __convert_to_resource(self, urn, expiration=None):
         sliver_urn = self.__generate_sliver_urn_from_slice_urn(urn)
         exps = Experiment.objects.filter(slice_urn=urn)
+        if expiration:
+            expiration = str(expiration)
         if exps:
             experiment = exps[0]
-            expiration = ExpiringFlowSpaces.objects.filter(slice_urn=experiment.slice_urn)[0].expiration
+            if not expiration:
+                expiration = ExpiringFlowSpaces.objects.filter(slice_urn=experiment.slice_urn)[0].expiration
             efs = experiment.experimentflowspace_set.all()     
-            return self.__parse_to_fs_object(urn,experiment, efs, expiration)
+            return self.__parse_to_fs_object(urn, experiment, efs, expiration)
         elif Reservation.objects.filter(slice_urn=urn):
             reservation = Reservation.objects.filter(slice_urn=sliver_urn)[0]
-            expiration = reservation.expiration
+            if not expiration:
+                expiration = reservation.expiration
             efs = reservation.reservationflowspace_set.all()
             return self.__parse_to_fs_object(sliver_urn, reservation, efs, expiration, slice_urn=urn)
         return None
@@ -287,10 +296,11 @@ class OptinDriver:
         flowspace.set_email(str(experiment.owner_email))
         flowspace.set_slice_urn(urn) # slice_urn == urn (optin)
         flowspace.set_state(self.GENI_NOT_READY)
-        provisioning_status, allocation_status = self.__get_geni_status(urn)                  
+        provisioning_status, allocation_status = self.__get_geni_status(urn)
         flowspace.set_allocation_status(allocation_status)
+#        flowspace.set_expiration(self.__get_slice_expiration(expiration))
         flowspace.set_operational_status(provisioning_status)
-        flowspace.set_expiration(self.__get_slice_expiration(expiration))
+        flowspace.set_expiration(expiration)
         controller = Controller()
         controller.parse_url(experiment.controller_url)
         flowspace.set_controller(controller)
@@ -306,12 +316,10 @@ class OptinDriver:
                 return self.GENI_READY, self.GENI_PROVISIONED
             else:
                 return self.GENI_NOT_READY, self.GENI_PROVISIONED
-
         res = Reservation.objects.filter(slice_urn = urn)
         if res:
             return self.GENI_NOT_READY, self.GENI_ALLOCATED
         raise Exception("Slice Does Not Exist")
-
 
     def __get_switches(self):
         fv =  FVServerProxy.objects.all()[0]
