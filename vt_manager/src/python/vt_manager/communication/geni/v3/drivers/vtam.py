@@ -248,12 +248,12 @@ class VTAMDriver:
         resources = self.__crud_vm(urn, Action.PROVISIONING_VM_DELETE_TYPE)
         if vms_provisioned or vms_allocated:
             expiration = ExpiringComponents.objects.filter(slice = vm_params["sliceName"])[0].expires
-        for resource in resources:
-            resource.set_allocation_state(self.GENI_UNALLOCATED)
-            resource.set_operational_state(self.GENI_PENDING_TO_ALLOCATE)
-            resource.get_sliver().set_allocation_status(self.GENI_UNALLOCATED)
-            resource.get_sliver().set_operational_status(self.GENI_PENDING_TO_ALLOCATE)
-            resource.get_sliver().set_expiration(expiration)
+            for resource in resources:
+                resource.set_allocation_state(self.GENI_UNALLOCATED)
+                resource.set_operational_state(self.GENI_PENDING_TO_ALLOCATE)
+                resource.get_sliver().set_allocation_status(self.GENI_UNALLOCATED)
+                resource.get_sliver().set_operational_status(self.GENI_PENDING_TO_ALLOCATE)
+                resource.get_sliver().set_expiration(expiration)
         # Allocated VMs are deleted here
         vms_allocated.delete()
         if not resources:
