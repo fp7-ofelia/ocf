@@ -63,10 +63,20 @@ class VTAMDriver:
         params =  self.__urn_to_vm_params(urn)
         servers = VTServer.objects.all()
         resources = list() 
+        vms = list()
         for server in servers:
             if not server.available and geni_available:
                 continue
-            vms = server.getChildObject().getVMs(**params)
+            # Look for provisioned VMs
+            vms_provisioned = server.getChildObject().getVMs(**params)
+            # ... Also for reserved VMs
+            vms_allocated = Reservation.objects.filter(server__id=server.id)
+            vms.extend(vms_provisioned)
+            # NOTE: if there are VMs provisioned, these are the ones to be returned
+            # Explanation: when a VM is provisioned, the reservation for the
+            # VM may still be active, but it is of no interest to the user
+            #if not vms_provisioned:
+            vms.extend(vms_allocated)
             if vms:
                 converted_resources = self.__convert_to_resources_with_slivers(server, vms)
                 resources.extend(converted_resources)
@@ -183,7 +193,6 @@ class VTAMDriver:
         return reservation
     
     def renew_vms(self, urn, expiration):
-        # TODO TEST, TEST, TEST
         vm_params =  self.__urn_to_vm_params(urn)
         resources = list()
         try:
@@ -199,21 +208,21 @@ class VTAMDriver:
                     continue
             else:
                 raise e
+        # An existing Reservation and a non existing VirtualMachine implies there is only an allocated VM
         try:
             reserved_vms = Reservation.objects.filter(**vm_params)
-            for vm in reserved_vms:
-                vm.set_valid_until(expiration)
-                vm.save()
+            for reserved_vm in reserved_vms:
+                reserved_vm.set_valid_until(expiration)
+                reserved_vm.save()
+                self.__add_expiration(expiration, reserved_vm.projectName, reserved_vm.sliceName)
+                resources.extend(self.__convert_to_resources_with_slivers(reserved_vm.server, [reserved_vm], expiration))
         except Exception as e:
             if reserved_vms:
                for reserved_vm in reserved_vms:
                    self.__add_expiration(expiration, reserved_vm.projectName, reserved_vm.sliceName)
-                   resources.extend(self.__convert_to_resource_with_slivers(reserved_vm.server, [reserved_vm], expiration))
-                   
+                   resources.extend(self.__convert_to_resources_with_slivers(reserved_vm.server, [reserved_vm], expiration))
             raise e 
-         
         return self.get_specific_server_and_vms(urn)
-             
 
     def start_vm(self, urn):
         return self.__crud_vm(urn, Action.PROVISIONING_VM_START_TYPE) 
@@ -227,16 +236,17 @@ class VTAMDriver:
     def delete_vm(self, urn):
         vm_params  = self.__urn_to_vm_params(urn)
         # Deleting allocated slivers
-        Reservation.objects.filter(**vm_params).delete()
+        vms_allocated = Reservation.objects.filter(**vm_params)
         # Deleting provisioned slivers
-        vms = VirtualMachine.objects.filter(**vm_params)
-        # Remove SSH keys for each deleted VM
-        for vm in vms:
-            params_list = self.__vm_to_ssh_keys_params_list(vm)
+        vms_provisioned = VirtualMachine.objects.filter(**vm_params)
+        # Remove SSH keys for each provisioned VM
+        for vm_provisioned in vms_provisioned:
+            params_list = self.__vm_to_ssh_keys_params_list(vm_provisioned)
             for params in params_list:
                 VirtualMachineKeys.objects.filter(**params).delete()
+        # Provisioned VMs are deleted here
         resources = self.__crud_vm(urn, Action.PROVISIONING_VM_DELETE_TYPE)
-        if vms:
+        if vms_provisioned or vms_allocated:
             expiration = ExpiringComponents.objects.filter(slice = vm_params["sliceName"])[0].expires
         for resource in resources:
             resource.set_allocation_state(self.GENI_UNALLOCATED)
@@ -244,6 +254,10 @@ class VTAMDriver:
             resource.get_sliver().set_allocation_status(self.GENI_UNALLOCATED)
             resource.get_sliver().set_operational_status(self.GENI_PENDING_TO_ALLOCATE)
             resource.get_sliver().set_expiration(expiration)
+        # Allocated VMs are deleted here
+        vms_allocated.delete()
+        if not resources:
+            raise Exception("Slice Does Not Exist")
         return resources
 
     def get_geni_best_effort_mode(self):
@@ -257,33 +271,41 @@ class VTAMDriver:
         servers = VTServer.objects.all()
         vm_server_pairs = list()
         resources = list()
+        vms = list()
         for server in servers:
-            vms = server.getChildObject().getVMs(**params)
+            # Look for provisioned VMs
+            vms_provisioned = server.getChildObject().getVMs(**params)
+            # ... Also for reserved VMs
+            vms_allocated = Reservation.objects.filter(server__id=server.id)
+            vms.extend(vms_provisioned)
+            vms.extend(vms_allocated)
             for vm in vms:
-                # Return "REFUSED" exception if sliver is in a transient state
-                self.__validate_precondition_states(vm, action)
-                # Return "BUSY" exception if sliver is in incorrect operational state
-                if self.__translate_to_operational_state(vm) == self.GENI_UPDATING_USERS:
-                    raise Exception("BUSY sliver in state '%s'" % self.GENI_UPDATING_USERS)
-                
-                vm_params = {"server_uuid":server.uuid, "vm_id":vm.id}
-                if vm_params not in vm_server_pairs:
-                    vm_server_pairs.append(vm_params)
-                try:
-                    with self.__mutex_thread:
-                        VTDriver.PropagateActionToProvisioningDispatcher(vm.id, server.uuid, action)
-                except Exception as e:
+                # The following is to be executed only for provisioned VMs
+                if isinstance(vm, VirtualMachine):
+                    # Return "REFUSED" exception if sliver is in a transient state
+                    self.__validate_precondition_states(vm, action)
+                    # Return "BUSY" exception if sliver is in incorrect operational state
+                    if self.__translate_to_operational_state(vm) == self.GENI_UPDATING_USERS:
+                        raise Exception("BUSY sliver in state '%s'" % self.GENI_UPDATING_USERS)
+                    vm_params = {"server_uuid":server.uuid, "vm_id":vm.id}
+                    if vm_params not in vm_server_pairs:
+                        vm_server_pairs.append(vm_params)
                     try:
-                        if self.get_geni_best_effort_mode():
-                            resource = self.__convert_to_resources_with_slivers(server, [vm])[0]
-                            resource.set_error_message(str(e))
-                            #resources.extend(resource)
-                            resources.append(resource)
-                            continue
-                        else:
-                            raise e
+                        with self.__mutex_thread:
+                            VTDriver.PropagateActionToProvisioningDispatcher(vm.id, server.uuid, action)
                     except Exception as e:
-                        raise e
+                        try:
+                            if self.get_geni_best_effort_mode():
+                                resource = self.__convert_to_resources_with_slivers(server, [vm])[0]
+                                resource.set_error_message(str(e))
+                                #resources.extend(resource)
+                                resources.append(resource)
+                                continue
+                            else:
+                                raise e
+                        except Exception as e:
+                            raise e
+                # The resources are fetched for any (allocated/provisioned) VM
                 resource = self.__convert_to_resources_with_slivers(server, [vm])
                 resources.extend(resource)
         return resources
@@ -299,7 +321,7 @@ class VTAMDriver:
         else:
             return None
 
-    def __convert_to_resource(self,server):
+    def __convert_to_resource(self, server):
         #TODO add missing params 
         component_manager_id = self.__generate_component_manager_id(server)
         component_manager_name = self.__generate_component_manager_id(server)
@@ -313,7 +335,6 @@ class VTAMDriver:
         # Default params
         resource.set_available(server.available)
         resource.set_exclusive(False)
-        
         return resource
 
     def __convert_to_links(self, server):
@@ -373,16 +394,16 @@ class VTAMDriver:
             sliver.set_client_id(vm.name)
             sliver.set_urn(self.__generate_sliver_urn(vm))
             sliver.set_slice_urn(hrn_to_urn(vm.sliceName, "slice"))
-            sliver.set_services(self.__generate_vt_am_services(vm))
+            if isinstance(vm, VirtualMachine):
+                sliver.set_services(self.__generate_vt_am_services(vm))        
             sliver.set_allocation_status(self.__translate_to_allocation_state(vm))
             sliver.set_operational_status(self.__translate_to_operational_state(vm))
             sliver.set_expiration(expiration)
             new_resource.set_sliver(sliver)
-            
             resources.append(copy.deepcopy(new_resource))
         return resources
     
-    #Sliver Utils Stuff
+    # Sliver Utils Stuff
     
     def __generate_vt_am_services(self, vm):
         vm_ip = self.__get_ip_from_vm(vm)
@@ -395,7 +416,7 @@ class VTAMDriver:
                 used_user_names.append(key.user_name)
         return login_services
 
-    #URN Stuff
+    # URN Stuff
 
     def __generate_component_manager_id(self, server):
         return hrn_to_urn(self.__config.CM_HRN, "authority+cm")
@@ -426,7 +447,7 @@ class VTAMDriver:
         extended_expiration = min(user_expiration, slice_expiration)
         return extended_expiration
     
-    #VT AM Models Utils
+    # VT AM Models Utils
  
     def __get_ip_from_vm(self, vm):
         ifaces = vm.getNetworkInterfaces()

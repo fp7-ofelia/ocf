@@ -106,7 +106,7 @@ class GeniV3Handler(HandlerBase):
         # expiration == self.__get_expiration(creds)
         # First is datetime, Second is RFC3339
         expiration = self.__credential_manager.get_slice_expiration(creds)
-        # It is to request for sliver expiration time < credentials expiration time
+        # It is possible to request for sliver expiration time < credentials expiration time
         if "geni_end_time" in options:
             expiration = min(self.__get_expiration(creds), options["geni_end_time"])
         users = self.__get_users_pubkeys(creds)
@@ -288,8 +288,8 @@ class GeniV3Handler(HandlerBase):
             try:
                 result = self.__delegate.renew(urns, expiration_time, geni_best_effort)
             except Exception as e:
-                if "NOT FOUND" in str(e).upper():
-                    return self.error_result(self.__geni_exception_manager.SEARCHFAILED, str(e))
+#                if "NOT FOUND" in str(e).upper():
+                return self.error_result(self.__geni_exception_manager.SEARCHFAILED, str(e))
         return self.success_result(slivers_direct=result)
     
     def Shutdown(self, slice_urn="", credentials=list(), options=dict()):

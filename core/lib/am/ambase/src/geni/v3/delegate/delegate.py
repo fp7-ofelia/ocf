@@ -61,7 +61,6 @@ class GeniV3Delegate(DelegateBase):
             raise SliceAlreadyExists(str(e))
         except Exception as e:
             raise AllocationError(str(e))
-
     
     #def create(self, urns=list(), expiration=None, users=list(), geni_best_effort=True):
     # XXX Default geni_best_effort = False
