@@ -35,8 +35,6 @@ class FOAMLibCrafter:
         
         links = self.filter_links(resources)
         devices = self.filter_devices(resources)
-        print "==============================LINKS", links
-        print "==============================DEVICES", devices
 
         for dpid in devices:
             self.ad_device(rspec, dpid)
