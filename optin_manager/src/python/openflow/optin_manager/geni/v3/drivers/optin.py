@@ -137,6 +137,12 @@ class OptinDriver:
             
             reservation_params = self.__get_experiment_params(reservation,slice_urn) 
             #reservation_params['slice_urn'] = slice_urn
+            # Delete first any other reservation by this name
+            reservation_params_filter = copy.deepcopy(reservation_params)
+            # Remove slice_id key (changes for every allocation)
+            reservation_params_filter.pop("slice_id")
+            # Delete previous reservations
+            Reservation.objects.filter(**reservation_params_filter).delete()
             r = Reservation(**reservation_params)
             r.expiration = expiration
             r.save()
