@@ -156,9 +156,12 @@ class VTAMDriver:
     def reserve_vms(self, slice_urn, reservation, expiration=None, users=list()):
         # VMs are dynamic resource -> no collision will happen
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
-        server_hrn, hrn_type = urn_to_hrn(reservation.get_component_id())
-
-        server_name = server_hrn.split(".")[-1]
+        if not reservation.get_component_id() == None:
+            server_hrn, hrn_type = urn_to_hrn(reservation.get_component_id())
+            server_name = server_hrn.split(".")[-1]
+        else:
+            server_name = self.__get_best_server()
+            server_hrn = self.__config.CM_HRN + "." + server_name
         server = VTServer.objects.get(name=server_name).getChildObject()
         server_id = server.id 
         if reservation.get_id():
@@ -180,7 +183,10 @@ class VTAMDriver:
         reserved_vm.set_valid_until(str(expiration))
         reserved_vm.uuid = str(uuid.uuid4())
         reserved_vm.save()
-        
+       
+        if not reservation.get_sliver():
+            reservation.set_sliver(Sliver())
+         
         # Set information for sliver
         reservation.get_sliver().set_urn(hrn_to_urn(server_hrn+"."+str(reserved_vm.id), "sliver"))
         reservation.get_sliver().set_allocation_status(self.GENI_ALLOCATED)
@@ -309,6 +315,15 @@ class VTAMDriver:
                 resource = self.__convert_to_resources_with_slivers(server, [vm])
                 resources.extend(resource)
         return resources
+
+    def __get_best_server(self):
+        nvms = dict()
+        servers = VTServer.objects.all()
+        for server in servers:
+            vms = server.getChildObject().getVMs()
+            nvms[len(vms)] = server.name
+        candidate = min(nvms.keys())
+        return nvms[candidate]
 
     def __urn_to_vm_params(self, urn):
         #XXX For now, I prefer to have the same slice name as project name
