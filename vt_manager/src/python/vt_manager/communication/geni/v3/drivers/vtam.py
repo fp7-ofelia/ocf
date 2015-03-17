@@ -241,10 +241,12 @@ class VTAMDriver:
 
     def delete_vm(self, urn):
         vm_params  = self.__urn_to_vm_params(urn)
-        # Deleting allocated slivers
         vms_allocated = Reservation.objects.filter(**vm_params)
-        # Deleting provisioned slivers
         vms_provisioned = VirtualMachine.objects.filter(**vm_params)
+        if not vms_allocated and not vms_provisioned:
+            raise Exception("Slice Does not Exists")
+        print "------------------------------vms_allocated", vms_allocated
+        print "------------------------------vms_provisioned", vms_provisioned
         # Remove SSH keys for each provisioned VM
         for vm_provisioned in vms_provisioned:
             params_list = self.__vm_to_ssh_keys_params_list(vm_provisioned)
@@ -253,7 +255,11 @@ class VTAMDriver:
         # Provisioned VMs are deleted here
         resources = self.__crud_vm(urn, Action.PROVISIONING_VM_DELETE_TYPE)
         if vms_provisioned or vms_allocated:
-            expiration = ExpiringComponents.objects.filter(slice = vm_params["sliceName"])[0].expires
+            expirations = ExpiringComponents.objects.filter(slice = vm_params["sliceName"])
+            if expirations:
+                expiration = expirations[0].expires
+            else:
+                expiration = None
             for resource in resources:
                 resource.set_allocation_state(self.GENI_UNALLOCATED)
                 resource.set_operational_state(self.GENI_PENDING_TO_ALLOCATE)
@@ -262,6 +268,8 @@ class VTAMDriver:
                 resource.get_sliver().set_expiration(expiration)
         # Allocated VMs are deleted here
         vms_allocated.delete()
+        print "------------------------------VMS allocated", vms_allocated
+        print "--------------------------------------resources!!", resources
         if not resources:
             raise Exception("Slice Does Not Exist")
         return resources
