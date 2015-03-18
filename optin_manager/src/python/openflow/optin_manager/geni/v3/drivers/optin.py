@@ -409,10 +409,10 @@ class OptinDriver:
     
     def __generate_link_component_id(self, link):
         hrn = self.__config.HRN.replace(".", ":")
-        return "urn:publicid:IDN+openflow:%s+link+%s_%s_%s_%s" %(self.__config.HRN,str(link.get_src_dpid().get_datapath()), str(link.get_src_port().get_num()),str(link.get_dst_dpid().get_datapath()),str(link.get_dst_port().get_num()))
+        return "urn:publicid:IDN+openflow:%s+link+%s_%s_%s_%s" % (hrn, str(link.get_src_dpid().get_datapath()), str(link.get_src_port().get_num()), str(link.get_dst_dpid().get_datapath()), str(link.get_dst_port().get_num()))
 
     def __generate_sliver_urn(self, vm):
-        return hrn_to_urn(self.__config.CM_HRN+"."+str(vm.id), "sliver")
+        return hrn_to_urn(self.__config.CM_HRN + "." + str(vm.id), "sliver")
 
     def __select_sliver_expiration(self, user_expiration, slice_expiration=None, **kwargs):
         if not slice_expiration:
@@ -456,7 +456,7 @@ class OptinDriver:
     def __generate_sliver_urn_from_slice_urn(self, slice_urn):
         hrn, urn_type = urn_to_hrn(slice_urn)
         leaf = hrn.split(".")[-1]
-        return hrn_to_urn(self.__config.CM_HRN+"."+str(leaf), "sliver") 
+        return hrn_to_urn(self.__config.CM_HRN + "." + str(leaf), "sliver") 
 
     def __urn_to_fs_params(self, urn):
         hrn, urn_type = urn_to_hrn(urn)
