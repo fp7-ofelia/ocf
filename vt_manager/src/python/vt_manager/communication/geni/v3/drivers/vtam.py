@@ -37,21 +37,21 @@ import dateutil.parser
 class VTAMDriver:
 
     def __init__(self):
-       self.__geni_best_effort_mode = True
-       self.__agent_callback_url = "SFA.OCF.VTM"
-       self.__mutex_thread = threading.Lock()
-       self.__mutex_process = multiprocessing.Lock()
-       self.GENI_ALLOCATED = "geni_allocated"
-       self.GENI_UNALLOCATED = "geni_unallocated"
-       self.GENI_PROVISIONED = "geni_provisioned"
-       self.GENI_READY = "geni_ready"
-       self.GENI_NOT_READY = "geni_notready"
-       self.GENI_CONFIGURING = "geni_configuring"
-       self.GENI_FAILED = "geni_failed"
-       self.GENI_PENDING_TO_ALLOCATE = "geni_pending_allocation"
-       self.GENI_UPDATING_USERS = "geni_updating_users"
+        self.__geni_best_effort_mode = True
+        self.__agent_callback_url = "SFA.OCF.VTM"
+        self.__mutex_thread = threading.Lock()
+        self.__mutex_process = multiprocessing.Lock()
+        self.GENI_ALLOCATED = "geni_allocated"
+        self.GENI_UNALLOCATED = "geni_unallocated"
+        self.GENI_PROVISIONED = "geni_provisioned"
+        self.GENI_READY = "geni_ready"
+        self.GENI_NOT_READY = "geni_notready"
+        self.GENI_CONFIGURING = "geni_configuring"
+        self.GENI_FAILED = "geni_failed"
+        self.GENI_PENDING_TO_ALLOCATE = "geni_pending_allocation"
+        self.GENI_UPDATING_USERS = "geni_updating_users"
        
-       self.__config = None
+        self.__config = None
 
     def get_version(self):
         return None
@@ -61,6 +61,7 @@ class VTAMDriver:
         When 'available' is False or unspecified, all resources must be retrieved.
         """
         params =  self.__urn_to_vm_params(urn)
+        print "params,urnxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",params, urn
         servers = VTServer.objects.all()
         resources = list() 
         vms = list()
@@ -70,7 +71,7 @@ class VTAMDriver:
             # Look for provisioned VMs
             vms_provisioned = server.getChildObject().getVMs(**params)
             # ... Also for reserved VMs
-            vms_allocated = Reservation.objects.filter(server__id=server.id)
+            vms_allocated = Reservation.objects.filter(server__id=server.id, **params)
             vms.extend(vms_provisioned)
             # NOTE: if there are VMs provisioned, these are the ones to be returned
             # Explanation: when a VM is provisioned, the reservation for the
@@ -106,9 +107,9 @@ class VTAMDriver:
     
     def create_vms(self, urn, expiration=None, users=list(), geni_best_effort=True):
         #TODO: Manage Exceptions,
-        # NOTE that "geni_best_effort" is False by default. This is not how it is intended to work
         vm_params  = self.__urn_to_vm_params(urn)
         reservations = Reservation.objects.filter(**vm_params)
+        print "----------------On PROVISION", vm_params, "......", urn
         # Provisioning a VM must be made after an Allocate. Allocate:Provisioning follow 1:1 ratio
         if not reservations:
             # Be cautious when changing the messages, as handler depends on those
@@ -156,6 +157,8 @@ class VTAMDriver:
     def reserve_vms(self, slice_urn, reservation, expiration=None, users=list()):
         # VMs are dynamic resource -> no collision will happen
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
+        print "-----------------------------on Allocate:", slice_hrn, slice_urn
+
         if not reservation.get_component_id() == None:
             server_hrn, hrn_type = urn_to_hrn(reservation.get_component_id())
             server_name = server_hrn.split(".")[-1]
@@ -188,7 +191,7 @@ class VTAMDriver:
             reservation.set_sliver(Sliver())
          
         # Set information for sliver
-        reservation.get_sliver().set_urn(hrn_to_urn(server_hrn+"."+str(reserved_vm.id), "sliver"))
+        reservation.get_sliver().set_urn(hrn_to_urn(server_hrn+"." + slice_hrn.split(".")[-1] + "." +str(reservation_name), "sliver"))
         reservation.get_sliver().set_allocation_status(self.GENI_ALLOCATED)
         reservation.get_sliver().set_expiration(expiration)
         reservation.get_sliver().set_operational_status(self.GENI_NOT_READY)
@@ -245,8 +248,6 @@ class VTAMDriver:
         vms_provisioned = VirtualMachine.objects.filter(**vm_params)
         if not vms_allocated and not vms_provisioned:
             raise Exception("Slice Does not Exists")
-        print "------------------------------vms_allocated", vms_allocated
-        print "------------------------------vms_provisioned", vms_provisioned
         # Remove SSH keys for each provisioned VM
         for vm_provisioned in vms_provisioned:
             params_list = self.__vm_to_ssh_keys_params_list(vm_provisioned)
@@ -415,7 +416,7 @@ class VTAMDriver:
             sliver.set_type("VM")
             sliver.set_expiration(expiration)
             sliver.set_client_id(vm.name)
-            sliver.set_urn(self.__generate_sliver_urn(vm))
+            sliver.set_urn(self.__generate_sliver_urn(vm, server.name +  "." + vm.sliceName.split(".")[-1]))
             sliver.set_slice_urn(hrn_to_urn(vm.sliceName, "slice"))
             if isinstance(vm, VirtualMachine):
                 sliver.set_services(self.__generate_vt_am_services(vm))        
@@ -453,8 +454,11 @@ class VTAMDriver:
     def __generate_component_name(self, server):
         return hrn_to_urn(self.__config.CM_HRN+"."+str(server.name),"node")
 
-    def __generate_sliver_urn(self, vm):
-        return hrn_to_urn(self.__config.CM_HRN+"."+str(vm.id), "sliver")
+    def __generate_sliver_urn(self, vm, slice_leaf=None):
+        if slice_leaf:
+            return hrn_to_urn(self.__config.CM_HRN + "." + slice_leaf  + "." + str(vm.name), "sliver")
+        else:
+            return hrn_to_urn(self.__config.CM_HRN + "." + str(vm.name), "sliver")
 
     def __select_sliver_expiration(self, user_expiration, slice_expiration=None, **kwargs):
         if not slice_expiration:
