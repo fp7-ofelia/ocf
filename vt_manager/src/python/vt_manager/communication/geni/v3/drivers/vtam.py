@@ -61,7 +61,6 @@ class VTAMDriver:
         When 'available' is False or unspecified, all resources must be retrieved.
         """
         params =  self.__urn_to_vm_params(urn)
-        print "params,urnxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",params, urn
         servers = VTServer.objects.all()
         resources = list() 
         vms = list()
@@ -70,8 +69,8 @@ class VTAMDriver:
                 continue
             # Look for provisioned VMs
             vms_provisioned = server.getChildObject().getVMs(**params)
-            # ... Also for reserved VMs
-            vms_allocated = Reservation.objects.filter(server__id=server.id, **params)
+            vm_names = self.__return_vm_names(vms_provisioned)
+            vms_allocated = Reservation.objects.filter(server__id=server.id, **params).exclude(name__in = vm_names)
             vms.extend(vms_provisioned)
             # NOTE: if there are VMs provisioned, these are the ones to be returned
             # Explanation: when a VM is provisioned, the reservation for the
@@ -82,6 +81,12 @@ class VTAMDriver:
                 converted_resources = self.__convert_to_resources_with_slivers(server, vms)
                 resources.extend(converted_resources)
         return resources
+
+    def __return_vm_names(self, vms):
+        names = list()
+        for vm in vms:
+            names.append(vm.name)
+        return names
 
     def get_all_servers(self, geni_available=False):
         """
@@ -109,7 +114,6 @@ class VTAMDriver:
         #TODO: Manage Exceptions,
         vm_params  = self.__urn_to_vm_params(urn)
         reservations = Reservation.objects.filter(**vm_params)
-        print "----------------On PROVISION", vm_params, "......", urn
         # Provisioning a VM must be made after an Allocate. Allocate:Provisioning follow 1:1 ratio
         if not reservations:
             # Be cautious when changing the messages, as handler depends on those
@@ -157,7 +161,6 @@ class VTAMDriver:
     def reserve_vms(self, slice_urn, reservation, expiration=None, users=list()):
         # VMs are dynamic resource -> no collision will happen
         slice_hrn, hrn_type = urn_to_hrn(slice_urn)
-        print "-----------------------------on Allocate:", slice_hrn, slice_urn
 
         if not reservation.get_component_id() == None:
             server_hrn, hrn_type = urn_to_hrn(reservation.get_component_id())
@@ -269,8 +272,6 @@ class VTAMDriver:
                 resource.get_sliver().set_expiration(expiration)
         # Allocated VMs are deleted here
         vms_allocated.delete()
-        print "------------------------------VMS allocated", vms_allocated
-        print "--------------------------------------resources!!", resources
         if not resources:
             raise Exception("Slice Does Not Exist")
         return resources
@@ -291,7 +292,7 @@ class VTAMDriver:
             # Look for provisioned VMs
             vms_provisioned = server.getChildObject().getVMs(**params)
             # ... Also for reserved VMs
-            vms_allocated = Reservation.objects.filter(server__id=server.id)
+            vms_allocated = Reservation.objects.filter(server__id=server.id, **params)
             vms.extend(vms_provisioned)
             vms.extend(vms_allocated)
             for vm in vms:
