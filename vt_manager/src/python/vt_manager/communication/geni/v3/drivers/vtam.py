@@ -432,8 +432,9 @@ class VTAMDriver:
     
     def __generate_vt_am_services(self, vm):
         vm_ip = self.__get_ip_from_vm(vm)
-        login_services = [{"login":{"authentication":"ssh", "hostname":vm_ip, "port": "22", "username":"root:openflow"}}]
+        #login_services = [{"login":{"authentication":"ssh", "hostname":vm_ip, "port": "22", "username":"root:openflow"}}]
         keys = VirtualMachineKeys.objects.filter(vm_uuid=vm.uuid)
+        login_services = []
         used_user_names = []
         for key in keys:
             if not key.user_name in used_user_names:

@@ -241,6 +241,8 @@ class ProvisioningResponseDispatcher():
         
         @staticmethod
         def __contextualize_vm(vm, ip):
+            import time
+            time.sleep(5)
             # SSH keys for users are passed to the VM right after it is started
             vm_keys = VirtualMachineKeys.objects.filter(slice_uuid=vm.sliceId, project_uuid=vm.projectId)
             params = {
