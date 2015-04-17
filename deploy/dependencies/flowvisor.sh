@@ -20,8 +20,19 @@ flowvisor_etc_folder="/etc/flowvisor"
 flowvisor_db_folder="/usr/share/db/flowvisor"
 flowvisor_log_folder="/var/log/flowvisor"
 
+# Set hourly job to determine that FlowVisor is running (otherwise restarts it)
+function link_cron_job()
+{
+    current_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+    if [ -f $current_dir/../utils/scripts/flowvisor_cron.sh ] && [ -d /etc/cron.hourly ]; then
+      chmod +x $current_dir/../utils/scripts/flowvisor_cron.sh
+      ln -s $current_dir/../utils/scripts/flowvisor_cron.sh /etc/cron.hourly/flowvisor
+    fi
+}
+
 # If dpkg shows entry with $FLOWVISOR_RELEASE on it, do not install
 if [[ $(dpkg -l | grep flowvisor) =~ $FLOWVISOR_RELEASE ]]; then
+    link_cron_job
     warning "FlowVisor $FLOWVISOR_RELEASE already installed. Skipping..."
     exit 1
 elif [[ $(which flowvisor) ]]; then
@@ -113,5 +124,14 @@ sed -i -e "s/^log4j.rootCategory=WARN, system/#log4j.rootCategory=WARN, system\n
 
 # Start FlowVisor
 /etc/init.d/flowvisor restart
+
+# Set hourly job to determine that FlowVisor is running (otherwise restarts it)
+current_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+if [ -f $current_dir/../utils/scripts/flowvisor_cron.sh ] && [ -d /etc/cron.hourly ]; then
+  ln -s $current_dir/../utils/scripts/flowvisor_cron.sh /etc/cron.hourly/flowvisor
+fi
+
+# Link to hourly cron job
+link_cron_job
 
 success "FlowVisor successfully installed"
