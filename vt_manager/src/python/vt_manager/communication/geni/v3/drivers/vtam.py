@@ -397,7 +397,8 @@ class VTAMDriver:
 
     def __get_port_urn(self, port, server_name):
         name = self.__correct_iface_name(port)
-        return hrn_to_urn(self.__config.CM_HRN + "." + str(server_name) + "." + str(name),"interface")
+#        return hrn_to_urn(self.__config.CM_HRN + "." + str(server_name) + "." + str(name),"interface")
+        return hrn_to_urn(self.__config.CM_HRN + "." + str(server_name), "node") + "+interface+" + str(name)
 
     def __convert_to_resources_with_slivers(self, server, vms, expiration=None):
         """

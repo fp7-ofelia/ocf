@@ -16,4 +16,4 @@ class VTAMConfig(Settings):
     ROOT_CERT_LOCATION = TRUSTED_ROOTS_DIR + "/topdomain.gid"
     CM_HRN = HRN + ".vtam"
     
-    FOREIGN_HRN = "ocf.ofam"
+    FOREIGN_HRN = "openflow." + HRN + ".ofam"
