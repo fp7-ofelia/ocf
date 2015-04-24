@@ -152,6 +152,7 @@ class OptinDriver:
                     for port in dpid.get_ports():
                         for match in group.get_matches():
                             req_params = self.__translate_to_flow_space_model(match, dpid, port)
+                            print "----------------------------------------------------", req_params
                             for param in req_params:
                                 param = self.__format_params_to_reservation_model(param)
                                 reservation_flowspace = ReservationFlowSpace(**param)
@@ -408,7 +409,8 @@ class OptinDriver:
         return hrn_to_urn(hrn,"datapath")
     
     def __generate_link_component_id(self, link):
-        hrn = self.__config.HRN.replace(".", ":")
+#        hrn = self.__config.HRN.replace(".", ":")
+        hrn = self.__config.CM_HRN.replace(".", ":")
         return "urn:publicid:IDN+openflow:%s+link+%s_%s_%s_%s" % (hrn, str(link.get_src_dpid().get_datapath()), str(link.get_src_port().get_num()), str(link.get_dst_dpid().get_datapath()), str(link.get_dst_port().get_num()))
 
     def __generate_sliver_urn(self, vm):
