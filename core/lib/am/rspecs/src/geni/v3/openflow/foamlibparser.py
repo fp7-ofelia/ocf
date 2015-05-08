@@ -23,19 +23,35 @@ class FOAMLibParser:
         groups = sliver_dom.findall('{%s}group' % (self.OFNSv3))
         matches_dom = sliver_dom.findall('{%s}match' % (self.OFNSv3))
         
-        flowspace = self.__parse_sliver(sliver_dom)  
-        controller = self.__parse_controller(controller_elems)
-        groups = self.__parse_groups(groups)
-        matches = self.__parse_matches(matches_dom)
-        
+        try:
+            flowspace = self.__parse_sliver(sliver_dom)
+        except:
+            raise Exception("Error Parsing OpenFlow RSpec on Sliver part")
+        try:  
+            controller = self.__parse_controller(controller_elems)
+        except:
+            raise Exception("Error Parsing OpenFlow RSpec on Controller Part")
+        try:
+            groups = self.__parse_groups(groups)
+        except:
+            raise Exception("Error Parsing OpenFlow RSpec on Groups Part")
+        try:
+            matches, raw_groups = self.__parse_matches(matches_dom)
+        except Exception as e:
+            print e
+            raise Exception("Error Parsing OpenFlow RSpec on Match Part")
+       
+        if raw_groups:
+             groups.extend(raw_groups)
+        groups_w_match = list()        
         for group in groups:
             for match in matches:
                 if group.get_name() == match.get_group():
                     group.add_match(match)
+                    groups_w_match.append(group)
         flowspace.set_controller(controller)
-        flowspace.set_groups(groups)
+        flowspace.set_groups(groups_w_match)
         return flowspace
-        
         
         #vlinks = sliver_dom.findall('{%s}vlink' % (self.OFNSv3))
         #for virtuallink in vlinks:
@@ -75,6 +91,16 @@ class FOAMLibParser:
             group.set_dpids(dplist)    
             groups.append(group)
         return groups
+
+    def __create_raw_group(self, group_name, datapath_dom):
+        group = Group()
+        dplist = []
+        for dp in datapath_dom:
+                dplist.append(self.__parse_datapath(dp))
+        group.set_name(group_name)
+        group.set_dpids(dplist)
+        return group
+         
     
     def __parse_datapath(self, dpid_dom):
         component_manager_id = dpid_dom.get("component_manager_id")
@@ -97,13 +123,20 @@ class FOAMLibParser:
         
     def __parse_matches(self, matches_dom):
         matches = list()
+        raw_groups = list()
         for match_dom in matches_dom:
             group_dom = match_dom.find("{%s}use-group" % (self.OFNSv3))
-            group_name = group_dom.get("name")
+            if group_dom != None:
+                group_name = group_dom.get("name")
+            else:
+                group_name = "default" + str(matches_dom.index(match_dom))
+                raw_groups.append(self.__create_raw_group(group_name, match_dom.findall('{%s}datapath' % (self.OFNSv3))))
+
             match = self.__parse_flowspec(match_dom)
             match.set_group(group_name)
             matches.append(match)
-        return matches
+        return matches, raw_groups
+
         
     def __parse_flowspec(self, match_dom):    
         packet_dom = match_dom.find("{%s}packet" % (self.OFNSv3))    
