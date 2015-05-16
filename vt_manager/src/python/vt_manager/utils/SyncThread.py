@@ -1,3 +1,4 @@
+from django.db import connection
 from threading import Thread
 
 class SyncThread(Thread):
@@ -9,10 +10,12 @@ class SyncThread(Thread):
 
     @staticmethod
     def startMethodAndJoin(servmethod, param, url=None): 
-	thread = SyncThread()
-	thread.callBackURL = url
+        thread = SyncThread()
+        thread.callBackURL = url
         thread.startMethod(servmethod,param)
-	thread.join()
+        thread.join()
+        connection.close()
+        return
 
     def startMethod(self,servmethod,param):
         self.__method = servmethod
