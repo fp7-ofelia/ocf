@@ -20,31 +20,12 @@ class VMContextualize(object):
         self.vm_user = kwargs["vm_user"]
         self.vm_user_password = kwargs["vm_password"]
    
-    def connect(self):
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(self.vm_address, username=self.vm_user, port=22, password=self.vm_user_password)
-        return client
-    
     def contextualize(self, context_command):
-        client = self.connect()
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(self.vm_address, username=self.vm_user, port=22, password=self.vm_user_password)
         a,b,c = client.exec_command(context_command)
    
-    def read_file(self, remote_path):
-        ssh_client = self.connect()
-        sftp_client = ssh_client.open_sftp()
-        remote_file = sftp_client.open(remote_path)
-        content = ""
-        try:
-            for line in remote_file:
-                content += file
-        finally:
-            remote_file.close()
-        return content
-
     def contextualize_add_pub_keys(self, user_keys):
         command = ""
         context_sudores = ""
