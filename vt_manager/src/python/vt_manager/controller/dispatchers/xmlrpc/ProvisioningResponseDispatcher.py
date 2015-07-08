@@ -250,9 +250,16 @@ class ProvisioningResponseDispatcher():
                 "vm_user": "root",
                 "vm_password": "openflow",
             }
-            logging.debug("context params: %s" % str(params))
             vm_context = VMContextualize(**params)
+            user_keys = {}
             for vm_key in vm_keys:
-                logging.debug("Adding %s's public key into VM. Key contents: %s" % (vm_key.get_user_name(), vm_key.get_ssh_key()))
-                vm_context.contextualize_add_pub_key(str(vm_key.get_user_name()), str(vm_key.get_ssh_key()))
+                user_name = str(vm_key.get_user_name())
+                if user_name not in user_keys:
+                    user_keys[user_name] = [ vm_key.get_ssh_key() ]
+                else:
+                    user_keys[user_name].append(vm_key.get_ssh_key())
+                logging.debug("Adding %s's public key(s) into VM. Key contents: %s" % (vm_key.get_user_name(), user_keys[str(vm_key.get_user_name())]))
+            # Placing a number of keys per user, multiple users
+            if len(user_keys[str(vm_key.get_user_name())]) > 0:
+                vm_context.contextualize_add_pub_keys(user_keys)
             logging.debug("Contextualizing VM (%s)..." % str(ip))

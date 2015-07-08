@@ -243,7 +243,11 @@ class VTAMDriver:
         return self.__crud_vm(urn, Action.PROVISIONING_VM_STOP_TYPE)
 
     def reboot_vm(self, urn):
-        return self.__crud_vm(urn, Action.PROVISIONING_VM_REBOOT_TYPE)
+        try:
+            self.stop_vm(urn)
+            return self.start_vm(urn) 
+        except:
+            return self.__crud_vm(urn, Action.PROVISIONING_VM_REBOOT_TYPE)
 
     def delete_vm(self, urn):
         vm_params  = self.__urn_to_vm_params(urn)
