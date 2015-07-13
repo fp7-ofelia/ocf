@@ -246,6 +246,9 @@ class GeniV3Handler(HandlerBase):
                slice_urn = result[0].get_slice_urn()
         else:
             slice_urn = urns[0]
+        print "--------------------- STATUS ------------------__"
+        print "....... result=", result
+        print "....... slice_urn=", slice_urn
         return self.success_result(slivers=result, slice_urn=slice_urn)
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
@@ -375,17 +378,17 @@ class GeniV3Handler(HandlerBase):
                 value.append(geni_sliver_special_struct)
         elif result != None:
             value = result
-        else:    
+        else:
             value = dict()
             if rspec:
                 value["geni_rspec"] = rspec
             if slice_urn:
                 value["geni_urn"] = slice_urn
-            if slivers:
-                value["geni_slivers"] = list()
-                for sliver in slivers:
-                    geni_sliver_struct = self.__get_geni_sliver_structure(sliver)
-                    value["geni_slivers"].append(geni_sliver_struct)
+            # Return empty list of slivers for some cases
+            value["geni_slivers"] = list()
+            for sliver in slivers:
+                geni_sliver_struct = self.__get_geni_sliver_structure(sliver)
+                value["geni_slivers"].append(geni_sliver_struct)
         return self.build_property_list(self.__geni_exception_manager.SUCCESS, value=value)
     
     def error_result(self, code, output):
