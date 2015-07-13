@@ -2,6 +2,7 @@ from vt_manager.models.reservation import Reservation
 from vt_manager.models.VirtualMachine import VirtualMachine
 from datetime import datetime
 import threading
+import time
 
 
 class BackgroundReservationMonitoring(threading.Thread):
@@ -12,24 +13,24 @@ class BackgroundReservationMonitoring(threading.Thread):
         threading.Thread.__init__(self)
         self.period = 900 
         
-    def monitor():
+    def monitor(self):
         self.start()
      
-    def run():
+    def run(self):
         while True:
-            print "Background VM Reservation Monitoring Thread starting..."
+            print "Background VM Reservation Monitoring Thread starting...\n"
             reservations = Reservation.objects.all()
             try:
                 for r in reservations:
-                    time = datetime.strptime(r.get_valid_until, '%Y-%m-%d %H:%M:%S.%f')
-                    if time < datetime.utcnow():
-                        res_vm = VirtualMachine.objects.filter(uuid=r.uuid)
-                        print "VM (name=%s, uuid=%s) has expired on time=%s. Proceeding to its deletion" % \
-                                (res_vm.name, r.uuid, r.get_valid_until)
-                        #if len(res_vm):
-                        #    res_vm.delete()
-                        r.delete
+                    exp_date = r.get_valid_until().replace("Z", "").replace("T", " ")
+                    try:
+                        exp_time = datetime.strptime(exp_date, '%Y-%m-%d %H:%M:%S.%f')
+                    except:
+                        exp_time = datetime.strptime(exp_date, '%Y-%m-%d %H:%M:%S')
+                    if exp_time < datetime.utcnow():
+                        print "Deleting reservation (name=%s) upon expiration=%s" % (r.name, r.valid_until)
+                        r.delete()
             except Exception as e:
-                print "Reservation Monitoring failed, cause:", srt(e)
+                print "Reservation Monitoring failed, cause:", str(e)
             
             time.sleep(self.period)
