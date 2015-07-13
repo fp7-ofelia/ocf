@@ -33,12 +33,13 @@ class VMContextualize(object):
         context_sudoers = ""
         users_sudoers = ""
         for user, keys in user_keys.iteritems():
-            command += "( [[ -z $(grep '%s' /etc/group) ]] && useradd %s -m -s /bin/bash ); \
+            # Important: check for string "<user>:" (with two dots) to avoid match of substrings
+            command += "( [[ -z $(grep '%s:' /etc/group) ]] && useradd %s -m -s /bin/bash ); \
                        mkdir -p /home/%s/.ssh; \
                        touch /home/%s/.ssh/authorized_keys; " % (user, user, user, user)
+            command += "( [[ ! -z $(grep '%s:' /etc/group) ]] && chown %s:%s -R /home/%s ); " % (user, user, user, user)
             for key in keys:
                 command += "( [[ -z $(grep '%s' /home/%s/.ssh/authorized_keys) ]] && echo '%s' >> /home/%s/.ssh/authorized_keys ); " % (key, user, key, user)
-            command += "chown %s:%s -R /home/%s; " % (user, user, user) # Cheat code :)
             users_sudoers += "%s ALL=NOPASSWD:ALL\n" % user
         # Edit sudoers file, add sudo package
         current_folder = os.path.abspath(os.path.dirname(__file__))

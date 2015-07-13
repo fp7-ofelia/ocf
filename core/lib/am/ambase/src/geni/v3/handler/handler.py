@@ -246,9 +246,6 @@ class GeniV3Handler(HandlerBase):
                slice_urn = result[0].get_slice_urn()
         else:
             slice_urn = urns[0]
-        print "--------------------- STATUS ------------------__"
-        print "....... result=", result
-        print "....... slice_urn=", slice_urn
         return self.success_result(slivers=result, slice_urn=slice_urn)
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):

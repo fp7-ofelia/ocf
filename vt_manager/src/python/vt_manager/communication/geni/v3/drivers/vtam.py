@@ -790,7 +790,7 @@ class VTAMDriver:
                     user_keys[user_name].append(vm_key.get_ssh_key())
                 logging.debug("Adding %s's public key(s) into VM. Key contents: %s" % (vm_key.get_user_name(), user_keys[str(vm_key.get_user_name())]))
             # Placing a number of keys per user, multiple users
-            if len(user_keys[str(vm_key.get_user_name())]) > 0:
+            if len(user_keys) > 0:
                 with self.__mutex_process:
                     # FIXME Sometimes do not work properly and keys are not getting to the VM
                     ServiceProcess.startMethodInNewProcess(vm_context.contextualize_add_pub_keys, 

@@ -1,0 +1,61 @@
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            9b:c7:dd:d6:68:07:de:db
+        Signature Algorithm: sha1WithRSAEncryption
+        Issuer: CN=ch.geni.net
+        Validity
+            Not Before: May 20 13:18:12 2013 GMT
+            Not After : May 19 13:18:12 2018 GMT
+        Subject: CN=ch.geni.net
+        Subject Public Key Info:
+            Public Key Algorithm: rsaEncryption
+            RSA Public Key: (1024 bit)
+                Modulus (1024 bit):
+                    00:a1:6d:a5:59:33:43:82:00:7b:04:9c:1b:98:b9:
+                    1f:d8:a5:4c:1e:99:a7:b5:93:76:d6:8a:0e:e4:bd:
+                    4e:3c:f1:54:22:f2:50:83:a7:93:f4:cb:f5:82:3d:
+                    f1:87:a2:e2:91:3e:f5:24:fd:a5:63:ef:d7:01:a2:
+                    f7:18:b0:68:56:72:5c:24:98:e8:4b:25:26:89:21:
+                    b0:b4:18:eb:74:23:b9:b4:b9:69:2f:6e:1d:d0:de:
+                    d4:4f:6e:81:8a:d8:d9:20:44:41:b9:82:c2:46:3e:
+                    43:9e:98:b3:e0:cf:ab:00:3b:8d:a9:55:52:f7:77:
+                    b1:11:0c:93:e3:91:00:56:ff
+                Exponent: 65537 (0x10001)
+        X509v3 extensions:
+            X509v3 Subject Key Identifier: 
+                45:36:D9:5D:58:FF:42:F5:2B:09:6A:6E:79:1D:3C:83:04:CB:98:51
+            X509v3 Authority Key Identifier: 
+                keyid:45:36:D9:5D:58:FF:42:F5:2B:09:6A:6E:79:1D:3C:83:04:CB:98:51
+                DirName:/CN=ch.geni.net
+                serial:9B:C7:DD:D6:68:07:DE:DB
+
+            X509v3 Subject Alternative Name: 
+                URI:urn:publicid:IDN+ch.geni.net+authority+ca
+            X509v3 Basic Constraints: 
+                CA:TRUE
+    Signature Algorithm: sha1WithRSAEncryption
+        30:64:d6:36:46:7f:93:81:be:00:e6:0e:44:ae:96:00:9e:75:
+        75:9f:d1:c7:eb:2c:d7:e8:83:a4:47:ca:15:2e:90:1e:07:c1:
+        07:66:84:f9:a2:7f:09:a3:23:fa:b6:ea:25:6a:14:33:df:2b:
+        8f:ed:44:1e:c7:0d:1a:3a:35:e5:b2:12:43:97:c4:6b:04:a3:
+        b7:49:48:d1:4c:37:fb:51:8d:af:5a:98:30:c9:fe:45:5f:80:
+        25:3b:f5:f1:7b:3f:d8:8d:72:c7:eb:66:6c:2e:f0:6e:4f:e4:
+        51:dc:24:ef:c4:c5:da:73:ab:9e:90:a8:87:3b:4a:22:f9:25:
+        12:81
+-----BEGIN CERTIFICATE-----
+MIICWTCCAcKgAwIBAgIJAJvH3dZoB97bMA0GCSqGSIb3DQEBBQUAMBYxFDASBgNV
+BAMTC2NoLmdlbmkubmV0MB4XDTEzMDUyMDEzMTgxMloXDTE4MDUxOTEzMTgxMlow
+FjEUMBIGA1UEAxMLY2guZ2VuaS5uZXQwgZ8wDQYJKoZIhvcNAQEBBQADgY0AMIGJ
+AoGBAKFtpVkzQ4IAewScG5i5H9ilTB6Zp7WTdtaKDuS9TjzxVCLyUIOnk/TL9YI9
+8Yei4pE+9ST9pWPv1wGi9xiwaFZyXCSY6EslJokhsLQY63QjubS5aS9uHdDe1E9u
+gYrY2SBEQbmCwkY+Q56Ys+DPqwA7jalVUvd3sREMk+ORAFb/AgMBAAGjga4wgasw
+HQYDVR0OBBYEFEU22V1Y/0L1KwlqbnkdPIMEy5hRMEYGA1UdIwQ/MD2AFEU22V1Y
+/0L1KwlqbnkdPIMEy5hRoRqkGDAWMRQwEgYDVQQDEwtjaC5nZW5pLm5ldIIJAJvH
+3dZoB97bMDQGA1UdEQQtMCuGKXVybjpwdWJsaWNpZDpJRE4rY2guZ2VuaS5uZXQr
+YXV0aG9yaXR5K2NhMAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEAMGTW
+NkZ/k4G+AOYORK6WAJ51dZ/Rx+ss1+iDpEfKFS6QHgfBB2aE+aJ/CaMj+rbqJWoU
+M98rj+1EHscNGjo15bISQ5fEawSjt0lI0Uw3+1GNr1qYMMn+RV+AJTv18Xs/2I1y
+x+tmbC7wbk/kUdwk78TF2nOrnpCohztKIvklEoE=
+-----END CERTIFICATE-----
