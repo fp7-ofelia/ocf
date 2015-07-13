@@ -207,7 +207,7 @@ class GeniV3Handler(HandlerBase):
             best_effort = False
         
         try:
-            result = self.__delegate.perform_operational_action(urns, action, best_effort, options) 
+            result = self.__delegate.perform_operational_action(urns, action, best_effort, options)
         except PerformOperationalStateError as e:
             if "BUSY" in str(e).upper():
                 return self.error_result(self.__geni_exception_manager.BUSY, e)
@@ -219,7 +219,6 @@ class GeniV3Handler(HandlerBase):
         # Format undefined for this option, since it is "not fully implemented"        
         if action == "geni_console_url":
             return result
-        
         return self.success_result(slivers_direct=result)
      
     def Status(self, urns=list(), credentials=list(), options=dict()):
@@ -333,7 +332,7 @@ class GeniV3Handler(HandlerBase):
             # Removes everything after a "+" or a "."
             #date_form = re.sub(r'[\+|\.].+', "", date)
             # Removes everything after a "+"
-            date_form = re.sub(r'[\+].+', "", date)
+            date_form = re.sub(r'[\+].+', "", date).replace("Z", "")
             try:
                 formatted_date = datetime.datetime.strptime(date_form.replace("T"," "), "%Y-%m-%d %H:%M:%S.%f")
                 #formatted_date = datetime.datetime.strptime(date[:-1].replace("T"," "), "%Y-%m-%d %H:%M:%S")
@@ -445,7 +444,7 @@ class GeniV3Handler(HandlerBase):
         for user in geni_users:
             name = user['urn']
             users.append({'name':name, 'keys':user['keys']})
-        return user
+        return users
  
     def get_delegate(self):
         return self.__delegate

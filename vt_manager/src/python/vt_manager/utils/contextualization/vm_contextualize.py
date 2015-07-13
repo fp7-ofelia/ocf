@@ -23,12 +23,15 @@ class VMContextualize(object):
     def contextualize(self, context_command):
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # Re-initialize RNG after fork to avoid connectivity problems with Paramiko
+        Random.atfork()
         client.connect(self.vm_address, username=self.vm_user, port=22, password=self.vm_user_password)
         a,b,c = client.exec_command(context_command)
    
     def contextualize_add_pub_keys(self, user_keys):
         command = ""
-        context_sudores = ""
+        context_sudoers = ""
+        users_sudoers = ""
         for user, keys in user_keys.iteritems():
             command += "( [[ -z $(grep '%s' /etc/group) ]] && useradd %s -m -s /bin/bash ); \
                        mkdir -p /home/%s/.ssh; \
@@ -36,13 +39,13 @@ class VMContextualize(object):
             for key in keys:
                 command += "( [[ -z $(grep '%s' /home/%s/.ssh/authorized_keys) ]] && echo '%s' >> /home/%s/.ssh/authorized_keys ); " % (key, user, key, user)
             command += "chown %s:%s -R /home/%s; " % (user, user, user) # Cheat code :)
-
-            # Edit sudoers file, add sudo package
-            current_folder = os.path.abspath(os.path.dirname(__file__))
-            context_sudoers = open(os.path.join(current_folder, "contextualize_sudoers.txt")).read()
-            context_sudoers = context_sudoers.replace("<%newuser%>", "%s ALL=NOPASSWD:ALL" % user)
+            users_sudoers += "%s ALL=NOPASSWD:ALL\n" % user
+        # Edit sudoers file, add sudo package
+        current_folder = os.path.abspath(os.path.dirname(__file__))
+        context_sudoers = open(os.path.join(current_folder, "contextualize_sudoers.txt")).read()
+        context_sudoers = context_sudoers.replace("<%newuser%>", users_sudoers)
         # Some "tricks" to get a valid command
-        command += "echo \"\"\"%s\"\"\" > /etc/sudoers && \
+        command += "echo \"\"\"%s\"\"\" > /etc/sudoers; \
                     aptitude update && \
                     aptitude install sudo > /dev/null 2>&1 &" % context_sudoers
         return self.contextualize(command)

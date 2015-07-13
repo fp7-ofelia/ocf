@@ -63,19 +63,19 @@ class VTAMDriver:
         params =  self.__urn_to_vm_params(urn)
         servers = VTServer.objects.all()
         resources = list() 
-        vms = list()
         for server in servers:
+            vms = list()
             if not server.available and geni_available:
                 continue
             # Look for provisioned VMs
             vms_provisioned = server.getChildObject().getVMs(**params)
             vm_names = self.__return_vm_names(vms_provisioned)
-            vms_allocated = Reservation.objects.filter(server__id=server.id, **params).exclude(name__in = vm_names)
-            vms.extend(vms_provisioned)
             # NOTE: if there are VMs provisioned, these are the ones to be returned
             # Explanation: when a VM is provisioned, the reservation for the
             # VM may still be active, but it is of no interest to the user
             #if not vms_provisioned:
+            vms_allocated = Reservation.objects.filter(server__id=server.id, **params).exclude(name__in = vm_names)
+            vms.extend(vms_provisioned)
             vms.extend(vms_allocated)
             if vms:
                 converted_resources = self.__convert_to_resources_with_slivers(server, vms)
@@ -112,7 +112,7 @@ class VTAMDriver:
     
     def create_vms(self, urn, expiration=None, users=list(), geni_best_effort=True):
         #TODO: Manage Exceptions,
-        vm_params  = self.__urn_to_vm_params(urn)
+        vm_params = self.__urn_to_vm_params(urn)
         reservations = Reservation.objects.filter(**vm_params)
         # Provisioning a VM must be made after an Allocate. Allocate:Provisioning follow 1:1 ratio
         if not reservations:
@@ -121,7 +121,6 @@ class VTAMDriver:
         
         # Retrieve only the reservations that are provisioned
         reservations = Reservation.objects.filter(**vm_params).filter(is_provisioned=False)
-        
         if not reservations:
             # Be cautious when changing the messages, as handler depends on those
             raise Exception("Re-provisioning not possible. Try allocating first")
@@ -133,6 +132,8 @@ class VTAMDriver:
                 provisioning_rspec = self.get_action_instance(r)
                 with self.__mutex_thread:
                     SyncThread.startMethodAndJoin(ProvisioningDispatcher.processProvisioning,provisioning_rspec,self.__agent_callback_url)
+                # Update vm_params to get the exact, corresponding VM for each reservation
+                vm_params.update({"name": r.name})
                 vms = VirtualMachine.objects.filter(**vm_params)
                 self.__store_user_keys(users, vms)
                 # When reservation (allocation) is fulfilled, mark appropriately
@@ -149,8 +150,8 @@ class VTAMDriver:
                     continue
                 else:
                     raise e
+            # XXX FIXME Check this to see why N slivers are being returned
             manifested_resource = self.__convert_to_resources_with_slivers(r.server,vms,expiration)
-            len(manifested_resource)
             if type(manifested_resource) == list:
                 slivers_to_manifest.extend(manifested_resource)
             else:
@@ -245,8 +246,9 @@ class VTAMDriver:
     def reboot_vm(self, urn):
         try:
             self.stop_vm(urn)
-            return self.start_vm(urn) 
-        except:
+            return self.start_vm(urn)
+        except Exception as e:
+            # Note: Some problems with MINIMUM_RESTART_TIME
             return self.__crud_vm(urn, Action.PROVISIONING_VM_REBOOT_TYPE)
 
     def delete_vm(self, urn):
@@ -291,8 +293,8 @@ class VTAMDriver:
         servers = VTServer.objects.all()
         vm_server_pairs = list()
         resources = list()
-        vms = list()
         for server in servers:
+            vms = list()
             # Look for provisioned VMs
             vms_provisioned = server.getChildObject().getVMs(**params)
             # ... Also for reserved VMs
@@ -344,7 +346,14 @@ class VTAMDriver:
         hrn, hrn_type = urn_to_hrn(urn)
         if hrn_type == "sliver":
             value = hrn.split(".")[-1]
-            return {"id":int(value)}
+            try:
+                # XXX Why the int() conversion in the "sliver_part"
+                return {"id":int(value)}
+            except:
+                # E.g. VMs from jFed
+                slice_name = hrn.split(".")[-2]
+                # Partial matching (RegEx...)
+                return {"name":value, "sliceName__iregex":slice_name}
         elif hrn_type == "slice":
             return {"projectName":hrn, "sliceName":hrn} 
         else:
@@ -642,7 +651,7 @@ class VTAMDriver:
             servers = VTServer.objects.all()
             resources = list()
             for server in servers:
-                vms = server.getChildObject().getVMs(**params)
+                vms.extend(server.getChildObject().getVMs(**params))
         
         # Check preconditions (VMs must be in allowed state prior to update the keys)
         # If not on "best effort" mode, honor or revoke all requests
@@ -656,7 +665,7 @@ class VTAMDriver:
         
         # Store user's SSH keys
         self.__store_user_keys(geni_users, vms)
-        for vm in vms:
+        for vm in set(vms):
             try:
                 # Return "REFUSED" exception if sliver is in a transient state
                 self.__validate_precondition_states(vm, "PerformOperationalAction")
@@ -772,11 +781,20 @@ class VTAMDriver:
         }
         vm_context = VMContextualize(**params)
         try:
+            user_keys = {}
             for vm_key in vm_keys:
+                user_name = str(vm_key.get_user_name())
+                if user_name not in user_keys:
+                    user_keys[user_name] = [ vm_key.get_ssh_key() ]
+                else:
+                    user_keys[user_name].append(vm_key.get_ssh_key())
+                logging.debug("Adding %s's public key(s) into VM. Key contents: %s" % (vm_key.get_user_name(), user_keys[str(vm_key.get_user_name())]))
+            # Placing a number of keys per user, multiple users
+            if len(user_keys[str(vm_key.get_user_name())]) > 0:
                 with self.__mutex_process:
                     # FIXME Sometimes do not work properly and keys are not getting to the VM
-                    ServiceProcess.startMethodInNewProcess(vm_context.contextualize_add_pub_key, 
-                                    [vm_key.get_user_name(), vm_key.get_ssh_key()], self.__agent_callback_url)
+                    ServiceProcess.startMethodInNewProcess(vm_context.contextualize_add_pub_keys, 
+                                    [user_keys], self.__agent_callback_url)
         except Exception as e:
             raise e
     
@@ -793,10 +811,16 @@ class VTAMDriver:
             # Reuse "params" structure by operating on a new structure
             params_user = copy.deepcopy(params)
             # Retrieve user string from URN
+            user_id_key = "urn"
+            if user_id_key not in user:
+                # Get the other key that's not the user's keys
+                # Depending on client: "urn", "name", ...
+                user_id_key = set(user.keys()) - set(["keys"])
+                user_id_key = user_id_key.pop()
             try:
-                user_name = urn_to_hrn(user["urn"])[0].split(".")[-1]
+                user_name = urn_to_hrn(user[user_id_key])[0].split(".")[-1]
             except:
-                user_name = user["urn"]
+                user_name = user[user_id_key]
             params_user.update({"user_name": user_name,})
             for key in user["keys"]:
                 params_user_keys = copy.deepcopy(params_user)
