@@ -46,6 +46,8 @@ class VTAMRM(ResourceManagerBase):
             else:
                 reserved_resources.append(reserved_resource)
         #reserved_resources =  self.__update_reservation(reserved_resources)  #TODO
+        # Ignore those resources not reserved for manifest
+        reserved_resources = filter(lambda x: x is not None, reserved_resources)
         return reserved_resources
     
     def delete_resources(self, urns, geni_best_effort=False):
