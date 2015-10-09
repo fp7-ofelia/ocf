@@ -117,3 +117,13 @@ DEFAULT_FROM_EMAIL = "changeMe"
 # Subject (a prefix of it) for the e-mail.
 #
 EMAIL_SUBJECT_PREFIX = "changeMe"
+
+##
+## Time settings
+##
+
+#
+# Set to the time zone where your server is located.
+# List of timezones in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
+#
+TIME_ZONE = "Europe/Madrid"

@@ -83,3 +83,13 @@ UNALLOWED_VLANS = []
 # for further information on how to install new themes for OCF.
 #
 THEME = "default"
+
+##
+## Time zone
+##
+
+#
+# Set to the time zone where your server is located.
+# List of timezones in https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List
+#
+TIME_ZONE = "Europe/Madrid"
