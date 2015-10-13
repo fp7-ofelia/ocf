@@ -87,8 +87,7 @@ class ManualTests(TestCase):
             
     def test_case1(self):
         from django.contrib.auth.models import User
-        #from openflow.optin_manager.opts.models import UserFlowSpace,Experiment, ExperimentFLowSpace
-        from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
+        from openflow.optin_manager.opts.models import UserFlowSpace,Experiment, ExperimentFLowSpace
 
         # create a second experiemnt        
         username = "user"
@@ -137,7 +136,6 @@ class ManualTests(TestCase):
         
     def test_case2(self):
         from django.contrib.auth.models import User
-        #from openflow.optin_manager.opts.models import UserFlowSpace,Experiment, ExperimentFLowSpace
         from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
 
       
