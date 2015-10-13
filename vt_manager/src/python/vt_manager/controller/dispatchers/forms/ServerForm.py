@@ -28,5 +28,5 @@ class ServerForm(forms.ModelForm):
         d = dict(self.cleaned_data)
         if "agentPasswordConfirm" in d:
             del d["agentPasswordConfirm"]
-        p = self._meta.model(**d)
+        #p = self._meta.model(**d)
         return self.cleaned_data

@@ -1,13 +1,11 @@
 from django.http import *                                                     
-import os                                                                     
-import sys                                                                    
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningResponseDispatcher import ProvisioningResponseDispatcher
 from vt_manager.controller.dispatchers.xmlrpc.MonitoringResponseDispatcher import MonitoringResponseDispatcher
 from vt_manager.controller.dispatchers.xmlrpc.InformationDispatcher import InformationDispatcher
 from vt_manager.communication.utils import *                                  
 from vt_manager.utils.ServiceThread import *                                      
-from vt_manager.common.rpc4django import rpcmethod                                       
+#from vt_manager.common.rpc4django import rpcmethod                                       
 from vt_manager.common.rpc4django import *                                               
 import threading                                                                             
 import multiprocessing

@@ -92,7 +92,6 @@ class InformationDispatcher():
                 # Handle safely the connection against the agent
                 try:
                     server_active_vms = xmlrpc_server.force_list_active_vms(server.getAgentPassword(), vmID)
-                    updated_vms = list()
                     for vm in vtam_vms:
                         if vm.getUUID() in server_active_vms.keys():
                             vm.setState("running")

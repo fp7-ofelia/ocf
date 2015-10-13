@@ -7,7 +7,7 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from common.tests.client import test_get_and_post_form
 from django.contrib.auth.models import User
-from pyquery import PyQuery as pq
+#from pyquery import PyQuery as pq
 from openflow.plugin.models import OpenFlowInterface, NonOpenFlowConnection
 from geni.planetlab.models import PlanetLabNode
 

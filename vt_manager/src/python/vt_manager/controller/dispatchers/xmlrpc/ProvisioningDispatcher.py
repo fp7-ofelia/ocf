@@ -1,9 +1,7 @@
-import time
-
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.models.Action import Action
 from django.db import transaction
-import xmlrpclib, threading, logging, copy
+import threading, logging
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.communication.XmlRpcClient import XmlRpcClient
 #from vt_manager.settings.settingsLoader import ROOT_USERNAME,ROOT_PASSWORD,VTAM_IP,VTAM_PORT

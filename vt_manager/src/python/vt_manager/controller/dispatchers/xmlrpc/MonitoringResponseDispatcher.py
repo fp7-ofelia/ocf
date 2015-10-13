@@ -1,4 +1,4 @@
-from vt_manager.communication.utils.XmlHelper import XmlHelper
+#from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.models.Action import Action
 import logging
 
@@ -10,7 +10,7 @@ class MonitoringResponseDispatcher():
 
 	@staticmethod
 	def processResponse(rspec):
-	
+		from vt_manager.models.VTServer import VTServer
  		for action in rspec.response.monitoring.action:
 			if not action.type_ == "listActiveVMs":
 				raise Exception("Cannot process Monitoring action:"+action.type_)
@@ -18,7 +18,6 @@ class MonitoringResponseDispatcher():
 				if action.id == "callback":
 					print '---------------------->Libvirt Monitoring!!!'
 					from vt_manager.controller.monitoring.VMMonitor import VMMonitor
-					from vt_manager.models.VTServer import VTServer
                                         print '------>UUID',action.server.virtual_machines[0].uuid
 					print '------>STATUS',action.server.virtual_machines[0].status
 					VMMonitor.processUpdateVMsListFromCallback(action.server.virtual_machines[0].uuid,action.server.virtual_machines[0].status,rspec)
@@ -36,9 +35,7 @@ class MonitoringResponseDispatcher():
 				actionModel.setStatus(Action.ONGOING_STATUS)
 				return
 			elif action.status == "SUCCESS":
-				from vt_manager.models.VTServer import VTServer
 				from vt_manager.controller.monitoring.VMMonitor import VMMonitor
-
 				print "----------------------->SUCCESS"
 				server = VTServer.objects.get(uuid=actionModel.getObjectUUID())
 				print "----------------------->SUCCESS2"
