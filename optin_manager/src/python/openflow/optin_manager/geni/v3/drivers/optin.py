@@ -10,7 +10,7 @@ from geniutils.src.xrn.xrn import hrn_to_urn
 from geniutils.src.xrn.xrn import urn_to_hrn
 
 from openflow.optin_manager.opts.models import Experiment
-from openflow.optin_manager.opts.models import ExperimentFLowSpace
+#from openflow.optin_manager.opts.models import ExperimentFLowSpace
 from openflow.optin_manager.opts.models import Reservation
 from openflow.optin_manager.opts.models import ReservationFlowSpace
 from openflow.optin_manager.opts.models import ExpiringFlowSpaces
@@ -27,7 +27,6 @@ import copy
 import uuid
 
 import traceback
-import random
 from datetime import datetime
 from datetime import timedelta
 import dateutil.parser
@@ -55,8 +54,7 @@ class OptinDriver:
     def get_version(self):
         #TODO Add F4F Extensions
         #TODO Add FELIX Extesions, if any
-        version = {"urn" : self.__generate_component_manager_id()}
-    
+        return {"urn" : self.__generate_component_manager_id()}
 
     def get_specific_devices(self, urn,geni_available=True):
         try:
@@ -66,15 +64,14 @@ class OptinDriver:
             #exp = exps[0].exp
             #return self.__parse_to_fs_object(urn, exp, exps)
             return self.__convert_to_resource(urn)
-        except Exception as e:
-            import traceback
+        except:
             traceback.print_exc()    
 
     def __get_specific_devices(self, urn, geni_available=True):
         fv_wrap = FlowVisorWrap()
         fspaces = fv_wrap.flow_space_by_slice(urn)
         formatted_fs = dict()
-        for fspace in fspaces:
+        for fs in fspaces:
             if fs[dpid] in formatted_fs.keys():
                 if not fs["match"]["in_port"] in formatted_fs[dpid]["ports"]:
                     formatted_fs[dpid]["ports"].append(fs["match"]["in_port"])
@@ -123,18 +120,16 @@ class OptinDriver:
             slivers = self.__get_create_slice_params(rfs)
             self.__sliver_manager.create_of_sliver(urn, res.project_name, res.project_desc, res.slice_name, res.slice_desc, res.controller_url, res.owner_email, res.owner_password, slivers) 
             ExpiringFlowSpaces(slice_urn=urn, expiration=expiration).save()
-            print "-------------------------------------------------"
-            print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
             expirii = ExpiringFlowSpaces.objects.filter(slice_urn=urn, expiration=expiration)
             if expirii:
-                print "ExpiringFlowSpaces: ", ExpiringFlowSpaces.objects.filter(slice_urn=urn, expiration=expiration)[0].__dict__
-            print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
-            print "-------------------------------------------------"
+                print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+                print("ExpiringFlowSpaces: ", ExpiringFlowSpaces.objects.filter(slice_urn=urn, expiration=expiration)[0].__dict__)
+                print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             manifest = self.__convert_to_resource(urn, expiration)
             rfs.delete()
             res.delete()
         except Exception as e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
             raise e
         #manifest = self.__convert_to_resource(urn) 
         return manifest 
@@ -170,7 +165,7 @@ class OptinDriver:
                     for port in dpid.get_ports():
                         for match in group.get_matches():
                             req_params = self.__translate_to_flow_space_model(match, dpid, port)
-                            print "----------------------------------------------------", req_params
+                            print("----------------------------------------------------", req_params)
                             for param in req_params:
                                 param = self.__format_params_to_reservation_model(param)
                                 reservation_flowspace = ReservationFlowSpace(**param)
@@ -181,7 +176,7 @@ class OptinDriver:
  
                                 reservation_flowspace.save()
         except Exception as e:
-            print traceback.print_exc()
+            print(traceback.print_exc())
             raise e
         reservation.set_urn(reservation_params["slice_urn"])
         reservation.set_state("Pending of Provision")
@@ -291,7 +286,6 @@ class OptinDriver:
                     expiring_fs.save()
             return slivers
         except Exception as e:
-            import traceback
             traceback.print_exc()
             raise e
 

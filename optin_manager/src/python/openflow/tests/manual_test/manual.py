@@ -6,10 +6,8 @@ sys.path.append(SRC_DIR)
 from unittest import TestCase
 from expedient.common.tests.commands import call_env_command, Env
 from openflow.tests import test_settings
-from expedient.common.tests.utils import wrap_xmlrpc_call
 import xmlrpclib
 import random
-from pprint import pprint
 import logging
 
 logger = logging.getLogger("manual_test")
@@ -89,7 +87,8 @@ class ManualTests(TestCase):
             
     def test_case1(self):
         from django.contrib.auth.models import User
-        from openflow.optin_manager.opts.models import UserFlowSpace,Experiment, ExperimentFLowSpace
+        #from openflow.optin_manager.opts.models import UserFlowSpace,Experiment, ExperimentFLowSpace
+        from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
 
         # create a second experiemnt        
         username = "user"
@@ -138,7 +137,8 @@ class ManualTests(TestCase):
         
     def test_case2(self):
         from django.contrib.auth.models import User
-        from openflow.optin_manager.opts.models import UserFlowSpace,Experiment, ExperimentFLowSpace
+        #from openflow.optin_manager.opts.models import UserFlowSpace,Experiment, ExperimentFLowSpace
+        from openflow.optin_manager.opts.models import Experiment, ExperimentFLowSpace
 
       
         username = "user"

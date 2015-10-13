@@ -7,8 +7,8 @@ so that it can be used independently.
 import os
 import binascii
 from omctl_settings import *
-from datetime import timedelta, datetime
-import time
+#from datetime import timedelta, datetime
+#import time
 from expedient.common.utils.transport import TestClientTransport
 from urlparse import urlparse
 import xmlrpclib

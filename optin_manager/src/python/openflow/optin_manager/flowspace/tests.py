@@ -130,4 +130,3 @@ class Tests(SettingsTestCase):
         f4 = FlowSpace(ip_src_s=7, ip_src_e=11)  
         self.assertTrue(multifs_is_subset_of([f1,f2],[f3,f4]))
         
-            

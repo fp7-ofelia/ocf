@@ -18,7 +18,8 @@ import xmlrpclib, re
 from openflow.tests.helpers import kill_old_procs, parse_rspec
 from openflow.tests.helpers import create_random_resv
 from expedient.common.tests.commands import call_env_command, Env
-from expedient.common.tests.utils import drop_to_shell, wrap_xmlrpc_call
+#from expedient.common.tests.utils import drop_to_shell, wrap_xmlrpc_call
+from expedient.common.tests.utils import wrap_xmlrpc_call
 
 import logging
 logger = logging.getLogger(__name__)
@@ -218,7 +219,6 @@ class FullIntegration(TestCase):
         Flush and prepare the CH DB.
         Add the OMs to the CH.
         """
-        from os.path import dirname
         
         subprocess.call(shlex.split(
             "python %s/manage.py flush --noinput" % proj_dir))

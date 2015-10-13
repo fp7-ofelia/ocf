@@ -40,7 +40,7 @@ class Command(NoArgsCommand):
             f.close()
             os.remove("%s/slice_ids_to_grant_fs" % path)
             user = User.objects.filter(username=settings.ROOT_USERNAME)[0]
-            adminFS = AdminFlowSpace.objects.filter(user = user)
+            #adminFS = AdminFlowSpace.objects.filter(user = user)
             profile = UserProfile.get_or_create_profile(user)
             fv = FVServerProxy.objects.all()[0]
             for iden in ids:
@@ -69,8 +69,8 @@ class Command(NoArgsCommand):
          
                 for opt in allopts:
                     this_opt_fses = opt.optsflowspace_set.all()
-                    fs_project = opt.experiment.project_name or ""
-                    fs_slice = opt.experiment.slice_name or ""
+                    #fs_project = opt.experiment.project_name or ""
+                    #fs_slice = opt.experiment.slice_name or ""
                     fs_description = ""
                     for fs in this_opt_fses:
                         if fs_description != "":

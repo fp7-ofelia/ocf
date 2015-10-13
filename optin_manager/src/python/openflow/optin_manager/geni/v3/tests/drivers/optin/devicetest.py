@@ -29,10 +29,9 @@ class DeviceTest(unittest.TestCase):
 
     def test_should_get_links(self):
         links = self.filter_device(Link)
-        print "LINKS:---",len(links)
-        from pprint import pprint
+        print("LINKS:---",len(links))
         for link in links:
-            print "Link: SRC:", link.get_src_dpid().get_datapath(),"port:", link.get_src_port().get_num(), "DST:", link.get_dst_dpid().get_datapath(),"port:", link.get_dst_port().get_num() 
+            print("Link: SRC:", link.get_src_dpid().get_datapath(),"port:", link.get_src_port().get_num(), "DST:", link.get_dst_dpid().get_datapath(),"port:", link.get_dst_port().get_num())
 
     def filter_device(self, instance):
         devices = list()

@@ -1,6 +1,6 @@
 from django.db import models
-from datetime import datetime
-import uuid
+#from datetime import datetime
+#import uuid
 
 class ExpiringComponents(models.Model):
     """Class to relate slivers to an expiration date"""

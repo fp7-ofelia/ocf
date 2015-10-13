@@ -8,7 +8,7 @@ class ExpirationManager:
 
     @staticmethod
     def extend_expiration(slice_name,authority,time_extension):
-        time_extended = time_extension #FIXME: See how is processed the new expiration time
+        #time_extended = time_extension #FIXME: See how is processed the new expiration time
         try:
             exp_sl = ExpiringComponents.objects.get(slice=slice,authority=authority)
         except:
@@ -69,30 +69,21 @@ class ExpirationManager:
     @staticmethod         
     def delete_expired_reservations(reservation, reservation_flowspaces, expiration):
         try:
-            #from openflow.optin_manager.opts.models import Reservation
-            #from openflow optin_manager.opts.models import ReservationFlowSpace
             if expiration >= int(datetime.datetime.strptime(reservation.expiration.split(".")[0], "%Y-%m-%d %H:%M:%S").strftime("%s")): #Avoiding last-minute renews
                 reservation_flowspaces.delete()
                 reservation.delete()
-        except Exception as e:
+        except:
             import traceback
-            print traceback.print_exc()
+            print(traceback.print_exc())
 
     @staticmethod
     def delete_expired_flowspaces(urn, expiring_fs ,expiration):
-        from openflow.optin_manager.xmlrpc_server.models import FVServerProxy
-        from openflow.optin_manager.opts.models import Experiment
-        from openflow.optin_manager.opts.models import ExperimentFLowSpace
-        from openflow.optin_manager.opts.models import UserOpts
-        from openflow.optin_manager.opts.models import OptsFlowSpace
-        from openflow.optin_manager.opts.models import MatchStruct
         from openflow.optin_manager.geni.v3.utils.sliver import SliverUtils
-        from openflow.optin_manager.opts.models import ExpiringFlowSpaces
              
         if expiration >= int(datetime.datetime.strptime(expiring_fs.expiration.split(".")[0], "%Y-%m-%d %H:%M:%S").strftime("%s")): #Avoiding last-minute renews
             try:
                 SliverUtils.delete_of_sliver(urn)
-                exiring_fs.delete()
-            except Exception as e:
+                expiring_fs.delete()
+            except:
                 pass
 

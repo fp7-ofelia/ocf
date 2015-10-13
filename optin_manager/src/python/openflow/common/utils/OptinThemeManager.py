@@ -1,4 +1,3 @@
-import sys
 import os
 
 from django.conf import settings

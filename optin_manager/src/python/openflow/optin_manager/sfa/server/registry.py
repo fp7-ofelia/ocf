@@ -64,7 +64,7 @@ class RegistryManager:
                 caller_record = dbsession.query(RegRecord).filter_by(hrn=caller_hrn).first()
             if not caller_record:
                 raise RecordNotFound("Unable to associated caller (hrn=%s, type=%s) with credential for (hrn: %s, type: %s)"%(caller_hrn, caller_type, hrn, type))
-            caller_gid = GID(string=caller_record.gid)i
+            caller_gid = GID(string=caller_record.gid)
 
         object_hrn = record.get_gid_object().get_hrn()
         # call the builtin authorization/credential generation engine

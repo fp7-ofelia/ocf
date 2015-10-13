@@ -20,4 +20,3 @@ class Command(NoArgsCommand):
         f.write("SECRET_KEY = '%s'\n" % key)
         f.close()
         print "Done."
-        

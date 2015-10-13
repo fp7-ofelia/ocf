@@ -1,4 +1,3 @@
-import sys
 import re
 
 from django import template

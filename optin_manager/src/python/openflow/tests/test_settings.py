@@ -4,7 +4,6 @@ Created on May 15, 2010
 @author: jnaous
 '''
 from os.path import join, dirname
-import socket, sys
 
 PYTHON_DIR = join(dirname(__file__), "../../")
 OM_PROJECT_DIR = join(PYTHON_DIR, "openflow/optin_manager")
