@@ -110,7 +110,7 @@ class OptinDriver:
         devices.extend(self.__get_switches())
         devices.extend(self.__get_links()) 
         return devices
-    
+   
     def create_flowspace(self, urn, expiration=None, users=list(), geni_best_effort=True):
         try:
             urn = self.__generate_sliver_urn_from_slice_urn(urn)
@@ -118,9 +118,18 @@ class OptinDriver:
             #res = Reservation.objects.filter(slice_urn=urn)[0] 
             res = Reservation.objects.filter(**params)[0]       
             rfs = res.reservationflowspace_set.all()#ReservationFlowSpace.objects.filter(urn=urn)
+            if not res:
+                raise Exception("Sliver not found or already allocated") 
             slivers = self.__get_create_slice_params(rfs)
             self.__sliver_manager.create_of_sliver(urn, res.project_name, res.project_desc, res.slice_name, res.slice_desc, res.controller_url, res.owner_email, res.owner_password, slivers) 
             ExpiringFlowSpaces(slice_urn=urn, expiration=expiration).save()
+            print "-------------------------------------------------"
+            print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+            expirii = ExpiringFlowSpaces.objects.filter(slice_urn=urn, expiration=expiration)
+            if expirii:
+                print "ExpiringFlowSpaces: ", ExpiringFlowSpaces.objects.filter(slice_urn=urn, expiration=expiration)[0].__dict__
+            print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+            print "-------------------------------------------------"
             manifest = self.__convert_to_resource(urn, expiration)
             rfs.delete()
             res.delete()
@@ -135,7 +144,7 @@ class OptinDriver:
             if not expiration:
                 expiration = datetime.utcnow() + timedelta(hours=1)
             
-            reservation_params = self.__get_experiment_params(reservation,slice_urn) 
+            reservation_params = self.__get_experiment_params(reservation, slice_urn) 
             #reservation_params['slice_urn'] = slice_urn
             # Delete first any other reservation by this name
             reservation_params_filter = copy.deepcopy(reservation_params)
@@ -148,7 +157,16 @@ class OptinDriver:
             r.save()
 
             for group in reservation.get_groups():
+                # Filter to fetch only resources from this Component Manager ID
                 for dpid in group.get_dpids():
+                    # URNs of foreign RMs are not served
+                    current_cm_urn = self.__config.CM_HRN.replace(".", ":")
+                    cm_id = getattr(dpid, "get_component_manager_id")
+                    if callable(cm_id):
+                        cm_id = cm_id()
+                    # If current DPID does not belong to the current facility, skip
+                    if current_cm_urn not in cm_id:
+                        continue
                     for port in dpid.get_ports():
                         for match in group.get_matches():
                             req_params = self.__translate_to_flow_space_model(match, dpid, port)
@@ -285,7 +303,10 @@ class OptinDriver:
         if exps:
             experiment = exps[0]
             if not expiration:
-                expiration = ExpiringFlowSpaces.objects.filter(slice_urn=experiment.slice_urn)[0].expiration
+                try:
+                    expiration = ExpiringFlowSpaces.objects.filter(slice_urn=experiment.slice_urn)[0].expiration
+                except:
+                    raise Exception("Could not find appropriate FlowSpace expiration")
             efs = experiment.experimentflowspace_set.all()     
             return self.__parse_to_fs_object(urn, experiment, efs, expiration)
         elif Reservation.objects.filter(slice_urn=urn):

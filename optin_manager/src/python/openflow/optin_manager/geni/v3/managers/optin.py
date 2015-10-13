@@ -29,7 +29,7 @@ class OptinRM(ResourceManagerBase):
         return flowspaces[0]
     
     def reserve_resources(self, slice_urn, reservation, expiration=None, users=list()):
-        return self.__driver.reserve_flowspace(slice_urn, reservation,users)
+        return self.__driver.reserve_flowspace(slice_urn, reservation, users)
 
     def start_resources(self, urns, geni_best_effort=True):
         return self.__crud_resources(urns, geni_best_effort, self.START_ACTION)
