@@ -22,7 +22,7 @@ class ExpirationManager:
             from openflow.optin_manager.sfa.drivers.OFSfaDriver import OFSfaDriver #Avoiding circular Deps
         except:
             pass
-        slices = ExpiringComponets.objects.all()
+        slices = ExpiringComponents.objects.all()
         expired_components = list()
         for slice in slices:
             expiration_date = int(datetime_to_epoch(utcparse(slice.expires)))
@@ -35,18 +35,26 @@ class ExpirationManager:
     @staticmethod
     def launch_expired_fs():
         from openflow.optin_manager.opts.models import Experiment
-        from openflow.optin_manager.opts.models import ExperimentFLowspace
+        from openflow.optin_manager.opts.models import ExperimentFLowSpace
         from openflow.optin_manager.opts.models import ExpiringFlowSpaces
         from openflow.optin_manager.monitoring.util.queue import Queue
         
         expiration_buffer = list() 
         exps = Experiment.objects.exclude(slice_urn__isnull=True)
         for exp in exps:
-            expiring_fs = ExpiringFlowSpaces.objects.get(slice_urn = exp.slice_urn)
-            int_exp = int(datetime.strptime(expiring_fs.expiration.split(".")[0], '%Y-%m-%d %H:%M:%S').strftime("%s")) 
-            params = {"urn":exp.slice_urn, "expiring_fs":expiring_fs , "expiration":int_exp}
-            method = ExpirationManager.delete_expired_flowspaces
-            expiration_buffer.append((int_exp, method, params)) 
+            try:
+                # Attempt to retrieve expiring flowspaces for each experiment
+                expiring_fs = ExpiringFlowSpaces.objects.get(slice_urn = exp.slice_urn)
+                int_exp = int(datetime.strptime(expiring_fs.expiration.split(".")[0], '%Y-%m-%d %H:%M:%S').strftime("%s")) 
+                params = {"urn": exp.slice_urn, "expiring_fs": expiring_fs, "expiration": int_exp}
+                method = ExpirationManager.delete_expired_flowspaces
+                expiration_buffer.append((int_exp, method, params)) 
+            except:
+                pass
+
+        expiration_buffer.sort()
+        q = Queue(expiration_buffer)
+        q.start()
 
     @staticmethod
     def launch_reservation_queue():
@@ -69,7 +77,7 @@ class ExpirationManager:
     @staticmethod         
     def delete_expired_reservations(reservation, reservation_flowspaces, expiration):
         try:
-            if expiration >= int(datetime.datetime.strptime(reservation.expiration.split(".")[0], "%Y-%m-%d %H:%M:%S").strftime("%s")): #Avoiding last-minute renews
+            if expiration >= int(datetime.strptime(reservation.expiration.split(".")[0], "%Y-%m-%d %H:%M:%S").strftime("%s")): #Avoiding last-minute renews
                 reservation_flowspaces.delete()
                 reservation.delete()
         except:
@@ -80,7 +88,7 @@ class ExpirationManager:
     def delete_expired_flowspaces(urn, expiring_fs ,expiration):
         from openflow.optin_manager.geni.v3.utils.sliver import SliverUtils
              
-        if expiration >= int(datetime.datetime.strptime(expiring_fs.expiration.split(".")[0], "%Y-%m-%d %H:%M:%S").strftime("%s")): #Avoiding last-minute renews
+        if expiration >= int(datetime.strptime(expiring_fs.expiration.split(".")[0], "%Y-%m-%d %H:%M:%S").strftime("%s")): #Avoiding last-minute renews
             try:
                 SliverUtils.delete_of_sliver(urn)
                 expiring_fs.delete()

@@ -22,7 +22,7 @@ class ExpirationManager:
             from openflow.optin_manager.sfa.drivers.OFSfaDriver import OFSfaDriver #Avoiding circular Deps
         except:
             pass
-        slices = ExpiringComponets.objects.all()
+        slices = ExpiringComponents.objects.all()
         expired_components = list()
         for slice in slices:
             expiration_date = int(datetime_to_epoch(utcparse(slice.expires)))
