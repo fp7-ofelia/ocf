@@ -24,10 +24,16 @@ def print_error(text):
 ## Paths and files
 
 def get_modules():
-    unallowed_folders = [".git", "core", "deploy", "doc", "modules"]
+    unallowed_folders = [".git", "core*", "deploy*", "doc", "modules"]
     ocf_modules = sorted(os.walk(ocf_path).next()[1])
     for unallowed_folder in unallowed_folders:
         try:
+            if unallowed_folder.endswith("*"):
+                unallowed_folder = unallowed_folder[:-1]
+                ocf_modules = filter(lambda x: not x.startswith(unallowed_folder), ocf_modules)
+            elif unallowed_folder.startswith("*"):
+                unallowed_folder = unallowed_folder[1:]
+                ocf_modules = filter(lambda x: not x.endswith(unallowed_folder), ocf_modules)
             ocf_modules.remove(unallowed_folder)
         except ValueError:
             pass
