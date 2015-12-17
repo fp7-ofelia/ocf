@@ -113,18 +113,20 @@ class OptinDriver:
             urn = self.__generate_sliver_urn_from_slice_urn(urn)
             params = self.__urn_to_fs_params(urn)
             #res = Reservation.objects.filter(slice_urn=urn)[0] 
-            res = Reservation.objects.filter(**params)[0]       
-            rfs = res.reservationflowspace_set.all()#ReservationFlowSpace.objects.filter(urn=urn)
+            res = Reservation.objects.filter(**params)
             if not res:
                 raise Exception("Sliver not found or already allocated") 
+            res = res[0]
+            rfs = res.reservationflowspace_set.all()
             slivers = self.__get_create_slice_params(rfs)
             self.__sliver_manager.create_of_sliver(urn, res.project_name, res.project_desc, res.slice_name, res.slice_desc, res.controller_url, res.owner_email, res.owner_password, slivers) 
             ExpiringFlowSpaces(slice_urn=urn, expiration=expiration).save()
             expirii = ExpiringFlowSpaces.objects.filter(slice_urn=urn, expiration=expiration)
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            print "Expiration: ", expiration
             if expirii:
-                print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
                 print("ExpiringFlowSpaces: ", ExpiringFlowSpaces.objects.filter(slice_urn=urn, expiration=expiration)[0].__dict__)
-                print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             manifest = self.__convert_to_resource(urn, expiration)
             rfs.delete()
             res.delete()
@@ -138,7 +140,6 @@ class OptinDriver:
         try:
             if not expiration:
                 expiration = datetime.utcnow() + timedelta(hours=1)
-            
             reservation_params = self.__get_experiment_params(reservation, slice_urn) 
             #reservation_params['slice_urn'] = slice_urn
             # Delete first any other reservation by this name
@@ -165,7 +166,6 @@ class OptinDriver:
                     for port in dpid.get_ports():
                         for match in group.get_matches():
                             req_params = self.__translate_to_flow_space_model(match, dpid, port)
-                            print("----------------------------------------------------", req_params)
                             for param in req_params:
                                 param = self.__format_params_to_reservation_model(param)
                                 reservation_flowspace = ReservationFlowSpace(**param)
