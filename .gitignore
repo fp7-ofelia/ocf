@@ -73,4 +73,5 @@ vt_manager/bin/.ofverLock
 vt_manager/rescue/*
 ofrelease
 updater*
+server_id_rsa
 !.gitignore

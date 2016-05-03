@@ -6,6 +6,8 @@ from am.rspecs.src.geni.v3.container.link import Link
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
 from vt_manager.models.VirtualMachineKeys import VirtualMachineKeys
+from vt_manager.models.Ip4Range import Ip4Range
+from vt_manager.models.MacRange import MacRange
 from vt_manager.utils.contextualization.vm_contextualize import VMContextualize
 from vt_manager.utils.UrlUtils import UrlUtils
 from vt_manager.models.VirtualMachine import VirtualMachine
@@ -17,6 +19,8 @@ from vt_manager.models.expiring_components import ExpiringComponents
 from vt_manager.utils.SyncThread import SyncThread
 from vt_manager.utils.ServiceProcess import ServiceProcess
 from vt_manager.utils.ServiceThread import ServiceThread
+from vt_manager.communication.geni.v3.utils.reservation_mapper import ReservationMapper
+from vt_manager.communication.geni.v3.utils.server_stats import ServerStats
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.communication.utils.XmlHelper import XmlCrafter
 from vt_manager.models.VirtualMachineKeys import VirtualMachineKeys
@@ -29,6 +33,7 @@ import threading
 import copy
 import uuid
 import logging
+import math
 import random
 from datetime import datetime
 from datetime import timedelta
@@ -102,7 +107,7 @@ class VTAMDriver:
                 resources.extend(links)
             else:
                 continue
-        return resources        
+        return resources
 
     def __validate_precondition_states(self, vm, method_name=""):
         method_name += " action"
@@ -183,8 +188,13 @@ class VTAMDriver:
             if Reservation.objects.filter(sliceName=slice_hrn, projectName=slice_hrn, name=reservation.get_id()) or VirtualMachine.objects.filter(sliceName=slice_hrn, projectName=slice_hrn, name=reservation.get_id()):
                 raise Exception("There is another VM with client id %s on this slice already <GENI PROVISIONED> or <GENI ALLOCATED>" %reservation.get_id())
             reservation_name = reservation.get_id()
+            # XXX FIX NULL INITIALISATION! -- CALL MAPPER HERE??
+            disk_image = reservation.get_disk_image() or "default"
+            disk_memory = reservation.get_disk_memory() or self.__config.MEMORY_AVERAGE_MB
         else:
             reservation_name = str(random.randint(0,1000*1000))
+            disk_image = "default"
+            disk_memory = self.__config.MEMORY_AVERAGE_MB
         
         if expiration == None:
             expiration = datetime.utcnow() + timedelta(hours=1) 
@@ -196,12 +206,22 @@ class VTAMDriver:
         reserved_vm.set_project_name(slice_hrn)
         reserved_vm.set_name(reservation_name)
         reserved_vm.set_valid_until(str(expiration))
+        reserved_vm.set_disk_image(disk_image)
+        reserved_vm.set_disk_memory(disk_memory)
         reserved_vm.uuid = str(uuid.uuid4())
         reserved_vm.save()
-       
+
+        # Update values of free HD and memory in server
+        # self.update_server_mem_hd_status(server,
+        #                                 "-%s" % self.__config.HD_SIZE_AVERAGE_MB,
+        #                                 "-%s" % reserved_vm.get_disk_memory())
+        # Update values of free HD and memory in all servers
+        self.update_stats_servers(server, "-%s" % self.__config.HD_SIZE_AVERAGE_MB,
+                                    "-%s" % reserved_vm.get_disk_memory())
+
         if not reservation.get_sliver():
             reservation.set_sliver(Sliver())
-         
+
         # Set information for sliver
         reservation.get_sliver().set_urn(hrn_to_urn(server_hrn+"." + slice_hrn.split(".")[-1] + "." +str(reservation_name), "sliver"))
         reservation.get_sliver().set_allocation_status(self.GENI_ALLOCATED)
@@ -270,6 +290,26 @@ class VTAMDriver:
             params_list = self.__vm_to_ssh_keys_params_list(vm_provisioned)
             for params in params_list:
                 VirtualMachineKeys.objects.filter(**params).delete()
+
+            # Update values of free HD and memory in server
+            server_hrn, hrn_type = urn_to_hrn(urn)
+            server_name = server_hrn.split(".")[-1]
+            server_hrn = self.__config.CM_HRN + "." + server_name
+            try:
+                server_id = Reservation.objects.filter(sliceName=vm_params["sliceName"])[0].server_id
+                server = VTServer.objects.get(id=server_id).getChildObject()
+                # Update values of free HD and memory in server
+                # self.update_server_mem_hd_status(server,
+                #                             "+%s" % self.__config.HD_SIZE_AVERAGE_MB,
+                #                             "+%s" % vm_provisioned.memory)
+                # Update values of free HD and memory in all servers
+                self.update_stats_servers(server, "+%s" % self.__config.HD_SIZE_AVERAGE_MB,
+                                            "+%s" % vm_provisioned.memory)
+            except Exception as e:
+                print "VTAM.driver: error defining free HD and memory size after VM deletion. Details: %s" % e
+                import traceback
+                traceback.print_exc()
+
         # Provisioned VMs are deleted here
         resources = self.__crud_vm(urn, Action.PROVISIONING_VM_DELETE_TYPE)
         if vms_provisioned or vms_allocated:
@@ -378,6 +418,10 @@ class VTAMDriver:
         resource.set_component_id(component_id)
         resource.set_component_manager_name(component_manager_name)
         resource.set_component_name(component_name)
+        # Free memory and disk size (+ free slots)
+        resource.set_disk_free(server.getDiscSpaceGB())
+        resource.set_memory_free(server.getMemory())
+        resource.set_free_slots(self.determine_free_vms(server))
         # Default params
         resource.set_available(server.available)
         resource.set_exclusive(False)
@@ -525,7 +569,7 @@ class VTAMDriver:
    
     def get_default_vm_parameters(self, reservation):
         vm = dict()
-        ### TODO: Consider used the same name as id for porject and slices
+        ### TODO: Consider using the same name as id for project and slices
         vm["project-id"] = str(uuid.uuid4())
         vm["slice-id"] = str(uuid.uuid4())	
  	vm["project-name"] = reservation.get_project_name()
@@ -539,11 +583,18 @@ class VTAMDriver:
         vm["operating-system-type"] = "GNU/Linux"
         vm["operating-system-version"] = "6.0"
         vm["operating-system-distribution"] = "Debian"
-        vm["hd-origin-path"] = "legacy/legacy.tar.gz"
+        disk_details = ReservationMapper.get_template_info_from_urn(reservation.get_disk_image(), self.__config.CM_HRN)
+        #print "\n\n\n\ndisk_details: ", disk_details
+        # vm["hd-origin-path"] = "legacy/legacy.tar.gz"
+        vm["hd-origin-path"] = disk_details["img-path"]
         vm["interfaces"] = list()
-        vm["hd-setup-type"] = "file-image"
-        vm["virtualization-setup-type"] = "paravirtualization"
-        vm["memory-mb"] = 512
+        # vm["hd-setup-type"] = "file-image"
+        vm["hd-setup-type"] = disk_details["hd-setup"]
+        # vm["virtualization-setup-type"] = "paravirtualization"
+        vm["virtualization-setup-type"] = disk_details["virt-setup"]
+        #vm["memory-mb"] = 512
+        vm["memory-mb"] = ReservationMapper.check_memory(reservation.get_disk_memory())
+        #vm["hd-size-mb"] = ReservationMapper.check_disk_size(reservation.get_disk_size())
         return vm 
 
     def vm_dict_to_class(self, vm_dict, vm_class):
@@ -626,7 +677,63 @@ class VTAMDriver:
         else:
             expiring_sliver = ExpiringComponents(authority=project_name, slice=slice_name, expires=expiration)
         expiring_sliver.save()
-    
+
+    def update_server_mem_hd_status(self, server, vm_hd_mb, vm_memory_mb):
+        # Fill values of free HD and memory in server
+        try:
+            with self.__mutex_thread:
+                server_vm_args = {
+                                    "server": server,
+                                    "vm_hd_mb": vm_hd_mb,
+                                    "vm_memory_mb": vm_memory_mb,
+                                }
+                ServiceThread.startMethodInNewThread(ServerStats.update_server_with_hd_and_memory, server_vm_args)
+        except:
+            import traceback
+            traceback.print_exc()
+
+    def update_stats_servers(self, current_server=None, vm_size=0, vm_memory=0):
+        # Update values of free HD and memory in server
+        # self.update_server_mem_hd_status(server,
+        #                                 "-%s" % self.__config.HD_SIZE_AVERAGE_MB,
+        #                                 "-%s" % reserved_vm.get_disk_memory())
+        # Update values of free HD and memory in all servers
+        for vt_server in VTServer.objects.all():
+            vm_size_s = 0
+            vm_memory_s = 0
+            # Current server: update with new VM provisioned / deleted
+            if vt_server.name == current_server.name:
+                # vm_size_s = self.__config.HD_SIZE_AVERAGE_MB
+                # vm_memory_s = reserved_vm.get_disk_memory()
+                vm_size_s = vm_size
+                vm_memory_s = vm_memory
+            self.update_server_mem_hd_status(vt_server, vm_size_s, vm_memory_s)
+
+    def determine_free_vms(self, server):
+        free_vms = 0
+        free_hd = server.discSpaceGB
+        free_mem = server.memory
+        # NOTE: HD size from server is in GB, HD size in configuration is in MB
+        free_vms_hd = math.floor(free_hd / (self.__config.HD_SIZE_AVERAGE_MB / 1024))
+        free_vms_mem = math.floor(free_mem / self.__config.MEMORY_AVERAGE_MB)
+        free_vms_ips = 0
+        for ip4_range in Ip4Range.objects.all():
+            free_vms_ips += ip4_range.getGlobalNumberOfSlots() - ip4_range.getAllocatedGlobalNumberOfSlots()
+        free_vms_macs = 0
+        for mac_range in MacRange.objects.all():
+            free_vms_macs += mac_range.getGlobalNumberOfSlots() - mac_range.getAllocatedGlobalNumberOfSlots()
+        # NOTE: One VM has 3 interfaces: 1 with IP and 3 with MAC
+        free_vms_macs /= 3
+        #print "\n\n\n\n\n"
+        #print "free_hd: ", free_hd
+        #print "free_mem: ", free_mem
+        #print "free_vms_hd: ", free_vms_hd
+        #print "free_vms_mem: ", free_vms_mem
+        #print "free_vms_ips: ", free_vms_ips
+        #print "free_vms_macs: ", free_vms_macs
+        free_vms = int(min(free_vms_hd, free_vms_hd, free_vms_ips, free_vms_macs))
+        return free_vms
+
     def retrieve_access_data(self, urns, geni_best_effort=False):
         accesses_data = []
         for urn in urns:

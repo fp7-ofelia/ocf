@@ -10,6 +10,10 @@ class VTAMConfig(Settings):
     """Default Authority Settings"""
     HRN = "ocf.i2cat"
     SFA_INTERFACE_HRN = "ambase"
+
+    # In MB, average HD size and memory offered by VTAM
+    HD_SIZE_AVERAGE_MB = 8*1024
+    MEMORY_AVERAGE_MB = 512
     
     TRUSTED_ROOTS_DIR = settings.SRC_DIR + "python/vt_manager/communication/geni/v3/trusted_roots/"
     SFA_CREDENTIAL_SCHEMA = settings.AM_LIB_LOCATION + "/ext/schemas/credential.xsd"

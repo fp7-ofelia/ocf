@@ -22,10 +22,13 @@ class CrafterManager:
     def advert_node_template(self):
         tmpl = """<node component_manager_id="%s" component_name="%s" component_id="%s" exclusive="%s">
 <available now="%s"/>
+<hardware_type name="VM">
+    <emulab:node_type type_slots="%s"/>
+</hardware_type>
 </node>
 """
         return tmpl
-    
+
     def advert_link_template(self):
         tmpl = '''<link component_id="%s" component_name="%s">
 <property source_id="%s" dest_id="%s" capacity="%s"/>
@@ -53,7 +56,8 @@ class CrafterManager:
                        resource_component_name,
                        resource_component_id,
                        resource_exclusive,
-                       resource_available)
+                       resource_available,
+                       resource.get_free_slots())
     
     def advert_link(self, link):
         resource_component_name = link.get_component_name()
@@ -72,7 +76,7 @@ class CrafterManager:
     
     def advert_header(self):
         header = """<?xml version="1.0" encoding="UTF-8"?>
-<rspec xmlns="http://www.geni.net/resources/rspec/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/ad.xsd" type="advertisement">\n"""
+<rspec xmlns="http://www.geni.net/resources/rspec/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.geni.net/resources/rspec/3 http://www.geni.net/resources/rspec/3/ad.xsd" xmlns:emulab="http://www.protogeni.net/resources/rspec/ext/emulab/1" type="advertisement">\n"""
         return header
     
     def advert_footer(self):

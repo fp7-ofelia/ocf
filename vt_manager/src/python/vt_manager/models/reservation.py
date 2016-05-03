@@ -13,8 +13,9 @@ class Reservation(models.Model):
     name = models.CharField(max_length = 512, default="", verbose_name = "Reservation name")
     projectName = models.CharField(max_length = 1024, default="")
     sliceName = models.CharField(max_length = 1024, default="")
-    uuid  = models.CharField(max_length = 1024, default="")
-    
+    disk_image = models.CharField(max_length = 1024, default="")
+    disk_memory = models.IntegerField(default=512)
+    uuid = models.CharField(max_length = 1024, default="")
 
     def get_name(self):
         return self.name
@@ -30,7 +31,13 @@ class Reservation(models.Model):
 
     def get_provisioned(self):
         return self.is_provisioned
-     
+
+    def get_disk_image(self):
+        return self.disk_image
+
+    def get_disk_memory(self):
+        return self.disk_memory
+
     def set_name(self, value):
         self.name = value
 
@@ -45,3 +52,10 @@ class Reservation(models.Model):
 
     def set_provisioned(self, value):
         self.is_provisioned = value
+
+    def set_disk_image(self, value):
+        self.disk_image = value
+
+    def set_disk_memory(self, value):
+        self.disk_memory = value
+

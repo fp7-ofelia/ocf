@@ -44,8 +44,15 @@ class BackgroundVMEXpirationMonitoring(threading.Thread):
                                 print "VM (urn=%s) has expired on time=%s. Proceeding to its deletion" % \
                                         (sliver_urn, e.expires)
                                 self.vt_driver.delete_vm(sliver_urn)
+                                # Warn root
+                                send_mail(
+                                    settings.ISLAND_NAME + ": sliver expired at %s island" % settings.ISLAND_NAME,
+                                    "Sliver %s from slice %s has expired at time=%s.\n\nContents have been automatically deleted." % (sliver_urn, slice_urn, e.expires),
+                                    from_email=settings.DEFAULT_FROM_EMAIL,
+                                    recipient_list=[settings.ROOT_EMAIL],
+                                )
                             except:
-                                pass
+                                print "Automatic deletion of expired VM failed. Details:", str(e)
                         e.delete()
                     # If one hour or less is left for expiring, notify it to experimenter
                     elif time_to_expire.days == 0 and time_to_expire.seconds <= 60*60:
@@ -61,6 +68,6 @@ class BackgroundVMEXpirationMonitoring(threading.Thread):
                                 recipient_list=[settings.ROOT_EMAIL],
                             )
             except Exception as e:
-                print "Expiratio Monitoring failed, cause:", str(e)
+                print "Expiration Monitoring failed. Details:", str(e)
             
             time.sleep(self.period)

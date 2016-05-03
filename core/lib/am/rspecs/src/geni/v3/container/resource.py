@@ -1,5 +1,5 @@
 class Resource:
-    
+
     def __init__(self):
         self.__id = None
         self.__uuid = None
@@ -14,10 +14,15 @@ class Resource:
         self.__exclusive = None
         self.__type = None
         self.__error_message = None
+        self.__disk_image = None
+        self.__disk_memory = None
+        self.__disk_free = None
+        self.__memory_free = None
+        self.__free_slots = None
     
     def get_id(self):
         return self.__id
-    
+
     def get_uuid(self):
         return self.__uuid
 
@@ -47,12 +52,27 @@ class Resource:
 
     def get_exclusive(self):
         return self.__exclusive
-    
+
     def get_type(self):
         return self.__type
 
     def get_error_message(self):
         return self.__error_message
+
+    def get_disk_image(self):
+        return self.__disk_image
+
+    def get_disk_memory(self):
+        return self.__disk_memory
+
+    def get_disk_free(self):
+        return self.__disk_free
+
+    def get_memory_free(self):
+        return self.__memory_free
+
+    def get_free_slots(self):
+        return self.__free_slots
 
     def set_id(self, value):
         self.__id = value
@@ -86,19 +106,35 @@ class Resource:
 
     def set_exclusive(self, value):
         self.__exclusive = value
-        
+
     def set_type(self, value):
         self.__type = value
 
     def set_error_message(self, value):
         self.__error_mesage = value
-        
+
+    def set_disk_image(self, value):
+        self.__disk_image = value
+
+    def set_disk_memory(self, value):
+        self.__disk_memory = value
+
+    def set_disk_free(self, value):
+        self.__disk_free = value
+
+    def set_free_slots(self, value):
+        self.__free_slots = value
+
+    def set_memory_free(self, value):
+        self.__memory_free = value
+
+
 #    def add_sliver(self, value):
 #        if not type(self.__slivers) == list:
 #            self.__slivers = [value]
 #        else:
 #            self.__slivers.append(value)
-        
+
     def __str__(self):
         to_return = self.__class__.__name__ + " [ "
         attrs = self.__dict__.keys()
@@ -108,6 +144,6 @@ class Resource:
             to_return += new_attr
         to_return += "]"
         return to_return
-    
+
     def __repr__(self):
         return self.__str__()
