@@ -20,6 +20,7 @@ from openflow.optin_manager.flowspace.utils import int_to_mac, int_to_dotted_ip
 from django.contrib.sites.models import Site
 from openflow.optin_manager.opts.autofsgranter import auto_fs_granter
 import uuid
+import subprocess
 
 @decorator
 def check_fv_set(func, *arg, **kwargs):
@@ -139,7 +140,21 @@ def get_direction(direction):
     if (direction == 'bidirectional'):
         return 2
     return 2
-           
+
+@check_user
+@rpcmethod(signature=['struct', # return value
+                      'string'])
+def check_slice_exists(slice_id, options={}, **kwargs):
+    slice_found = False
+    try:
+        fv = subprocess.Popen(["fvctl", "--passwd-file=/root/.fvpassword", "getSliceInfo", slice_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = fv.communicate()
+        if len(out) > 0 and len(err) == 0:
+            slice_found = True
+    except:
+        pass
+    return slice_found
+
 @check_user
 @check_fv_set
 @rpcmethod(signature=['struct', # return value

@@ -34,7 +34,9 @@ class SessionMonitoringThread(Thread):
         self.start()
 
     def run(self):
-        self.__method()
+        # XXX Disabled due to Out-of-Memory
+        #self.__method()
+        pass
 
 def clean_up_expired_sessions():
     try:

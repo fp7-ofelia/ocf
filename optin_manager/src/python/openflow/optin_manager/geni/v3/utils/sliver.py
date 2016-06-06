@@ -24,6 +24,7 @@ class SliverUtils:
 
     @staticmethod
     def create_of_sliver(slice_urn,project_name,project_description,slice_name,slice_description,controller_url,owner_email,owner_password,switch_slivers,**kwargs):
+        print "SLIVERS----------------------------------------------------------", switch_slivers
         e = Experiment.objects.filter(slice_urn=slice_urn)
         if (e.count()>0):
             old_e = e[0]
@@ -84,10 +85,13 @@ class SliverUtils:
                         if (ch_start or ch_end) in ["nw_dst_start", "nw_dst_end", "nw_src_start", "nw_src_end"]:
                             fs[ch_start] = int_to_dotted_ip( fs[ch_start])
                             fs[ch_end] = int_to_dotted_ip( fs[ch_end])
-
+                          
+                        if (ch_start or ch_end) in ["dl_dst_start", "dl_dst_end", "dl_src_start", "dl_src_end"]:
+                            continue
                         try:
                             setattr(efs,om_start,from_str(fs[ch_start]))
                         except:
+                            print "-----------------",ch_start, ch_end
                             setattr(efs,om_start,from_str(int(fs[ch_start],16)))
                         try:
                             setattr(efs,om_end,from_str(fs[ch_end]))
@@ -255,6 +259,18 @@ class SliverUtils:
             pass #Probably is the best for now
 
         return 1
+
+    @staticmethod
+    def check_slice_exists(slice_id, options={}, **kwargs):
+        slice_found = False
+        try:
+            fv = subprocess.Popen(["fvctl", "--passwd-file=/root/.fvpassword", "getSliceInfo", slice_id], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = fv.communicate()
+            if len(out) > 0 and len(err) == 0:
+                slice_found = True
+        except:
+            pass
+        return slice_found
 
     @staticmethod
     def opt_in(urn):

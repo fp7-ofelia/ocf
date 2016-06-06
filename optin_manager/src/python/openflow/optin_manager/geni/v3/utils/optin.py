@@ -201,8 +201,10 @@ class OptinUtils:
             in_strs = [in_strs]
         output = list()
         for in_str in in_strs:
-           mac_int = int_to_mac(in_str) 
+           
+           mac_int = mac_to_int(in_str) 
            output.append((mac_int,mac_int))
+        print "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm", output
         return output
 
     @staticmethod

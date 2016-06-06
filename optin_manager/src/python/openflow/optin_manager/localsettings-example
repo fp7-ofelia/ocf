@@ -85,7 +85,7 @@ UNALLOWED_VLANS = []
 THEME = "default"
 
 ##
-## Time zone
+## Time settings
 ##
 
 #

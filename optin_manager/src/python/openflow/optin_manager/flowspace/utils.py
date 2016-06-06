@@ -26,7 +26,8 @@ def mac_to_int(mac):
     return int("".join(parts), base=16)
 
 def int_to_mac(mac):
-    if type(mac) == str and ":" in str:
+    print "--------------------", mac, type(mac)
+    if type(mac) == str and ":" in mac:
         return mac
     s = "%012x" % long(mac)
     m = re.findall("\w\w", s)
