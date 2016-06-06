@@ -9,6 +9,8 @@ class Command(BaseCommand):
     def remove_experiment_and_fs(self, slice_urn):
         if slice_urn is None:
             return
+        if isinstance(slice_urn, tuple):
+            slice_urn = slice_urn[0]
         exps = Experiment.objects.filter(Q(project_name=slice_urn) | Q(slice_urn=slice_urn))
         for exp in exps:
             fs = ExperimentFLowSpace.objects.filter(exp=exp)
