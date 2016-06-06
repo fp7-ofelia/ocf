@@ -51,11 +51,13 @@ from credentials.src.trustgcf.gid import GID
 
 # Simple XML helper functions
 
+
 # Find the text associated with first child text node
 def findTextChildValue(root):
     child = findChildNamed(root, '#text')
     if child: return str(child.nodeValue)
     return None
+
 
 # Find first child with given name
 def findChildNamed(root, name):
@@ -64,6 +66,7 @@ def findChildNamed(root, name):
             return child
     return None
 
+
 # Write a string to a tempfile, returning name of tempfile
 def write_to_tempfile(str):
     str_fd, str_file = tempfile.mkstemp()
@@ -71,6 +74,7 @@ def write_to_tempfile(str):
         os.write(str_fd, str)
     os.close(str_fd)
     return str_file
+
 
 # Run a subprocess and return output
 def run_subprocess(cmd, stdout, stderr):
@@ -85,6 +89,7 @@ def run_subprocess(cmd, stdout, stderr):
     except Exception as e:
         raise Exception("Failed call to subprocess '%s': %s" % (" ".join(cmd), e))
 
+
 def get_cert_keyid(gid):
     """Extract the subject key identifier from the given certificate.
     Return they key id as lowercase string with no colon separators
@@ -92,11 +97,27 @@ def get_cert_keyid(gid):
     certificate are in uppercase with colon separators.
 
     """
-    raw_key_id = gid.get_extension('subjectKeyIdentifier')
-    # Raw has colons separating pairs, and all characters are upper case.
-    # Remove the colons and convert to lower case.
-    keyid = raw_key_id.replace(':', '').lower()
-    return keyid
+    raw_key_id = None
+    # try:
+    #     raw_key_id = gid.get_extension('subjectKeyIdentifier')
+    #     # Raw has colons separating pairs, and all characters are upper case.
+    #     # Remove the colons and convert to lower case.
+    #     keyid = raw_key_id.replace(':', '').lower()
+    #     return keyid
+    # except:
+    #     pass
+    # UT: if subjectKeyIdentifier extension is not present
+    import hashlib
+    return hashlib.sha1(gid.get_pubkey().get_m2_pkey().as_der()).hexdigest()
+
+    # from M2Crypto import X509
+    # m2x509 = X509.load_cert_string(gid.save_to_string())
+    # #print hashlib.sha1(m2x509.get_pubkey().get_rsa().as_pem() ).hexdigest()
+    # #print gid.get_pubkey().as_pem()
+    # # Here is the right key as pem
+    # #print m2x509.get_pubkey().get_rsa().as_pem()
+    # return m2x509.get_fingerprint('sha1').lower()
+
 
 # Pull the cert out of a list of certs in a PEM formatted cert string
 def grab_toplevel_cert(cert):
@@ -127,7 +148,9 @@ def grab_toplevel_cert(cert):
 #   String user certificate of speaking_for user if the above tests succeed
 #      (None otherwise)
 #   Error message indicating why the speaks_for call failed ("" otherwise)
-def verify_speaks_for(cred, tool_gid, speaking_for_urn, \
+
+
+def verify_speaks_for(cred, tool_gid, speaking_for_urn,
                           trusted_roots, schema=None, logger=None):
 
     # Credential has not expired
@@ -220,6 +243,125 @@ def verify_speaks_for(cred, tool_gid, speaking_for_urn, \
 
     return True, user_gid, ""
 
+
+def verify_speaks_for_ex(abac_cred_list, tool_gid, speaking_for_gid):
+
+    cred_with_speaksfor_attr = None
+    cred_with_tool_keyid = None
+    speaking_for_keyid = get_cert_keyid(speaking_for_gid)
+    tool_keyid = get_cert_keyid(tool_gid)
+
+    for cred in abac_cred_list:
+        # Credential has not expired
+        if cred.expiration and cred.expiration < datetime.datetime.utcnow():
+            return False, None, "ABAC Credential expired at %s (%s)" % (cred.expiration.isoformat(), cred.get_summary_tostring())
+
+        # Must be ABAC
+        if cred.get_cred_type() != ABACCredential.ABAC_CREDENTIAL_TYPE:
+            # return False, None, "Credential not of type ABAC but %s" % cred.get_cred_type
+            abac_cred_list.remove(cred) # silently ignore non-ABAC attributes
+
+        tails = cred.get_tails()
+        if len(tails) != 1:
+            return False, None, "Invalid ABAC-SF credential: Need exactly 1 tail element, got %d (%s)" % \
+                   (len(tails), cred.get_summary_tostring())
+
+        if cred.signature is None or cred.signature.gid is None:
+            return False, None, "Credential malformed: missing signature or signer cert. Cred: %s" %\
+                   cred.get_summary_tostring()
+
+        if cred.get_head().get_role() == 'speaks_for_'+str(speaking_for_keyid) and \
+                        cred.get_head().get_principal_keyid() == speaking_for_keyid:
+            cred_with_speaksfor_attr = cred
+
+        if tails[0].get_principal_keyid() == tool_keyid and not tails[0].get_role():
+            cred_with_tool_keyid = cred
+
+    if not cred_with_speaksfor_attr:
+        return False, None, "Passed credentials have no speaks-for attribute"
+
+    if not cred_with_tool_keyid:
+        return False, None, "Passed credentials have no speaks-for applicable to caller"
+
+    tail = cred_with_speaksfor_attr.get_tails()[0]
+    if tail.get_principal_keyid() == tool_keyid and not tail.get_role():
+        return True, speaking_for_gid, ""
+
+    def search_cred(tail_principal, tail_role):
+        for c in abac_cred_list:
+            t = c.get_tails()[0]
+            if t.get_principal_keyid() == tail_principal and t.get_role() == tail_role:
+                return c
+
+    r = cred_with_tool_keyid
+    abac_cred_list.remove(r)
+
+    while len(abac_cred_list) > 0:
+        r_head = r.get_head()
+        r = search_cred(r_head.get_principal_keyid(), r_head.get_role())
+        if r:
+            if r.get_head().get_principal_keyid() == speaking_for_keyid and \
+               r.get_head().get_role() == "speaks_for_"+str(speaking_for_keyid):
+                return True, speaking_for_gid, ""
+            else:
+                r = abac_cred_list.pop()
+        else:
+            break
+
+    return False, None, "Passed credentials do not allow speaks-for operation"
+
+    # URN of signer from cert must match URN of 'speaking-for' argument
+    # if user_urn != speaking_for_urn:
+    #     return False, None, "User URN from cred doesn't match speaking_for URN: %s != %s (cred %s)" % \
+    #         (user_urn, speaking_for_urn, cred_with_speaksfor_attr.get_summary_tostring())
+
+    # tails = cred_with_speaksfor_attr.get_tails()
+    # subject_keyid = tails[0].get_principal_keyid()
+    # subject_role = tails[0].get_role()
+    #
+    # #loop through
+    # while not subject_keyid == tool_keyid and len(abac_cred_list) >0:
+    #     target_found = False
+    #     for cred in abac_cred_list:
+    #         head = cred.get_head()
+    #         if head.get_principal_keyid() == subject_keyid and head.get_role() == subject_role:
+    #             tails = cred.get_tails()
+    #             subject_keyid = tails[0].get_principal_keyid()
+    #             subject_role = tails[0].get_role()
+    #             abac_cred_list.remove(cred)
+    #             target_found = True
+    #             break
+    #     if not target_found:
+    #         break
+    # if not subject_keyid == tool_keyid:
+    #     return False, None, "No cred allow speaking_for URN: %s != %s" % \
+    #         (user_urn, speaking_for_urn)
+    # head = cred_with_speaksfor_attr.get_head()
+    # principal_keyid = head.get_principal_keyid()
+    # role = head.get_role()
+
+    # # <Using libabac>
+    # # Initialize ABAC context
+    # cxt = ABAC.Context()
+    #
+    # # create libabac compatible ids of user and tool
+    # user_abac_id = ABAC.ID_chunk(speaking_for_gid.save_to_string())
+    # tool_abac_id = ABAC.ID_chunk(tool_gid.save_to_string())
+    #
+    # # Load all received ABAC attributes
+    # for item in abac_cred_list:
+    #     cxt.load_attribute_chunk(item.xml)
+    #
+    # try:
+    #     ok, proof = cxt.query(user_abac_id.keyid()+".speaks_for_"+str(user_abac_id.keyid()), tool_abac_id.keyid())
+    # except Exception, err:
+    #     ok = False
+    #     proof = ''
+    #     print Exception, err
+    # print ok
+    # get_cert_keyid(speaking_for_gid)
+    # return ok, speaking_for_gid if ok else None, str(proof)
+
 # Determine if this is a speaks-for context. If so, validate
 # And return either the tool_cert (not speaks-for or not validated)
 # or the user cert (validated speaks-for)
@@ -233,8 +375,9 @@ def verify_speaks_for(cred, tool_gid, speaking_for_urn, \
 # trusted_roots is a list of Certificate objects from the system
 #   trusted_root directory
 # Optionally, provide an XML schema against which to validate the credential
-def determine_speaks_for(logger, credentials, caller_gid, options, \
-                             trusted_roots, schema=None):
+
+
+def determine_speaks_for(logger, credentials, caller_gid, options, trusted_roots, schema=None):
     if options and 'geni_speaking_for' in options:
         speaking_for_urn = options['geni_speaking_for'].strip()
         for cred in credentials:
@@ -261,12 +404,9 @@ def determine_speaks_for(logger, credentials, caller_gid, options, \
 
             # See if this is a valid speaks_for
             is_valid_speaks_for, user_gid, msg = \
-                verify_speaks_for(cred,
-                                  caller_gid, speaking_for_urn, \
-                                      trusted_roots, schema, logger)
-
+                verify_speaks_for(cred, caller_gid, speaking_for_urn, trusted_roots, schema, logger)
             if is_valid_speaks_for:
-                return user_gid # speaks-for
+                return user_gid  # speaks-for
             else:
                 if logger:
                     logger.info("Got speaks-for option but not a valid speaks_for with this credential: %s" % msg)
@@ -274,15 +414,68 @@ def determine_speaks_for(logger, credentials, caller_gid, options, \
                     print "Got a speaks-for option but not a valid speaks_for with this credential: " + msg
     return caller_gid # Not speaks-for
 
+
+def determine_speaks_for_ex(logger, credentials, caller_gid, options, trusted_roots, schema=None):
+    abac_cred_list = []
+    speaking_for_gid = None
+
+    for cred in credentials:
+        # Skip things that aren't ABAC credentials
+        if type(cred) == dict:
+            if cred['geni_type'] != ABACCredential.ABAC_CREDENTIAL_TYPE:
+                cred_ = CredentialFactory.createCred(credString=cred['geni_value'])
+                speaking_for_gid = cred_.get_gid_caller() if cred_ else None
+                continue
+            cred_value = cred['geni_value']
+        elif isinstance(cred, Credential):
+            if not isinstance(cred, ABACCredential):
+                speaking_for_gid = cred.get_gid_caller()
+                continue
+            else:
+                cred_value = cred
+        else:
+            if CredentialFactory.getType(cred) != ABACCredential.ABAC_CREDENTIAL_TYPE:
+                cred_ = CredentialFactory.createCred(credString=cred)
+                speaking_for_gid = cred_.get_gid_caller() if cred_ else None
+                continue
+            cred_value = cred
+
+        # If the cred_value is xml, create the object
+        if not isinstance(cred_value, ABACCredential):
+            cred = CredentialFactory.createCred(cred_value)
+
+        abac_cred_list.append(cred)
+
+    # If speaking_for_gid is None or ABAC creds are absent then there is no point to proceed
+    if not speaking_for_gid or len(abac_cred_list) == 0:
+        print 'No point in checking speaks-for'
+        return caller_gid
+
+    # See if this is a valid speaks_for
+    is_valid_speaks_for, user_gid, msg = verify_speaks_for_ex(abac_cred_list, caller_gid, speaking_for_gid)
+
+    if is_valid_speaks_for:
+        print "Speaks-for successfully validated ! "
+        return user_gid  # speaks-for
+    else:
+        if logger:
+            logger.info("Got speaks-for option but not a valid speaks_for with this credential: %s" % msg)
+        else:
+            print "Got a speaks-for option but not a valid speaks_for with this credential: " + msg
+    return caller_gid  # Not speaks-for
+
+
 # Create an ABAC Speaks For credential using the ABACCredential object and it's encode&sign methods
-def create_sign_abaccred(tool_gid, user_gid, ma_gid, user_key_file, cred_filename, dur_days=365):
-    print "Creating ABAC SpeaksFor using ABACCredential...\n"
+def create_sign_abaccred(tool_gid, user_gid, ma_gid, user_key_file, cred_filename, dur_days=365,
+                         role_head=None, role_tail=None):
+
     # Write out the user cert
     from tempfile import mkstemp
-    ma_str = ma_gid.save_to_string()
     user_cert_str = user_gid.save_to_string()
-    if not user_cert_str.endswith(ma_str):
-        user_cert_str += ma_str
+    if ma_gid:
+        ma_str = ma_gid.save_to_string()
+        if not user_cert_str.endswith(ma_str):
+            user_cert_str += ma_str
     fp, user_cert_filename = mkstemp(suffix='cred', text=True)
     fp = os.fdopen(fp, "w")
     fp.write(user_cert_str)
@@ -295,8 +488,16 @@ def create_sign_abaccred(tool_gid, user_gid, ma_gid, user_key_file, cred_filenam
     user_urn = user_gid.get_urn()
     user_keyid = get_cert_keyid(user_gid)
     tool_keyid = get_cert_keyid(tool_gid)
-    cred.head = ABACElement(user_keyid, user_urn, "speaks_for_%s" % user_keyid)
-    cred.tails.append(ABACElement(tool_keyid, tool_urn))
+    if not role_head:
+        cred.head = ABACElement(user_keyid, user_urn, "speaks_for_%s" % user_keyid)
+    else:
+        cred.head = ABACElement(user_keyid, user_urn, role_head)
+
+    if not role_tail:
+        cred.tails.append(ABACElement(tool_keyid, tool_urn))
+    else:
+        cred.tails.append(ABACElement(tool_keyid, tool_urn, role_tail))
+
     cred.set_expiration(datetime.datetime.utcnow() + datetime.timedelta(days=dur_days))
     cred.expiration = cred.expiration.replace(microsecond=0)
 
@@ -307,13 +508,13 @@ def create_sign_abaccred(tool_gid, user_gid, ma_gid, user_key_file, cred_filenam
     cred.sign()
     # Save it
     cred.save_to_file(cred_filename)
-    print "Created ABAC credential: '%s' in file %s" % \
-            (cred.get_summary_tostring(), cred_filename)
+    print "Created ABAC credential: '%s' in file %s\n" % (cred.get_summary_tostring(), cred_filename)
 
 # FIXME: Assumes xmlsec1 is on path
 # FIXME: Assumes signer is itself signed by an 'ma_gid' that can be trusted
-def create_speaks_for(tool_gid, user_gid, ma_gid, \
-                          user_key_file, cred_filename, dur_days=365):
+
+
+def create_speaks_for(tool_gid, user_gid, ma_gid, user_key_file, cred_filename, dur_days=365):
     tool_urn = tool_gid.get_urn()
     user_urn = user_gid.get_urn()
 
@@ -352,7 +553,6 @@ def create_speaks_for(tool_gid, user_gid, ma_gid, \
         signature_block + \
         '</signed-credential>\n'
 
-
     credential_duration = datetime.timedelta(days=dur_days)
     expiration = datetime.datetime.now(du_tz.tzutc()) + credential_duration
     expiration_str = expiration.strftime('%Y-%m-%dT%H:%M:%SZ') # FIXME: libabac can't handle .isoformat()
@@ -360,28 +560,50 @@ def create_speaks_for(tool_gid, user_gid, ma_gid, \
 
     user_keyid = get_cert_keyid(user_gid)
     tool_keyid = get_cert_keyid(tool_gid)
-    unsigned_cred = template % (reference, expiration_str, version, \
-                                    user_keyid, user_urn, user_keyid, tool_keyid, tool_urn, \
-                                    reference, reference)
+    unsigned_cred = template % (reference, expiration_str, version, user_keyid, user_urn, user_keyid,
+                                tool_keyid, tool_urn, reference, reference)
     unsigned_cred_filename = write_to_tempfile(unsigned_cred)
 
     # Now sign the file with xmlsec1
     # xmlsec1 --sign --privkey-pem privkey.pem,cert.pem 
     # --output signed.xml tosign.xml
-    pems = "%s,%s,%s" % (user_key_file, user_gid.get_filename(),
-                         ma_gid.get_filename())
+    if ma_gid:
+        pems = "%s,%s,%s" % (user_key_file, user_gid.get_filename(),
+                             ma_gid.get_filename())
+    else:
+        pems = "%s,%s" % (user_key_file, user_gid.get_filename())
     # FIXME: assumes xmlsec1 is on path
     cmd = ['xmlsec1',  '--sign',  '--privkey-pem', pems, 
            '--output', cred_filename, unsigned_cred_filename]
 
 #    print " ".join(cmd)
     sign_proc_output = run_subprocess(cmd, stdout=subprocess.PIPE, stderr=None)
-    if sign_proc_output == None:
+    if sign_proc_output is None:
         print "OUTPUT = %s" % sign_proc_output
     else:
         print "Created ABAC credential: '%s speaks_for %s' in file %s" % \
             (tool_urn, user_urn, cred_filename)
     os.unlink(unsigned_cred_filename)
+
+
+def test():
+    files = ['ro-speaks_for.xml', 'bob-speaks_for.xml', 'chm-speaks_for.xml', 'chl-speaks_for.xml']
+    cred_list = []
+    for cred_file in files:
+        cred = open(cred_file).read()
+        cred_dict = {'geni_type': ABACCredential.ABAC_CREDENTIAL_TYPE, 'geni_value': cred,
+                'geni_version': '1'}
+        cred_list.append(cred_dict)
+
+    sfa_cred = {'geni_type': ABACCredential.SFA_CREDENTIAL_TYPE, 'geni_value': open('/root/.gcf/myUsercred.xml').read(),
+                'geni_version': '1'}
+    cred_list.append(sfa_cred)
+    tool_gid = GID(filename='ro-cert.pem')
+
+    gid = determine_speaks_for_ex(None, cred_list, tool_gid, None, None)
+
+    print 'SPEAKS_FOR = %s' % (not tool_gid == gid)
+    print "CERT URN = %s" % gid.get_urn()
 
 
 # Test procedure
@@ -406,23 +628,37 @@ if __name__ == "__main__":
                       help="name of file of ABAC speaksfor cred to create")
     parser.add_option('--useObject', action='store_true', default=False,
                       help='Use the ABACCredential object to create the credential (default False)')
+    parser.add_option('--role_head',
+                      help="Role of head element")
+    parser.add_option('--role_tail',
+                      help="Role of tail element")
+    parser.add_option('--test',
+                      help="Run test")
 
     options, args = parser.parse_args(sys.argv)
 
-    tool_gid = GID(filename=options.tool_cert_file)
+    if options.test:
+        test()
+        sys.exit()
 
-    if options.create:
-        if options.user_cert_file and options.user_key_file \
-            and options.ma_cert_file:
+    elif options.create:
+        tool_gid = GID(filename=options.tool_cert_file)
+        if options.user_cert_file and options.user_key_file:
+            # and options.ma_cert_file:
             user_gid = GID(filename=options.user_cert_file)
-            ma_gid = GID(filename=options.ma_cert_file)
-            if options.useObject:
-                create_sign_abaccred(tool_gid, user_gid, ma_gid, \
-                                         options.user_key_file,  \
-                                         options.create)
+            if options.ma_cert_file:
+                ma_gid = GID(filename=options.ma_cert_file)
             else:
-                create_speaks_for(tool_gid, user_gid, ma_gid, \
-                                         options.user_key_file,  \
+                ma_gid = None
+            if options.useObject:
+                create_sign_abaccred(tool_gid, user_gid, ma_gid,
+                                         options.user_key_file,
+                                         options.create, role_head=options.role_head,
+                                         role_tail=options.role_tail, dur_days=365*5)
+
+            else:
+                create_speaks_for(tool_gid, user_gid, ma_gid,
+                                         options.user_key_file,
                                          options.create)
         else:
             print "Usage: --create cred_file " + \
@@ -432,7 +668,7 @@ if __name__ == "__main__":
 
     user_urn = options.user_urn
 
-    # Get list of trusted rootcerts
+    # Get list of trusted root certs
     if options.cred_file and not options.trusted_roots_directory:
         sys.exit("Must supply --trusted_roots_directory to validate a credential")
 

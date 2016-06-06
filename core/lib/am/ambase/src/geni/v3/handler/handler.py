@@ -28,10 +28,12 @@ class GeniV3Handler(HandlerBase):
             return self.error_result(self.__geni_exception_manager.ERROR, e) 
         return self.success_result(result=value)
 
-    def ListResources(self, credentials=list(), options=dict()):
+    def ListResources(self, credentials=list(), options=dict(), caller_cert=None):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("ListResources", credentials)
+            # Speaks-for 
+            # self.__credential_manager.validate_for("ListResources", credentials)
+            self.__credential_manager.validate_for("ListResources", credentials, caller_cert)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         # Required options validation
@@ -60,10 +62,12 @@ class GeniV3Handler(HandlerBase):
             output = base64.b64encode(zlib.compress(output))
         return self.listresources_success_result(output)
         
-    def Describe(self, urns=dict(),credentials=dict(),options=dict()):
+    def Describe(self, urns=dict(),credentials=dict(),options=dict(), caller_cert=None):
         # Credential validation
         try:
-            self.__credential_manager.validate_for("Describe", credentials)
+            # Speaks-for
+            # self.__credential_manager.validate_for("Describe", credentials)
+            self.__credential_manager.validate_for("Describe", credentials, caller_cert)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         if not options.get("geni_rspec_version"):
@@ -96,10 +100,12 @@ class GeniV3Handler(HandlerBase):
         
         return self.success_result(output, slivers, slice_urn)
 
-    def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict()):
+    def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict(), caller_cert=None):
         # Credential validation
         try:
-            creds = self.__credential_manager.validate_for("Allocate", credentials)
+            # Speaks-for
+            # creds = self.__credential_manager.validate_for("Allocate", credentials)
+            creds = self.__credential_manager.validate_for("Allocate", credentials, caller_cert)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         reservation = self.__rspec_manager.parse_request(rspec)
@@ -123,10 +129,12 @@ class GeniV3Handler(HandlerBase):
 
         return self.success_result(manifest, allocated_slivers)
         
-    def Provision(self, urns=list(), credentials=list(), options=dict()):
+    def Provision(self, urns=list(), credentials=list(), options=dict(), caller_cert=None):
         # Credential validation
         try:
-            creds = self.__credential_manager.validate_for("Provision", credentials)
+            # Speaks-for
+            # creds = self.__credential_manager.validate_for("Provision", credentials)
+            creds = self.__credential_manager.validate_for("Provision", credentials, caller_cert)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
@@ -163,10 +171,12 @@ class GeniV3Handler(HandlerBase):
             slivers = [slivers]
         return self.success_result(manifest, slivers)
     
-    def Delete(self, urns=list(), credentials=list(), options=dict()):
+    def Delete(self, urns=list(), credentials=list(), options=dict(), caller_cert=None):
         # Credential validation
         try:
-            creds = self.__credential_manager.validate_for("Delete", credentials)
+            # Speaks-for
+            # creds = self.__credential_manager.validate_for("Delete", credentials)
+            creds = self.__credential_manager.validate_for("Delete", credentials, caller_cert)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
@@ -188,10 +198,12 @@ class GeniV3Handler(HandlerBase):
         
         return self.delete_success_result(result)
     
-    def PerformOperationalAction(self, urns=list(), credentials=list(), action=None, options=dict()):
+    def PerformOperationalAction(self, urns=list(), credentials=list(), action=None, options=dict(), caller_cert=None):
         # Credential validation
         try:
-            creds = self.__credential_manager.validate_for("PerformOperationalAction", credentials)
+            # Speaks-for
+            # creds = self.__credential_manager.validate_for("PerformOperationalAction", credentials)
+            creds = self.__credential_manager.validate_for("PerformOperationalAction", credentials, caller_cert)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
 
@@ -221,10 +233,12 @@ class GeniV3Handler(HandlerBase):
             return result
         return self.success_result(slivers_direct=result)
      
-    def Status(self, urns=list(), credentials=list(), options=dict()):
+    def Status(self, urns=list(), credentials=list(), options=dict(), caller_cert=None):
         # Credential validation
         try:
-            creds = self.__credential_manager.validate_for("Status", credentials)
+            # Speaks-for
+            # creds = self.__credential_manager.validate_for("Status", credentials)
+            creds = self.__credential_manager.validate_for("Status", credentials, caller_cert)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         
@@ -248,10 +262,12 @@ class GeniV3Handler(HandlerBase):
             slice_urn = urns[0]
         return self.success_result(slivers=result, slice_urn=slice_urn)
     
-    def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict()):
+    def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict(), caller_cert=None):
         # Credential validation
         try:
-            creds = self.__credential_manager.validate_for("Renew", credentials)
+            # Speaks-for
+            # creds = self.__credential_manager.validate_for("Renew", credentials)
+            creds = self.__credential_manager.validate_for("Renew", credentials, caller_cert)
         except Exception as e:
             return self.error_result(self.__geni_exception_manager.FORBIDDEN, e)
         slice_expiration = self.__credential_manager.get_slice_expiration(creds)
@@ -291,7 +307,7 @@ class GeniV3Handler(HandlerBase):
                 return self.error_result(self.__geni_exception_manager.SEARCHFAILED, str(e))
         return self.success_result(slivers_direct=result)
     
-    def Shutdown(self, slice_urn="", credentials=list(), options=dict()):
+    def Shutdown(self, slice_urn="", credentials=list(), options=dict(), caller_cert=None):
         return self.error_result(self.__geni_exception_manager.FORBIDDEN, "Shutdown method is only available for the AM administrators")
     
     def __get_max_expiration(self):

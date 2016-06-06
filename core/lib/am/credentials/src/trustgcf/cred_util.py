@@ -39,7 +39,7 @@ from credentials.src.trustgcf.credential_factory import CredentialFactory
 from credentials.src.trustgcf.abac_credential import ABACCredential
 from credentials.src.trustgcf.certificate import Certificate
 
-from credentials.src.trustgcf.speaksfor_util import determine_speaks_for
+from credentials.src.trustgcf.speaksfor_util import determine_speaks_for_ex
 
 def naiveUTC(dt):
     """Converts dt to a naive datetime in UTC.
@@ -147,19 +147,18 @@ class CredentialVerifier(object):
 
         caller_gid = gid.GID(string=gid_string)
 
-        # Potentially, change gid_string to be the cert of the actual user 
-        # if this is a 'speaks-for' invocation
+        # Speaks-for: potentially, change gid_string to be the cert of the
+        # actual user if this is a 'speaks-for' invocation
         speaksfor_gid = \
-            determine_speaks_for(None, \
-            cred_strings, # May include ABAC speaks_for credential
-            caller_gid, # Caller cert (may be the tool 'speaking for' user)
-            options, # May include 'geni_speaking_for' option with user URN
+            determine_speaks_for_ex(None, \
+            cred_strings,  # May include ABAC speaks_for credential
+            caller_gid,  # Caller cert (may be the tool 'speaking for' user)
+            options,  # May include 'geni_speaking_for' option with user URN
             root_certs
             )
         if caller_gid.get_subject() != speaksfor_gid.get_subject():
             speaksfor_urn = speaksfor_gid.get_urn()
             caller_gid = speaksfor_gid
-
 
         # Remove the abac credentials
         cred_strings = [cred_string for cred_string in cred_strings \
@@ -255,10 +254,10 @@ class CredentialVerifier(object):
                 failure = "Not an SFA credential: " + cS
                 continue
          
-            #if not self.verify_source(gid, cred):
-            #    failure = "Cred %s fails: Credential doesn't grant rights to you (%s), but to %s (over object %s)" % (cred.get_gid_caller().get_urn(), gid.get_urn(), cred.get_gid_caller().get_urn(), cred.get_gid_object().get_urn())
-            #    continue
-         
+            # if not self.verify_source(gid, cred):
+            #     failure = "Cred %s fails: Credential doesn't grant rights to you (%s), but to %s (over object %s)" % (cred.get_gid_caller().get_urn(), gid.get_urn(), cred.get_gid_caller().get_urn(), cred.get_gid_object().get_urn())
+            #     continue
+
             if not self.verify_target(target_urn, cred):
                 failure = "Cred granting rights to %s on %s fails: It grants permissions over a different target, not %s (URNs dont match)" % (cred.get_gid_caller().get_urn(), cred.get_gid_object().get_urn(), target_urn)
                 continue

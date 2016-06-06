@@ -148,7 +148,7 @@ def serve_rpc_request(request, url_name="root", **kwargs):
     '''
     This method handles rpc calls based on the content type of the request
     '''
-    
+
     dispatcher = get_dispatcher(request.path, url_name)
     
     if request.method == "POST" and len(request.POST) > 0:
