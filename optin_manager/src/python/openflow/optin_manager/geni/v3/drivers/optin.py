@@ -473,7 +473,7 @@ class OptinDriver:
     def __generate_sliver_urn_from_slice_urn(self, slice_urn):
         hrn, urn_type = urn_to_hrn(slice_urn)
         leaf = hrn.split(".")[-1]
-        return hrn_to_urn(self.__config.CM_HRN + "." + str(leaf), "sliver") 
+        return hrn_to_urn("openflow." + self.__config.CM_HRN + "." + str(leaf), "sliver") 
 
     def __urn_to_fs_params(self, urn):
         hrn, urn_type = urn_to_hrn(urn)
