@@ -60,7 +60,7 @@ class GeniV3Handler(HandlerBase):
         # Preparing the output
         if options.get("geni_compressed", False):
             output = base64.b64encode(zlib.compress(output))
-        return self.listresources_success_result(output)
+        return self.listresources_success_result(output, slice_urn=self.__get_slice_urn(credentials))
         
     def Describe(self, urns=dict(),credentials=dict(),options=dict(), caller_cert=None):
         # Credential validation
@@ -98,7 +98,7 @@ class GeniV3Handler(HandlerBase):
         else:
             slice_urn = urns[0]
         
-        return self.success_result(output, slivers, slice_urn)
+        return self.success_result(output, slivers, self.__get_slice_urn(credentials, slice_urn))
 
     def Allocate(self, slice_urn="", credentials=list(), rspec="", options=dict(), caller_cert=None):
         # Credential validation
@@ -260,7 +260,7 @@ class GeniV3Handler(HandlerBase):
                slice_urn = result[0].get_slice_urn()
         else:
             slice_urn = urns[0]
-        return self.success_result(slivers=result, slice_urn=slice_urn)
+        return self.success_result(slivers=result, slice_urn=self.__get_slice_urn(credentials))
     
     def Renew(self, urns=list(), credentials=list(), expiration_time=None, options=dict(), caller_cert=None):
         # Credential validation
@@ -309,7 +309,16 @@ class GeniV3Handler(HandlerBase):
     
     def Shutdown(self, slice_urn="", credentials=list(), options=dict(), caller_cert=None):
         return self.error_result(self.__geni_exception_manager.FORBIDDEN, "Shutdown method is only available for the AM administrators")
-    
+
+    def __get_slice_urn(self, credentials=list(), slice_urn=""):
+        try:
+            cred = credentials[0]["geni_value"]
+            m = re.search(ur'target_urn>(?P<text>.*?)</target_urn>', cred)
+            slice_urn = m.group(1)
+        except:
+            pass
+        return slice_urn
+
     def __get_max_expiration(self):
         #six_months = datetime.timedelta(weeks = 6 * 4) #6 months
         one_hour = datetime.timedelta(hours = 1)

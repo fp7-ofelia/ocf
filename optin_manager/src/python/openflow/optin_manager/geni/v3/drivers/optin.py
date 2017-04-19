@@ -56,7 +56,7 @@ class OptinDriver:
         #TODO Add FELIX Extesions, if any
         return {"urn" : self.__generate_component_manager_id()}
 
-    def get_specific_devices(self, urn,geni_available=True):
+    def get_specific_devices(self, urn, geni_available=True):
         try:
             urn = self.__generate_sliver_urn_from_slice_urn(urn)
             #flowspace = FlowSpace()
@@ -178,7 +178,9 @@ class OptinDriver:
         except Exception as e:
             print(traceback.print_exc())
             raise e
+        # Set sliver and slice URN
         reservation.set_urn(reservation_params["slice_urn"])
+        reservation.set_slice_urn(slice_urn)
         reservation.set_state("Pending of Provision")
 
         reservation.set_expiration(expiration)
@@ -301,7 +303,7 @@ class OptinDriver:
                     expiration = ExpiringFlowSpaces.objects.filter(slice_urn=experiment.slice_urn)[0].expiration
                 except:
                     raise Exception("Could not find appropriate FlowSpace expiration")
-            efs = experiment.experimentflowspace_set.all()     
+            efs = experiment.experimentflowspace_set.all()
             return self.__parse_to_fs_object(urn, experiment, efs, expiration)
         elif Reservation.objects.filter(slice_urn=urn):
             reservation = Reservation.objects.filter(slice_urn=sliver_urn)[0]
@@ -311,12 +313,13 @@ class OptinDriver:
             return self.__parse_to_fs_object(sliver_urn, reservation, efs, expiration, slice_urn=urn)
         return None
 
-    def __parse_to_fs_object(self,urn=None, experiment=None, exp_flowspace=None, expiration=None, slice_urn=None):
+    def __parse_to_fs_object(self, urn=None, experiment=None, exp_flowspace=None, expiration=None, slice_urn=None):
         flowspace = FlowSpace()
         flowspace.set_description(experiment.slice_desc)
         flowspace.set_urn(urn)
         flowspace.set_email(str(experiment.owner_email))
-        flowspace.set_slice_urn(urn) # slice_urn == urn (optin)
+        flowspace.set_slice_urn(urn) # slice_urn == urn (optin) is a wrong assumption
+        #flowspace.set_slice_urn(slice_urn)
         flowspace.set_state(self.GENI_NOT_READY)
         provisioning_status, allocation_status = self.__get_geni_status(urn)
         flowspace.set_allocation_status(allocation_status)
