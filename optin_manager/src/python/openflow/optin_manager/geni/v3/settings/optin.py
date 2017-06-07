@@ -25,4 +25,4 @@ class OptinConfig(Settings):
     REQ_RSPEC_EXTENSIONS = [{"openflow":"http://www.geni.net/resources/rspec/ext/openflow/3"}]
      
     GENI_API_VERSION = 3
-    AM_URL = "https://137.222.204.27:8443/xmlrpc/geni/3/"
+    AM_URL = "https://llull.ctx.i2cat.net:8443/xmlrpc/geni/3/"

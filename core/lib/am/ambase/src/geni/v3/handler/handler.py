@@ -60,7 +60,7 @@ class GeniV3Handler(HandlerBase):
         # Preparing the output
         if options.get("geni_compressed", False):
             output = base64.b64encode(zlib.compress(output))
-        return self.listresources_success_result(output, slice_urn=self.__get_slice_urn(credentials))
+        return self.listresources_success_result(output)
         
     def Describe(self, urns=dict(),credentials=dict(),options=dict(), caller_cert=None):
         # Credential validation
@@ -311,9 +311,10 @@ class GeniV3Handler(HandlerBase):
         return self.error_result(self.__geni_exception_manager.FORBIDDEN, "Shutdown method is only available for the AM administrators")
 
     def __get_slice_urn(self, credentials=list(), slice_urn=""):
+        # FIXME: do not rely on credentials provided by user, but on persistence
         try:
             cred = credentials[0]["geni_value"]
-            m = re.search(ur'target_urn>(?P<text>.*?)</target_urn>', cred)
+            m = re.search(ur'<target_urn>(?P<text>.*?)</target_urn>', cred)
             slice_urn = m.group(1)
         except:
             pass

@@ -21,12 +21,12 @@ class GeniV3Delegate(DelegateBase):
         include API version information, RSpec format and version
         information, etc. Return a dict.'''
         reqver = [dict(type=self.__config.REQ_RSPEC_TYPE,
-                       version=self.__config.REQ_RSPEC_VERSION,
+                       version=str(self.__config.REQ_RSPEC_VERSION),
                        schema=self.__config.REQ_RSPEC_SCHEMA,
                        namespace=self.__config.REQ_RSPEC_NAMESPACE,
                        extensions=self.__config.REQ_RSPEC_EXTENSIONS)]
         adver = [dict(type=self.__config.AD_RSPEC_TYPE,
-                       version=self.__config.AD_RSPEC_VERSION,
+                       version=str(self.__config.AD_RSPEC_VERSION),
                        schema=self.__config.AD_RSPEC_SCHEMA,
                        namespace=self.__config.AD_RSPEC_NAMESPACE,
                        extensions=self.__config.AD_RSPEC_EXTENSIONS)]
@@ -34,7 +34,7 @@ class GeniV3Delegate(DelegateBase):
         api_versions = dict()
         api_versions[str(self.__config.GENI_API_VERSION)] = self.__config.AM_URL
         credential_types = [dict(geni_type = self.__config.CREDENTIAL_TYPE,
-                                 geni_version = self.__config.GENI_API_VERSION)]
+                                 geni_version = str(self.__config.GENI_API_VERSION))]
         versions = dict(geni_api= self.__config.GENI_API_VERSION,
                         geni_api_versions=api_versions,
                         geni_request_rspec_versions=reqver,

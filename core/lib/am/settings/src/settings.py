@@ -26,7 +26,7 @@ class Settings:
     AD_RSPEC_EXTENSIONS = []
 
     GENI_API_VERSION = 3
-    AM_URL = "https://llull.ctx.i2cat.net:8445/xmlrpc/geni/3"
+    AM_URL = "https://llull.ctx.i2cat.net:8445/xmlrpc/geni/3/"
     CREDENTIAL_TYPE = "geni_sfa" 
     AM_TYPE = "GENI"
     AM_CODE_VERSION = 2.7
