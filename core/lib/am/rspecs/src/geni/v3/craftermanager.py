@@ -117,7 +117,12 @@ class CrafterManager:
             sliver = resource.get_sliver() 
             result += self.manifest_template() % (sliver.get_client_id(), resource.get_component_id(), resource.get_component_manager_id(), sliver.get_urn())
             if sliver.get_type():
-                result += self.manifest_sliver_type_template() % (sliver.get_type())
+                sliver_type = sliver.get_type()
+            else:
+                # XXX: sliver_type is hard-coded. It should always be taken from DB (introduce when #type(slivers) > 1
+                #sliver_type = "emulab-xen"
+                sliver_type = "VM"
+            result += self.manifest_sliver_type_template() % sliver_type
             if sliver.get_services():
                 services = sliver.get_services()
                 result += "<services>\n"
