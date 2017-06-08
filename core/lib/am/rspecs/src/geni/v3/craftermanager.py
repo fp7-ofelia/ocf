@@ -25,6 +25,9 @@ class CrafterManager:
 <hardware_type name="VM">
     <emulab:node_type type_slots="%s"/>
 </hardware_type>
+<sliver_type name="emulab-xen">
+    <disk_image default="true" description="Debian 6.0.4 LTS 64-bit" name="urn:publicid:IDN+wall2.ilabt.iminds.be+image+emulab-ops//DEB60_64-VLAN" os="Linux" url="" version="6.04"/>
+</sliver_type>
 </node>
 """
         return tmpl
