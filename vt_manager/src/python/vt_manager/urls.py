@@ -63,6 +63,9 @@ urlpatterns = patterns('',
 
 
     #Ethernet
+    ## Single
+    url(r'^networking/ethernet/(?P<action>\w+)/single/(?P<macId>\d+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageEthernetSingle', name='manageMac'),
+    ## Range
     url(r'^networking/ethernet/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageEthernet', name='macRanges'),
     url(r'^networking/ethernet/(?P<rangeId>\d+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageEthernet', name='showMacRange'),
     url(r'^networking/ethernet/(?P<action>\w+)/$', 'vt_manager.controller.dispatchers.ui.GUIdispatcher.manageEthernet', name='createMacRange'),

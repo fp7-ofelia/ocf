@@ -21,6 +21,13 @@ class EthernetController():
 		obj = EthernetController.getRange(rangeId)
 		obj.destroy()
 		return obj
+
+        @staticmethod
+        def deleteSingle(rangeId):
+                objs = MacSlot.objects.filter(mac=macId)
+                for obj in objs:
+                    obj.destroy()
+                return objs
 	
 	@staticmethod
 	def getRange(rangeId):
@@ -29,6 +36,7 @@ class EthernetController():
 	@staticmethod
 	def addExcludedMac(instance,request):
 		instance.addExcludedMac(request.POST["mac"],request.POST["comment"])
+
 	@staticmethod
 	def removeExcludedMac(instance,macId):
 		obj = MacSlot.objects.get(id = macId)

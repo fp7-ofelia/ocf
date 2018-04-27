@@ -79,6 +79,7 @@
                         <th style="text-align:left" width="150px">VM Iface</th>
                         <th style="text-align:left" width="200px">Project</th>
                         <th style="text-align:left" width="200px">Slice</th>
+                        <th style="text-align:left" width="200px">Action</th>
 		</tr>
 	{% if range.getAllocatedMacs.count > 0 %}
 		{% for mac in range.getAllocatedMacs %}
@@ -89,12 +90,18 @@
                                 <td>{{mac.interface.all.0.name}}</td>
                                 <td><span title = "uuid: {{mac.interface.all.0.vm.all.0.getProjectId}}">{{mac.interface.all.0.vm.all.0.projectName}}</span></td>
                                 <td><span title = "uuid: {{mac.interface.all.0.vm.all.0.getSliceId}}">{{mac.interface.all.0.vm.all.0.sliceName}}</span></td>
-
+                                <td>
+                                    <!--<form action="{# url manageMac "delete" mac.mac #}" method="POST">-->
+                                    <form action="/networking/ethernet/delete/single/{{ mac.mac }}/" method="POST">
+                                    {% csrf_token %}
+                                        <input type="submit" value="Remove" onClick="return confirmSubmit('Are you sure you want to delete MAC {{mac.mac}}? (currently not working)')">
+                                    </form>
+                                </td>
 			</tr>
 		{%endfor%}
 	{% else %}
 		<tr class="{% cycle 'odd' 'even' %}" >
-			<td colspan="6"> There are no MACs assigned at the moment...</td>
+			<td colspan="7"> There are no MACs assigned at the moment...</td>
 		</tr>
 	{% endif %}
 	</table>

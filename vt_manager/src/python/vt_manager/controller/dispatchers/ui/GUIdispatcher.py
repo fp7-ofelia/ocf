@@ -432,6 +432,30 @@ def manageIp4(request,rangeId=None,action=None,ip4Id=None):
 		)
 
 
+def manageEthernetSingle(request, action=None, macId=None):
+        if not action in NETWORKING_POSSIBLE_ACTIONS:
+                raise Exception("Unknown action")
+        #Define context
+        extra_context = {"section": "networking","subsection":"ethernet",}
+        #Delete
+        if (action == NETWORKING_ACTION_DELETE) and (request.method == "POST"):
+                try:
+                        EthernetController.deleteSingle(macId)
+                        return HttpResponseRedirect("/networking/ethernet/")
+
+                except Exception as e:
+                        print e
+                        extra_context["errors"] = HttpUtils.processException(e)
+                        pass
+        #Listing ranges
+        extra_context["ranges"] = EthernetController.listRanges()
+        return simple.direct_to_template(
+                        request,
+                        extra_context = extra_context,
+                        template = "networking/ethernet/index.html",
+                )
+
+
 def manageEthernet(request,rangeId=None,action=None,macId=None):
 
 	if not action in NETWORKING_POSSIBLE_ACTIONS:
