@@ -41,5 +41,9 @@ class XmlRpcClient():
 			logging.error("XMLRPC Client error: can't connect to method %s at %s" % (methodName, url))
 			logging.error(e)
 			raise Exception("XMLRPC Client error: can't connect to method %s at %s\n" % (methodName, url) + str(e))
+		print "\n\n\n\n"
+		print "url: ", url
+		print "methodName: ", methodName
+		print "params: ", params
 		return result
 

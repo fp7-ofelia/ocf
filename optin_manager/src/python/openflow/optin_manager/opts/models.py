@@ -69,6 +69,7 @@ class ReservationFlowSpace(FlowSpace):
     res = models.ForeignKey(Reservation)
     slice_urn = models.CharField(blank=True, null=True, max_length = 2048)     
     urn = models.CharField(blank=True, null=True, max_length = 2048)
+
 class ExperimentFLowSpace(FlowSpace):
     dpid          = models.CharField(max_length = 30)
     direction     = models.IntegerField(default = 2)  #0:ingress 1:egress 2:bi-directional

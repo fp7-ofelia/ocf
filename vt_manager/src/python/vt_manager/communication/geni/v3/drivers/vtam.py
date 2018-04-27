@@ -23,7 +23,6 @@ from vt_manager.communication.geni.v3.utils.reservation_mapper import Reservatio
 from vt_manager.communication.geni.v3.utils.server_stats import ServerStats
 from vt_manager.communication.utils.XmlHelper import XmlHelper
 from vt_manager.communication.utils.XmlHelper import XmlCrafter
-from vt_manager.models.VirtualMachineKeys import VirtualMachineKeys
 
 from geniutils.src.xrn.xrn import hrn_to_urn
 from geniutils.src.xrn.xrn import urn_to_hrn
@@ -282,14 +281,25 @@ class VTAMDriver:
     def delete_vm(self, urn):
         vm_params  = self.__urn_to_vm_params(urn)
         vms_allocated = Reservation.objects.filter(**vm_params)
+        print("\n\n\n\n\n\n\n\n\n\nDELETE vms_allocated = " + str(vms_allocated))
         vms_provisioned = VirtualMachine.objects.filter(**vm_params)
+        print("\n\n\n\n\n\n\n\n\n\nDELETE vms_provisioned = " + str(vms_provisioned))
         if not vms_allocated and not vms_provisioned:
-            raise Exception("Slice Does not Exists")
+            raise Exception("Slice Does Not Exist")
         # Remove SSH keys for each provisioned VM
         for vm_provisioned in vms_provisioned:
-            params_list = self.__vm_to_ssh_keys_params_list(vm_provisioned)
-            for params in params_list:
+            print("\n\n\n\n\n\n\n\n\n\nDELETE vm_provisioned = " + str(vm_provisioned))
+            params_key_list = self.__vm_to_ssh_keys_params_list(vm_provisioned)
+            print("\n\n\n\n\n\n\n\n\n\nDELETE params_key_list = " + str(params_key_list))
+            for params in params_key_list:
+                print("\n\n\n\n\n*** DELETE found VM key: " + str(VirtualMachineKeys.objects.filter(**params)))
                 VirtualMachineKeys.objects.filter(**params).delete()
+            params_vm_list = self.__vm_to_vm_params_list(vm_provisioned)
+            # TODO REMOVE
+            print("\n\n\n\n\n\n\n\n\n\nDELETE params_vm_list = " + str(params_vm_list))
+            for params in params_vm_list:
+                print("\n\n\n\n\n*** DELETE found VM: " + str(VirtualMachine.objects.filter(**params)))
+#                VirtualMachine.objects.filter(**params).delete()
 
             # Update values of free HD and memory in server
             server_hrn, hrn_type = urn_to_hrn(urn)
@@ -325,6 +335,8 @@ class VTAMDriver:
                 resource.get_sliver().set_operational_status(self.GENI_PENDING_TO_ALLOCATE)
                 resource.get_sliver().set_expiration(expiration)
         # Allocated VMs are deleted here
+        print("\n\n\n\n\n\n\n\n\n\nDELETE vms_allocated (2) = " + str(vms_allocated))
+        print("\n\n\n\n\n\n\n\n\n\nDELETE vms_provisioned (2) = " + str(vms_provisioned))
         vms_allocated.delete()
         if not resources:
             raise Exception("Slice Does Not Exist")
@@ -941,6 +953,15 @@ class VTAMDriver:
                 params_user_keys = copy.deepcopy(params_user)
                 params_user_keys.update({"ssh_key": key,})
                 params_list.append(params_user_keys)
+        return params_list
+    
+    def __vm_to_vm_params_list(self, vm):
+        params_list = list()
+        params = {"projectId": vm.projectId,
+                "sliceId": vm.sliceId,
+                "uuid": vm.uuid,
+                }
+        params_list.append(params)
         return params_list
     
     def __store_user_keys(self, users, vms):
