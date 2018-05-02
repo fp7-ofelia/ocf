@@ -5,6 +5,7 @@ import time
 class BackgroundExpirationMonitoring(threading.Thread):
       
     period = 3600 * 6  #seconds
+    #period = 1
    
     def __init__(self):
         threading.Thread.__init__(self)

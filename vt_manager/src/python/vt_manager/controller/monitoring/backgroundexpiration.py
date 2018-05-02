@@ -12,13 +12,13 @@ import time
 
 class BackgroundVMEXpirationMonitoring(threading.Thread):
       
-    #period = 10  #seconds
+    #period = 30  #seconds
     period = 3600  #seconds
    
     def __init__(self):
         threading.Thread.__init__(self)
         self.period = 900
-        #self.period = 1
+        #self.period = 10
         self.vt_driver = HandlerConfigurator.get_vt_am_driver()
         
     def monitor(self):
@@ -39,7 +39,7 @@ class BackgroundVMEXpirationMonitoring(threading.Thread):
                     current_time = datetime.utcnow()
                     time_to_expire = current_time - exp_time
                     print("\n\n[VTAM] MONITORING BG / CHECKING EXPIRATION: " + str(e.__dict__))
-                    print("[VTAM] exp_time < current_time: " + str(exp_time < current_time))
+                    print("[VTAM] exp_time (" + str(exp_time) + ") < current_time (" + str(current_time) + "): " + str(exp_time < current_time))
                     time_to_expire = current_time - exp_time
                     if exp_time < current_time:
                         vms = VirtualMachine.objects.filter(sliceName=e.slice, projectName=e.authority)

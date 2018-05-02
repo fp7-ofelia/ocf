@@ -27,6 +27,7 @@ class ExpirationManager:
         expired_components = list()
         for slice in slices:
             expiration_date = int(datetime_to_epoch(utcparse(slice.expires)))
+            print("[OFAM] MONITORING BG / EXPIRATION MANAGER. expiration_date (" + str(expiration_date) + ") < current_date (" + str(datetime_to_epoch(utcparse(datetime.utcnow()))) + ")?: " + str(expiration_date <= int(datetime_to_epoch(utcparse(datetime.utcnow())))))
             if expiration_date <= int(datetime_to_epoch(utcparse(datetime.utcnow()))):
                 try:
                     OFSfaDriver().crud_slice(slice.slice,slice.authority, 'delete_slice')
@@ -65,7 +66,7 @@ class ExpirationManager:
                 params = {"urn": exp.slice_urn, "expiring_fs": expiring_fs, "expiration": int_exp}
                 print "    CBA params: ", params
                 # Delete related experiment
-                delete_expired_experiment(params.get("urn"))
+                ExpirationManager.delete_expired_experiment(params.get("urn"))
                 # Delete related flowspaces
                 method = ExpirationManager.delete_expired_flowspaces
                 expiration_buffer.append((int_exp, method, params)) 
@@ -118,7 +119,7 @@ class ExpirationManager:
     def delete_expired_experiment(urn):
         try:
             print("\n\nDelete expired experiments**************************************************")
-            from opts.models import Experiment
+            from openflow.optin_manager.opts.models import Experiment
 
             date = expiring_fs.expiration
             print "Date: ", date
