@@ -201,3 +201,4 @@ def my_password_reset(request):
              return HttpResponseRedirect(settings.OFREG_URL+settings.OFREG_RESET_PATH)
         else:
             return password_reset(request, password_reset_form=LDAPPasswordResetForm)
+

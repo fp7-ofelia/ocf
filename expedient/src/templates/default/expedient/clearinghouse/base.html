@@ -81,12 +81,6 @@
 					<li>
 						<a href={%if ldapUser %}"{{ ofregURL }}"{% else %}"{% url users_my_detail %}"{% endif %} alt="Account settings">Account</a>
 					</li>
-					<li>
-						<a href="{% url help_home %}">Help</a>
-					</li>
-					<li>
-						<a href="{% url auth_logout %}">Logout</a>
-					</li>
 				{% else %}
 					<li>
 						<a href="{% url auth_login %}">Log in</a>
@@ -99,6 +93,17 @@
 							<a href="{% url my_password_reset %}">Password reset</a>
 						</li>
 					{% endif %}
+				{% endif %}
+                                        <li>
+                                                <a href="{% url help_home %}">Help</a>
+                                        </li>
+                                        <li>
+                                                <a href="{% url privacy_home %}">Privacy</a>
+                                        </li>
+                                {% if request.user.username %}
+                                        <li>
+                                                <a href="{% url auth_logout %}">Logout</a>
+                                        </li>
 				{% endif %}
 				</ul>
 			</div>

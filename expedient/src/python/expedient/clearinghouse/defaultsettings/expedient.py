@@ -25,10 +25,12 @@ SITE_LOCKDOWN_EXCEPTIONS = [
     r'^/accounts/activate/.*$',
     r'^/admin/.*',
     r'^/accounts/password/reset/.*$',
-    r'^/img/.*',
     r'^/css/.*',
+    r'^/img/.*',
+    r'^/help/$',
 #    r'^/static/media/.*',
 #    r'.*/xmlrpc/?',
+    r'^/privacy/.*',
 ]
 '''List of URL regular expressions that do not require the user to
 be logged in to access.'''

@@ -58,6 +58,7 @@ urlpatterns = patterns('',
     (r'^messagecenter/',include('expedient.clearinghouse.messagecenter.urls')),
     (r'^admin/', include(admin.site.urls)),
     (r'^help/',include('expedient.clearinghouse.help.urls')),
+    (r'^privacy/',include('expedient.clearinghouse.privacy.urls')),
 )
 
 # Password reset url
@@ -66,6 +67,7 @@ urlpatterns += patterns('',
         'expedient.clearinghouse.users.views.my_password_reset',
         name='my_password_reset'),
     )
+
 #Registration urls depending on ALLOW_LOCAL_REGISTRATION flag
 if settings.ALLOW_LOCAL_REGISTRATION == True:
     urlpatterns += patterns('',
