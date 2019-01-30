@@ -197,6 +197,7 @@ INSTALLED_APPS = [
 #    'vt_plugin.communication',
 #    'openflow.dummyom',
 #    'sample_resource',
+    'expedient.clearinghouse.communication.terms',
 ]
 append_to_local_setting(
     "INSTALLED_APPS", INSTALLED_APPS, globals(), at_start=True,
