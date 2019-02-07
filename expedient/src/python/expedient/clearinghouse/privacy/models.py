@@ -13,7 +13,7 @@ class UserPrivacy(models.Model):
 
     user_urn = models.CharField(primary_key=True, max_length=255, default="")
     accept = models.BooleanField(default=False)
-    date_mod = models.DateTimeField(auto_now=True)
+    date_mod = models.DateTimeField(auto_now=False, auto_now_add=False)
 
     def __unicode__(self):
         try:

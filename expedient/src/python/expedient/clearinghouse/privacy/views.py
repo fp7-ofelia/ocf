@@ -61,7 +61,8 @@ def parse_cert_dn(cert_dn):
     return cert_dn_fields
 
 def get_until_date(time_delta=180):
-    return str(datetime.now() + timedelta(days=180))
+    max_date = datetime.now() + timedelta(days=180)
+    return max_date.strftime('%Y-%m-%d %H:%M:%S')
 
 def privacy_get_or_delete(request, user_urn):
     """
@@ -79,7 +80,7 @@ def privacy_get_or_delete(request, user_urn):
             user = UserPrivacy.objects.get(user_urn=user_urn)
             reply["user_urn"] = user.user_urn
             reply["testbed_access"] = True if user.accept else False
-            reply["until"] = get_until_date()
+            reply["until"] = str(user.date_mod)
         except:
             pass
         return HttpResponse(json.dumps(reply), content_type="application/json", status=200)
@@ -127,12 +128,13 @@ def privacy_remove(user_urn):
     reply = {
         "user_urn": "",
         "testbed_access": "",
+        "until": "",
     }
     try:
         user = UserPrivacy.objects.get(user_urn=user_urn)
         reply["user_urn"] = user.user_urn
         reply["testbed_access"] = True if user.accept else False
-        reply["until"] = get_until_date()
+        reply["until"] = str(get_until_date())
         user.delete()
     except:
         pass
@@ -148,6 +150,7 @@ def privacy_update(user_urn, accept_or_decline):
     reply = {
         "user_urn": "",
         "testbed_access": "",
+        "until": "",
     }
     # Create or update, as needed
     try:
@@ -162,6 +165,6 @@ def privacy_update(user_urn, accept_or_decline):
             accept=accept_or_decline, date_mod=get_until_date())
     reply["user_urn"] = user.user_urn
     reply["testbed_access"] = True if user.accept else False
-    reply["until"] = get_until_date()
+    reply["until"] = str(get_until_date())
     return HttpResponse(json.dumps(reply), content_type="application/json", status=204)
 
