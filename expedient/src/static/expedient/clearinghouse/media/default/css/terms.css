@@ -1,0 +1,79 @@
+/** css minimal reset */
+html {
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body, h1, h2, h3, h4, h5, h6, p, ol, ul {
+  margin: 0;
+  padding: 0;
+  font-weight: normal;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+
+input[type=checkbox]
+{
+  /* Double-sized Checkboxes */
+  -ms-transform: scale(2); /* IE */
+  -moz-transform: scale(2); /* FF */
+  -webkit-transform: scale(2); /* Safari and Chrome */
+  -o-transform: scale(2); /* Opera */
+  padding: 10px;
+  margin-right: 10px;
+}
+
+.actions-area {
+  display: flex;
+  justify-content: flex-end;
+}
+button.action-button {
+  min-width: 144px;
+  margin-left: 1.3em;
+  font-size: 1.3em;
+}
+.accept-button {
+  border-color: #8ccdf8; !important;
+}
+
+/** override default boostrap clases properties */
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.card-body {
+  padding: 1.3rem 2.2rem;
+}
+.card-text {
+  margin-bottom: .7em
+}
+
+/** colors */
+.fed4fire-dark-grey {
+  color: #242435 !important;
+}
+.fed4fire-primary-bg {
+  background-color: #8ccdf8;
+}
+
+/** positioning */
+.push-bottom {
+  margin-bottom: 24px !important;
+}
+.push-bottom-sm {
+  margin-bottom: 16px !important;
+}

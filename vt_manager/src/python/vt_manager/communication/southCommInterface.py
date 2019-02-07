@@ -18,7 +18,7 @@ def sendAsync(xml):
 	#ServiceThread.startMethodInNewThread(ProvisioningResponseDispatcher.processResponse , rspec)
 	return
 
-@rpcmethod(ulr_name="agent", signature=['string', 'string'])
+@rpcmethod(url_name="agent", signature=['string', 'string'])
 def sendSync(xml):
 	logging.debug("sendSync lauched")
 	rspec = XmlHelper.parseXmlString(xml)
