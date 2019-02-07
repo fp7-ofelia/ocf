@@ -6,7 +6,7 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
 from django.views.generic.simple import direct_to_template
-from expedient.clearinghouse.communication.terms.api import *
+#from expedient.clearinghouse.communication.terms.api import *
 
 
 ''' Theme Management '''
@@ -101,9 +101,9 @@ else:
     )
 
 # RPC URLs
-urlpatterns += patterns("",
-    rpc_url(r"^terms_conditions/?$", name="tcapi"),
-)
+#urlpatterns += patterns("",
+#    rpc_url(r"^terms_conditions/?$", name="tcapi"),
+#)
 
 # Add the plugin URLs:
 for plugin in getattr(settings, "UI_PLUGINS", []):

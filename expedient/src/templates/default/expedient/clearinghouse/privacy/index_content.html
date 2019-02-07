@@ -1,0 +1,32 @@
+<div class="main">
+    <h1 class="push-bottom-sm">Terms &amp; Conditions</h1>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Terms</h5>
+            <p class="card-text">
+            By using this testbed, the experimenter agrees to the following points:
+            <blockquote>
+            <ol>
+                <li>Specific pieces of information of the experimenter are collected and stored in the system (see "Privacy" section for details)</li>
+                <li>The experimenter may receive communications from Fed4FIRE (not from the OFELIA i2CAT testbed), at least for the management of its experiment</li>
+            </ol>
+            </p>
+            </blockquote>
+            <h5 class="card-title">Privacy</h5>
+            <p class="card-text">Our testbed requires some basic information to provide resources for any experiment. We use a minimal set of data, associated to your Fed4FIRE account (find the <a href="http://lab.i2cat.net/data-protection/" target="_blank">specific data in this page</a>). This information is used during the lifetime of the experiment and discarded upon its expiration, along with any resource contained in your slice(s).</p>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body actions-area">
+            <div>
+                <button id="terms-decline" class="btn btn-light action-button" onclick="on_accept_decline_action('{{ user_urn }}', false)">Decline</button>
+            </div>
+            <div>
+                <button id="terms-accept" class="btn btn-primary fed4fire-primary-bg fed4fire-dark-grey accept-button action-button" onclick="on_accept_decline_action('{{ user_urn }}', true)">Accept</button>
+            </div>
+        </div>
+    </div>
+</div>
+</script>
