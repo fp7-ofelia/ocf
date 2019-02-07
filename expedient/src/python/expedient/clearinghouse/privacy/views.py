@@ -10,6 +10,7 @@ from django.http import HttpResponse, HttpResponseNotAllowed
 from django.views.generic import create_update
 from django.views.generic.simple import direct_to_template
 from models import UserPrivacy
+import json
 import re
 
 def home(request):
@@ -26,9 +27,18 @@ def home(request):
         user_urn = "urn:publicid:IDN+%s+user+%s" % (cert_dn_fields_user[1], cert_dn_fields_user[0])
     else:
         user_urn = "urn:publicid:IDN+%s+user+%s" % (ssl_client_dn_fields.get("email", ""), ssl_client_dn_fields.get("CN", ""))
+    try:
+        user_agent = request.environ["HTTP_USER_AGENT"]
+    except:
+        user_agent = ""
+    # Select template based on external client
+    if "javafx" in user_agent.lower():
+        privacy_template="privacy/index_lite.html"
+    else:
+        privacy_template="privacy/index.html"
     return direct_to_template(
         request,
-        template="privacy/index.html",
+        template=privacy_template,
         extra_context = {
             "user_urn": user_urn,
             "until_date": get_until_date(),
@@ -51,7 +61,7 @@ def parse_cert_dn(cert_dn):
     return cert_dn_fields
 
 def get_until_date(time_delta=180):
-    return datetime.now() + timedelta(days=180)
+    return str(datetime.now() + timedelta(days=180))
 
 def privacy_get_or_delete(request, user_urn):
     """
@@ -59,15 +69,20 @@ def privacy_get_or_delete(request, user_urn):
 
     @param string User URN
     """
+    reply = {
+        "user_urn": "",
+        "testbed_access": "",
+        "until": "",
+    }
     if request.method == "GET":
-        reply = "user_urn: " + str(user_urn)
         try:
             user = UserPrivacy.objects.get(user_urn=user_urn)
-            user_consent = "consented" if user.accept else "declined"
-            reply += " has " + str(user_consent)
+            reply["user_urn"] = user.user_urn
+            reply["testbed_access"] = True if user.accept else False
+            reply["until"] = get_until_date()
         except:
-            reply += " does not exist"
-        return HttpResponse(reply, mimetype="text/plain")
+            pass
+        return HttpResponse(json.dumps(reply), content_type="application/json", status=200)
     elif request.method == "DELETE":
         return privacy_delete(request, user_urn)
     else:
@@ -109,13 +124,19 @@ def privacy_remove(user_urn):
 
     @param string User URN
     """
+    reply = {
+        "user_urn": "",
+        "testbed_access": "",
+    }
     try:
         user = UserPrivacy.objects.get(user_urn=user_urn)
+        reply["user_urn"] = user.user_urn
+        reply["testbed_access"] = True if user.accept else False
+        reply["until"] = get_until_date()
         user.delete()
     except:
-        user = None
-        user_urn = "%s already" % user_urn
-    return HttpResponse("User with URN=%s deleted" % user_urn)
+        pass
+    return HttpResponse(json.dumps(reply), content_type="application/json", status=204)
 
 def privacy_update(user_urn, accept_or_decline):
     """
@@ -124,18 +145,23 @@ def privacy_update(user_urn, accept_or_decline):
     @param string User URN
     @param bool Accept (true) or decline (false) terms
     """
+    reply = {
+        "user_urn": "",
+        "testbed_access": "",
+    }
     # Create or update, as needed
     try:
         user = UserPrivacy.objects.get(user_urn=user_urn)
         # Only update if consent changes
         if user.accept != accept_or_decline:
             user.accept = accept_or_decline
-            # TODO Take value from configuration
             user.date_mod = get_until_date()
             user.save()
     except Exception as e:
         user = UserPrivacy.objects.create(user_urn=user_urn,
             accept=accept_or_decline, date_mod=get_until_date())
-    user_consent = "consent" if accept_or_decline else "decline"
-    return HttpResponse("User with URN=%s updated to %s the terms" % (user_urn, user_consent), status=204)
+    reply["user_urn"] = user.user_urn
+    reply["testbed_access"] = True if user.accept else False
+    reply["until"] = get_until_date()
+    return HttpResponse(json.dumps(reply), content_type="application/json", status=204)
 
