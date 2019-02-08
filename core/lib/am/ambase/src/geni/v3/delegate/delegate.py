@@ -1,10 +1,11 @@
 from ambase.src.abstract.classes.delegatebase import DelegateBase
-from ambase.src.ambase.exceptions import SliceAlreadyExists
 from ambase.src.ambase.exceptions import AllocationError
-from ambase.src.ambase.exceptions import ProvisionError
 from ambase.src.ambase.exceptions import DeleteError
-from ambase.src.ambase.exceptions import Shutdown
 from ambase.src.ambase.exceptions import PerformOperationalStateError
+from ambase.src.ambase.exceptions import ProvisionError
+from ambase.src.ambase.exceptions import Shutdown
+from ambase.src.ambase.exceptions import SliceAlreadyExists
+from ambase.src.ambase.exceptions import TermsNotAccepted
 
 class GeniV3Delegate(DelegateBase):
     
@@ -51,16 +52,19 @@ class GeniV3Delegate(DelegateBase):
     def describe(self, urns=dict()):
         return self.__resource_manager.get_resources(urns)
 
-    def reserve(self, slice_urn, reservation, expiration, users=list()):
+    def reserve(self, slice_urn, credentials, reservation, expiration, users=list()):
         """
         Allocate slivers
         """
         try:
-            return self.__resource_manager.reserve_resources(slice_urn, reservation, expiration)
+            return self.__resource_manager.reserve_resources(slice_urn, credentials, reservation, expiration)
         except SliceAlreadyExists as e:
             raise SliceAlreadyExists(str(e))
         except Exception as e:
-            raise AllocationError(str(e))
+            if str(e).startswith("TermsNotAccepted"):
+                raise TermsNotAccepted(str(e))
+            else:
+                raise AllocationError(str(e))
     
     #def create(self, urns=list(), expiration=None, users=list(), geni_best_effort=True):
     # XXX Default geni_best_effort = False

@@ -34,7 +34,7 @@ class VTAMDriverMocker():
             resources.append(r)
         return resources
 
-    def reserve_vms(self, slice_urn, reservation, expiration=None):
+    def reserve_vms(self, slice_urn, credentials, reservation, expiration=None):
         resources = list()
         for i in range(0,2):
             r = ResourceMocker()

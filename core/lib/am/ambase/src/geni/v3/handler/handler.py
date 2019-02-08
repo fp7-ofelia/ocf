@@ -1,10 +1,11 @@
 from ambase.src.abstract.classes.handlerbase import HandlerBase
-from ambase.src.ambase.exceptions import SliceAlreadyExists
 from ambase.src.ambase.exceptions import AllocationError
-from ambase.src.ambase.exceptions import ProvisionError
 from ambase.src.ambase.exceptions import DeleteError
-from ambase.src.ambase.exceptions import Shutdown
 from ambase.src.ambase.exceptions import PerformOperationalStateError
+from ambase.src.ambase.exceptions import ProvisionError
+from ambase.src.ambase.exceptions import SliceAlreadyExists
+from ambase.src.ambase.exceptions import Shutdown
+from ambase.src.ambase.exceptions import TermsNotAccepted
 
 import base64
 import datetime
@@ -117,11 +118,13 @@ class GeniV3Handler(HandlerBase):
             expiration = min(self.__get_expiration(creds), options["geni_end_time"])
         users = self.__get_users_pubkeys(creds)
         try:
-            allocated_slivers = self.__delegate.reserve(slice_urn, reservation, expiration, users)
+            allocated_slivers = self.__delegate.reserve(slice_urn, credentials, reservation, expiration, users)
         except SliceAlreadyExists as e:
             return self.error_result(self.__geni_exception_manager.ALREADYEXISTS, e)
         except AllocationError as e:
             return self.error_result(self.__geni_exception_manager.ERROR, e)
+        except TermsNotAccepted as e:
+            return self.error_result(self.__geni_exception_manager.REFUSED, e)
         
         manifest = self.__rspec_manager.compose_manifest(allocated_slivers)
         if not type(allocated_slivers) == list:

@@ -2,6 +2,7 @@ from am.geniutils.src.xrn.xrn import hrn_to_urn
 from am.rspecs.src.geni.v3.container.resource import Resource
 from am.rspecs.src.geni.v3.container.sliver import Sliver
 from am.rspecs.src.geni.v3.container.link import Link
+from am.terms import TermsAndConditions
 
 from vt_manager.controller.drivers.VTDriver import VTDriver
 from vt_manager.controller.dispatchers.xmlrpc.ProvisioningDispatcher import ProvisioningDispatcher
@@ -163,7 +164,9 @@ class VTAMDriver:
         self.__add_expiration(expiration, reservations[0].projectName, reservations[0].sliceName)
         return slivers_to_manifest       
     
-    def reserve_vms(self, slice_urn, reservation, expiration=None, users=list()):
+    def reserve_vms(self, slice_urn, credentials, reservation, expiration=None, users=list()):
+        # Evaluate user's conformance to the Terms and Conditions. If failed, user cannot reserve resources
+        TermsAndConditions.get_user_conformity(credentials)
         # URNs of foreign RMs are not served
         current_cm_hrn = self.__config.CM_HRN
         cm_id = getattr(reservation, "get_component_manager_id")

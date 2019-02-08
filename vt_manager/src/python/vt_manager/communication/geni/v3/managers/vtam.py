@@ -37,10 +37,10 @@ class VTAMRM(ResourceManagerBase):
                 created_resources.append(resource)
         return created_resources
     
-    def reserve_resources(self, slice_urn, reservations, expiration=None, users=list()):
+    def reserve_resources(self, slice_urn, credentials, reservations, expiration=None, users=list()):
         reserved_resources = list()
         for r in reservations:
-            reserved_resource = self.__driver.reserve_vms(slice_urn, r, expiration, users)
+            reserved_resource = self.__driver.reserve_vms(slice_urn, credentials, r, expiration, users)
             if type(reserved_resource) == list():
                 reserved_resources.extend(reserved_resource)
             else:

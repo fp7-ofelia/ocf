@@ -31,7 +31,8 @@ SITE_LOCKDOWN_EXCEPTIONS = [
 #    r'^/static/media/.*',
 #    r'.*/xmlrpc/?',
     r'^/privacy/.*',
-    r'^/terms_conditions/?',
+    r'^/privacy_local/.*',
+#    r'^/terms_conditions/?',
 ]
 '''List of URL regular expressions that do not require the user to
 be logged in to access.'''

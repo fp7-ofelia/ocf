@@ -70,24 +70,27 @@ def privacy_get_or_delete(request, user_urn):
 
     @param string User URN
     """
+    if request.method == "GET":
+        return privacy_get(user_urn)
+    elif request.method == "DELETE":
+        return privacy_remove(user_urn)
+    else:
+        return HttpResponseNotAllowed("GET", "DELETE")
+
+def privacy_get(user_urn):
     reply = {
         "user_urn": "",
         "testbed_access": "",
         "until": "",
     }
-    if request.method == "GET":
-        try:
-            user = UserPrivacy.objects.get(user_urn=user_urn)
-            reply["user_urn"] = user.user_urn
-            reply["testbed_access"] = True if user.accept else False
-            reply["until"] = str(user.date_mod)
-        except:
-            pass
-        return HttpResponse(json.dumps(reply), content_type="application/json", status=200)
-    elif request.method == "DELETE":
-        return privacy_delete(request, user_urn)
-    else:
-        return HttpResponseNotAllowed("GET", "DELETE")
+    try:
+        user = UserPrivacy.objects.get(user_urn=user_urn)
+        reply["user_urn"] = user.user_urn
+        reply["testbed_access"] = True if user.accept else False
+        reply["until"] = str(user.date_mod)
+    except Exception as e:
+        print("Expedient.TermsAndConditions.privacy_get = exception: %s " % str(e))
+    return HttpResponse(json.dumps(reply), content_type="application/json", status=200)
 
 def privacy_accept(request, user_urn):
     """

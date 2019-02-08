@@ -61,6 +61,7 @@ urlpatterns = patterns('',
     (r'^admin/', include(admin.site.urls)),
     (r'^help/',include('expedient.clearinghouse.help.urls')),
     (r'^privacy/',include('expedient.clearinghouse.privacy.urls')),
+    (r'^privacy_local/',include('expedient.clearinghouse.privacy.urls')),
 )
 
 # Password reset url

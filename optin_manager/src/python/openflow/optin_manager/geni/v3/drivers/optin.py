@@ -5,6 +5,7 @@ from am.rspecs.src.geni.v3.openflow.container.dpid import DPID
 from am.rspecs.src.geni.v3.openflow.container.link import Link
 from am.rspecs.src.geni.v3.openflow.container.port import Port
 from am.rspecs.src.geni.v3.openflow.container.controller import Controller
+from am.terms import TermsAndConditions
 
 from geniutils.src.xrn.xrn import hrn_to_urn
 from geniutils.src.xrn.xrn import urn_to_hrn
@@ -30,6 +31,7 @@ import traceback
 from datetime import datetime
 from datetime import timedelta
 import dateutil.parser
+import json
 import re
 
 class OptinDriver:
@@ -136,7 +138,9 @@ class OptinDriver:
         #manifest = self.__convert_to_resource(urn) 
         return manifest 
     
-    def reserve_flowspace(self, slice_urn, reservation, expiration=None, users=list()):
+    def reserve_flowspace(self, slice_urn, credentials, reservation, expiration=None, users=list()):
+        # Evaluate user's conformance to the Terms and Conditions. If failed, user cannot reserve resources
+        TermsAndConditions.get_user_conformity(credentials)
         try:
             if not expiration:
                 expiration = datetime.utcnow() + timedelta(hours=1)
