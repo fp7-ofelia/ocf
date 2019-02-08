@@ -77,3 +77,8 @@ button.action-button {
 .push-bottom-sm {
   margin-bottom: 16px !important;
 }
+
+/* Lists */
+.card-body ol li {
+    margin-left: 4em;
+}
