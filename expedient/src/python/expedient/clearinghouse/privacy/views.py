@@ -27,6 +27,8 @@ def home(request):
         user_urn = "urn:publicid:IDN+%s+user+%s" % (cert_dn_fields_user[1], cert_dn_fields_user[0])
     else:
         user_urn = "urn:publicid:IDN+%s+user+%s" % (ssl_client_dn_fields.get("email", ""), ssl_client_dn_fields.get("CN", ""))
+    if not ssl_client_s_dn:
+        user_urn = "N/A"
     try:
         user_agent = request.environ["HTTP_USER_AGENT"]
     except:

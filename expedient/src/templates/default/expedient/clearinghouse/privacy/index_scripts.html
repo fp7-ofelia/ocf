@@ -4,19 +4,29 @@ var validyOfAcceptanceInDays = 180;
 
 function set_loading(is_loading) {
 //    console.log("set_loading("+is_loading+")");
-    if (document.getElementById("userurn") != undefined ) {
-        if (is_loading) {
-            document.getElementById("userurn").innerHTML = "loading...";
-        } else {
-            document.getElementById("userurn").innerHTML = "{{ user_urn }}";
-        }
-    }
 
     if (document.getElementById("testbed-access-denied") != undefined ) {
         document.getElementById("testbed-access-denied").hidden = true;
     }
     if (document.getElementById("testbed-access-allowed") != undefined ) {
         document.getElementById("testbed-access-allowed").hidden = true;
+    }
+
+    if (document.getElementById("userurn") != undefined ) {
+        if (is_loading) {
+            document.getElementById("userurn").innerHTML = "loading...";
+        } else {
+            document.getElementById("userurn").innerHTML = "{{ user_urn }}";
+            if ("{{ user_urn }}" == "N/A") {
+                document.getElementById("terms-accept").disabled = true;
+                document.getElementById("terms-decline").disabled = true;
+                document.getElementById("testbed-access-denied").hidden = false;
+            } else {
+                document.getElementById("terms-accept").disabled = false;
+                document.getElementById("terms-decline").disabled = false;
+                document.getElementById("testbed-access-allowed").hidden = false;
+            }
+        }
     }
 
     var loadedonce = document.getElementsByClassName("loadedonce");
