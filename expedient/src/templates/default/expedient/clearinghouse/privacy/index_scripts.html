@@ -2,6 +2,20 @@
 var change_event_prevent_hack = false;
 var validyOfAcceptanceInDays = 180;
 
+function setUserNAVisibility(user_urn) {
+    document.getElementById("userurn").innerHTML = "{{ user_urn }}";
+    if (user_urn == "N/A") {
+        document.getElementById("terms-accept").disabled = true;
+        document.getElementById("terms-decline").disabled = true;
+        document.getElementById("testbed-access-denied").hidden = false;
+    } else {
+        document.getElementById("terms-accept").disabled = false;
+        document.getElementById("terms-decline").disabled = false;
+        document.getElementById("testbed-access-allowed").hidden = false;
+    }
+    document.getElementById("testbed-access-loading").hidden = true;
+}
+
 function set_loading(is_loading) {
 //    console.log("set_loading("+is_loading+")");
 
@@ -16,16 +30,7 @@ function set_loading(is_loading) {
         if (is_loading) {
             document.getElementById("userurn").innerHTML = "loading...";
         } else {
-            document.getElementById("userurn").innerHTML = "{{ user_urn }}";
-            if ("{{ user_urn }}" == "N/A") {
-                document.getElementById("terms-accept").disabled = true;
-                document.getElementById("terms-decline").disabled = true;
-                document.getElementById("testbed-access-denied").hidden = false;
-            } else {
-                document.getElementById("terms-accept").disabled = false;
-                document.getElementById("terms-decline").disabled = false;
-                document.getElementById("testbed-access-allowed").hidden = false;
-            }
+            setUserNAVisibility("{{ user_urn }}");
         }
     }
 
@@ -94,8 +99,12 @@ function load_info() {
             console.log("load_info onload FAILURE status=" + this.status);
         }
     };
-    xhttp.open("GET", "/privacy/{{ user_urn }}", true);
-    xhttp.send();
+    if ("{{ user_urn }}" != "N/A") {
+        xhttp.open("GET", "/privacy/{{ user_urn }}", true);
+        xhttp.send();
+    } else {
+        setUserNAVisibility("{{ user_urn }}");
+    }
 }
 
 function on_accept_decline_action(user_urn, accepts) {
