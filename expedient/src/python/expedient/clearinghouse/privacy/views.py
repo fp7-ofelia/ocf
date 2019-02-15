@@ -20,7 +20,11 @@ def home(request):
     @param request HTTP request
     @return string template for the privacy main page
     """
-    ssl_client_s_dn = request.__dict__.get("environ", {}).get("SSL_CLIENT_S_DN", "")
+    # Taken from proxy
+    #ssl_client_s_dn = request.__dict__.get("environ", {}).get("HTTP_SSL_CLIENT_CERT", "")
+    ssl_client_s_dn = request.__dict__.get("environ", {}).get("HTTP_SSL_CLIENT_S_DN", "")
+    # Taken directly from OCF service
+    ssl_client_s_dn = request.__dict__.get("environ", {}).get("SSL_CLIENT_S_DN", ssl_client_s_dn)
     ssl_client_dn_fields = parse_cert_dn(ssl_client_s_dn)
     cert_dn_fields_user = ssl_client_dn_fields.get("email", "").split("@")
     if len(cert_dn_fields_user) >= 2:
@@ -48,18 +52,30 @@ def home(request):
     )
 
 def parse_cert_dn(cert_dn):
-    cert_dn_regex = "\/C=(.*)\/ST=(.*)\/O=(.*)\/OU=(.*)\/CN=(.*)\/emailAddress=(.*)"
     cert_dn_fields = {}
+    # Nginx case
+    cert_dn_regex = "emailAddress=(.*),CN=(.*),OU=(.*),O=(.*),ST=(.*),C=(.*)"
     m = re.search(cert_dn_regex, cert_dn)
     try:
-        cert_dn_fields["C"] = m.group(1)
-        cert_dn_fields["ST"] = m.group(2)
-        cert_dn_fields["O"] = m.group(3)
-        cert_dn_fields["OU"] = m.group(4)
-        cert_dn_fields["CN"] = m.group(5)
-        cert_dn_fields["email"] = m.group(6)
+        cert_dn_fields["email"] = m.group(1)
+        cert_dn_fields["CN"] = m.group(2)
+        cert_dn_fields["OU"] = m.group(3)
+        cert_dn_fields["O"] = m.group(4)
+        cert_dn_fields["ST"] = m.group(5)
+        cert_dn_fields["C"] = m.group(6)
     except:
-        pass
+        # Apache case
+        cert_dn_regex = "\/C=(.*)\/ST=(.*)\/O=(.*)\/OU=(.*)\/CN=(.*)\/emailAddress=(.*)"
+        m = re.search(cert_dn_regex, cert_dn)
+        try:
+            cert_dn_fields["C"] = m.group(1)
+            cert_dn_fields["ST"] = m.group(2)
+            cert_dn_fields["O"] = m.group(3)
+            cert_dn_fields["OU"] = m.group(4)
+            cert_dn_fields["CN"] = m.group(5)
+            cert_dn_fields["email"] = m.group(6)
+        except:
+            pass
     return cert_dn_fields
 
 def get_until_date(time_delta=180):
