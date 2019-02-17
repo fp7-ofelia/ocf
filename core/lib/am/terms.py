@@ -1,4 +1,5 @@
 from ambase.config.terms import TERMS_CONDITIONS_PRIV_URL
+import json
 import re
 import urllib2
 
