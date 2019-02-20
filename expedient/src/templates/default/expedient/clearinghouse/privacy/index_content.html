@@ -3,25 +3,70 @@
 
     <div class="card mb-3">
         <div class="card-body">
-            <h5 class="card-title">Terms</h5>
-            <p class="card-text">By using this testbed, the experimenter agrees to the following points:</p>
+            <h5 class="card-title">Preliminary information</h5>
+            <ul>
+                <li>Updated: 8th February, 2019</li>
+                <li>Testbed: OFELIA (i2CAT)</li>
+                <li>Data Protection Officer: <a href="http://i2cat.net/en/directory/sonia-beltr%C3%A1n" target="_blank">Sonia Beltr&aacute;n</a> (sonia.beltran (at] i2cat [dot) net)</li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Information processing and archiving</h5>
+            <p class="card-text">
             <ol>
-                <li>Specific pieces of information of the experimenter are collected and stored in the system (see "Privacy" section for details)</li>
-                <li>The experimenter may receive communications from Fed4FIRE (not from the OFELIA i2CAT testbed), at least for the management of its experiment</li>
+                <li>Some basic personal information is needed to provide resources for any experiment. We use a minimal set of data, taken from your Fed4FIRE account (find the <a href="http://lab.i2cat.net/data-protection/" target="_blank">described here</a>).</li>
+                <li>The experimenter's information described above is used during the lifetime of the experiment in order to authorise the experimenter(s) to use the requested resources and t internally provide the service (e.g., internally mapping resources to the Fed4FIRE's user ID).</li>
+                <li>All information (both the experimenter's personal data and the resources requested) is discarded in an irrecoverable way upon the expiration of the containing experiment.</li>
+                <li>Backups should be manually performed by the experimenter(s) or requested to the OFELIA i2CAT testbed before the expiration of the experiment.</li>
+                <li>No archiving process takes place inside of the OFELIA i2CAT testbed.</li>
             </ol>
-            <h5 class="card-title">Privacy</h5>
-            <p class="card-text">Our testbed requires some basic information to provide resources for any experiment. We use a minimal set of data, associated to your Fed4FIRE account (find the <a href="http://lab.i2cat.net/data-protection/" target="_blank">specific data in this page</a>). This information is used during the lifetime of the experiment and discarded upon its expiration, along with any resource contained in your slice(s).</p>
+            </p>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Security</h5>
+            <p class="card-text">
+            <ol>
+                <li>The OFELIA i2CAT testbed provides perimetral security to ensure authorised access to the resources from the experiments.</li>
+                <li>Access to the experimenter's data and resources is limited to the experimenter(s) and the technical operator in charge of supporting the experiment.</li>
+                <li>The data generated within the resources or derived from their usage is only modified by the experimenter(s).</li>
+                <li>Information from the experimenters, their resources or the data and activities performed inside or through them is not shared, copied or moved outside the OFELIA i2CAT testbed.</li>
+                <li>Points 3 and 4 can be also affected (i.e., modified or copied in any way) upon explicit request by the Principal Investigator of the experiment. In such case, the allowed technical operator in charge of supporting the experiment and/or the network team (in charge of the network configuration or the backup of computing resources) may perform such task.</li>
+                <li>In case of the detection of a breach in the OFELIA i2CAT testbed, the DPO and the affected parties shall be promptly noticed. Remediation actions shall be put in place immediately.</li>
+            </ol>
+            </p>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Terms of usage</h5>
+            <p class="card-text">
+            <ol>
+                <li>The experimenter shall not perform any unlawful activity through the use of the OFELIA i2CAT testbed.</li>
+                <li>The experimenter shall not process any personal data in the OFELIA i2CAT testbed.</li>
+            </ol>
+            </p>
+        </div>
+        <div class="card-body">
+            <h5 class="card-title">Communications</h5>
+            <p class="card-text">
+            <ol>
+                <li>The experimenter may not receive communications from the OFELIA i2CAT testbed.</li>
+                <li>The experimenter may receive communications from Fed4FIRE regarding, at least, the management of its experiment (i.e., an approaching expiration).</li>
+            </ol>
+            </p>
         </div>
     </div>
 
     <div class="card mb-3">
         <div class="card-body actions-area">
-            <div>
-                <button id="terms-decline" class="btn btn-light action-button" onclick="on_accept_decline_action('{{ user_urn }}', false)">Decline</button>
-            </div>
-            <div>
-                <button id="terms-accept" class="btn btn-primary fed4fire-primary-bg fed4fire-dark-grey accept-button action-button" onclick="on_accept_decline_action('{{ user_urn }}', true)">Accept</button>
-            </div>
+            <table width="100%">
+                <tr>
+                    <td width="50%" style="text-align: left;">
+                        <button id="terms-decline" class="btn btn-warning action-button" onclick="on_accept_decline_action('{{ user_urn }}', false)">Decline</button>
+                    </td>
+                    <td width="50%" style="text-align: right;">
+                        <button id="terms-accept" class="btn btn-info fed4fire-primary-bg fed4fire-dark-grey accept-button action-button" onclick="on_accept_decline_action('{{ user_urn }}', true)">Accept</button>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </div>
